@@ -1,12 +1,7 @@
 package com.hackathon.backend.Security;
 
 
-import com.hackathon.backend.Entities.CountryEntity;
-import com.hackathon.backend.Entities.RoleEntity;
-import com.hackathon.backend.Repositories.CountryRepository;
-import com.hackathon.backend.Repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -66,37 +61,5 @@ public class SecurityConfig {
     public JWTAuthenticationFilter jwtAuthenticationFilter() {
         return new JWTAuthenticationFilter();
     }
-
-//    @Bean
-//    CommandLineRunner commandLineRunner(RoleRepository roleRepository, CountryRepository countryRepository){
-//        return args -> {
-//            RoleEntity roleEntity = new RoleEntity("USER");
-//            roleRepository.save(roleEntity);
-//
-//            CountryEntity countryEntity = new CountryEntity("Palestine");
-//            countryRepository.save(countryEntity);
-//
-//            List<TodoListEntity> l = new ArrayList<>();
-//            l.add(new TodoListEntity("Test Todos 1",false));
-//            l.add(new TodoListEntity("Test Todos 2",false));
-//            l.add(new TodoListEntity("Test Todos 3",false));
-//            l.add(new TodoListEntity("Test Todos 4",false));
-//            l.add(new TodoListEntity("Test Todos 5",false));
-//            l.add(new TodoListEntity("Test Todos 6",false));
-//            l.add(new TodoListEntity("Test Todos 7",false));
-//
-//            CountryEntity country = countryRepository.findByCountry("Palestine").orElseThrow(()-> new EntityNotFoundException("error"));
-//            for (TodoListEntity todoList : l) {
-//                country.getTodos().add(todoList);
-//            }
-//            countryRepository.save(country);
-//
-//            CountryEntity countrys = countryRepository.findByCountry("Palestine").orElseThrow(()-> new EntityNotFoundException("error"));
-//            RoadmapEntity roadmapEntity = new RoadmapEntity("Filename_egypt");
-//            country.setRoadmap(List.of(roadmapEntity));
-//            countryRepository.save(country);
-//
-//        };
-//    }
 
 }

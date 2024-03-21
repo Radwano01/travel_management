@@ -7,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.Path;
-
 @Controller
 @RequestMapping(path = "${country.controller.path}")
 public class CountryController {
