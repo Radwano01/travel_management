@@ -1,8 +1,5 @@
 package com.hackathon.backend.Dto.UserDto;
 
-import com.hackathon.backend.Entities.RoleEntity;
-
-import java.util.List;
 
 public class RegisterUserDto {
 
