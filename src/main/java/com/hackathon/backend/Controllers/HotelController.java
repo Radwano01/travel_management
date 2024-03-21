@@ -10,7 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping(path = "/api/v1/hotel")
+@RequestMapping(path = "${hotel.controller.path}")
 public class HotelController {
 
     private final HotelService hotelService;
@@ -20,43 +20,44 @@ public class HotelController {
         this.hotelService = hotelService;
     }
 
-    @PostMapping(path = "/create-new-hotel")
+    @PostMapping(path = "${hotel.create.hotel.path}")
     public ResponseEntity<?> createHotel(@RequestBody HotelDto hotelDto){
         return hotelService.createHotel(hotelDto);
     }
 
-    @PostMapping(path = "/create-new-room")
+    @PostMapping(path = "${hotel.create.room.path}")
     public ResponseEntity<?> createRoom(@RequestBody RoomDto roomDto){
         return hotelService.createNewRoom(roomDto);
     }
 
-    @GetMapping(path = "/get-all-hotels")
+    @GetMapping(path = "${hotel.get.hotels.path}")
     public ResponseEntity<?> getAllHotel(){
         return hotelService.getAllHotels();
     }
 
-    @GetMapping(path = "/get-all-rooms")
+    @GetMapping(path = "${hotel.get.rooms.path}")
     public ResponseEntity<?> getAllRoomsFromHotel(@RequestBody HotelDto hotelDto){
         return hotelService.getAllRoomsFromHotel(hotelDto);
     }
 
-    @PutMapping(path = "/edit-hotel/{id}")
+    @PutMapping(path = "${hotel.edit.hotel.path}")
     public ResponseEntity<?> editHotel(@PathVariable int id, @RequestBody HotelDto hotelDto){
         return hotelService.editHotel(id, hotelDto);
     }
 
-    @PutMapping(path = "/edit-room/{id}")
+    @PutMapping(path = "${hotel.edit.room.path}")
     public ResponseEntity<?> editRoom(@PathVariable int id, @RequestBody RoomDto roomDto){
         return hotelService.editRoom(id,roomDto);
     }
 
-    @DeleteMapping(path = "/delete-hotel/{id}")
+    @DeleteMapping(path = "${hotel.delete.hotel.path}")
     public ResponseEntity<?> deleteHotel(@PathVariable int id){
         return hotelService.deleteHotel(id);
     }
 
-    @DeleteMapping(path = "/delete-room/{id}")
+    @DeleteMapping(path = "${hotel.delete.room.path}")
     public ResponseEntity<?> deleteRoom(@PathVariable int id){
         return hotelService.deleteRooms(id);
     }
 }
+

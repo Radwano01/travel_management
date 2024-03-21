@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.file.Path;
 
 @Controller
-@RequestMapping(path = "/api/v1/country")
+@RequestMapping(path = "${country.controller.path}")
 public class CountryController {
 
     private final CountryService countryService;
@@ -19,24 +19,24 @@ public class CountryController {
         this.countryService = countryService;
     }
 
-    @PostMapping(path = "/create-new-country")
+    @PostMapping(path = "${country.create.path}")
     public ResponseEntity<?> createCountry(@RequestBody CountryDto countryDto){
         return countryService.createCountry(countryDto);
     }
 
-    @GetMapping(path = "/get-all-countries")
+    @GetMapping(path = "${country.get.path}")
     public ResponseEntity<?> getAllCountries(){
         return countryService.getAllCountries();
     }
 
-    @PutMapping(path = "/edit-country/{id}")
+    @PutMapping(path = "${country.edit.path}")
     public ResponseEntity<?> editCountry(@PathVariable("id") int id, @RequestBody CountryDto countryDto){
         return countryService.editCountry(id,countryDto);
     }
 
-    @DeleteMapping(path = "/delete-country/{id}")
+    @DeleteMapping(path = "${country.delete.path}")
     public ResponseEntity<?> deleteCountry(@PathVariable("id") int id){
         return countryService.deleteCountry(id);
     }
-
 }
+
