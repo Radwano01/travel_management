@@ -1,6 +1,5 @@
 package com.hackathon.backend.Controllers;
 
-
 import com.hackathon.backend.Dto.UserDto.EditUserDto;
 import com.hackathon.backend.Dto.UserDto.LoginUserDto;
 import com.hackathon.backend.Dto.UserDto.RegisterUserDto;
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping(path = "${user.controller.path}")
+@RequestMapping(path = "${USER_API_PATH}")
 public class UserController {
 
     private final UserService userService;
@@ -21,22 +20,22 @@ public class UserController {
         this.userService = userServices;
     }
 
-    @PostMapping(path="${user.register.path}")
+    @PostMapping(path="${USER_REGISTER_PATH}")
     public ResponseEntity<?> registerUserDetails(@RequestBody RegisterUserDto registerUserDto){
         return userService.RegisterUser(registerUserDto);
     }
 
-    @PostMapping(path="${user.login.path}")
+    @PostMapping(path="${USER_LOGIN_PATH}")
     public ResponseEntity<?> loginUser(@RequestBody LoginUserDto loginUserDto) {
         return userService.LoginUser(loginUserDto);
     }
 
-    @DeleteMapping(path="${user.delete.path}")
+    @DeleteMapping(path="${USER_DELETE_PATH}")
     public ResponseEntity<?> removeUserDetails(@PathVariable("id") int id){
         return userService.DeleteUser(id);
     }
 
-    @PutMapping(path="${user.edit.path}")
+    @PutMapping(path="${USER_EDIT_PATH}")
     public ResponseEntity<?> editUserDetails(@PathVariable("id") int id,
                                              @RequestParam(required = false) String email,
                                              @RequestParam(required = false) String username,
@@ -46,10 +45,9 @@ public class UserController {
 
     }
 
-    @PostMapping(path = "${user.verification.path}")
+    @PostMapping(path = "${USER_VERIFICATION_PATH}")
     public ResponseEntity<?> verifyUserDetails(@PathVariable("email") String email,
                                                @PathVariable("token") String token){
         return userService.VerifyUser(email,token);
     }
 }
-
