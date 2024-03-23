@@ -24,12 +24,8 @@ public class RoomController {
     @PostMapping(path = "${ROOM_CREATE_PATH}")
     public ResponseEntity<?> createRoom(@RequestBody RoomDto roomDto){
     return roomService.createNewRoom(roomDto);
-}
-
-    @GetMapping(path = "${ROOM_GET_PATH}")
-    public ResponseEntity<?> getAllRoomsFromHotel(@RequestBody HotelDto hotelDto){
-        return roomService.getAllRoomsFromHotel(hotelDto);
     }
+
     @GetMapping(path = "${ROOM_GET_VALID_PATH}")
     public ResponseEntity<?> getValidVisas(){
         return roomService.getValidRooms();
