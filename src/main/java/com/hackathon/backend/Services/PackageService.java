@@ -5,6 +5,9 @@ import com.hackathon.backend.Dto.PackageDto.PackageDto;
 import com.hackathon.backend.Dto.PackageDto.PackageRoadmapDto;
 import com.hackathon.backend.Dto.PackageDto.PackageTodosDto;
 import com.hackathon.backend.Entities.*;
+import com.hackathon.backend.RelationShips.BenefitEntity;
+import com.hackathon.backend.RelationShips.RoadmapEntity;
+import com.hackathon.backend.RelationShips.TodoListEntity;
 import com.hackathon.backend.Repositories.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -133,6 +136,18 @@ public class PackageService {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    public ResponseEntity<?> getSinglePackage(int packageID) {
+        try{
+            PackageEntity packageEntity = packageRepository.findById(packageID)
+                    .orElseThrow(()-> new EntityNotFoundException("Package Id is Not Found: "+packageID));
+            return new ResponseEntity<>(packageEntity, HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public ResponseEntity<?> getAllPackagesFromCountry(PackageDto packageDto){
         try{
             List<PackageEntity> packageEntity = packageRepository.findAll();

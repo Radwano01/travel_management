@@ -3,6 +3,7 @@ package com.hackathon.backend.Controllers;
 import com.hackathon.backend.Dto.UserDto.EditUserDto;
 import com.hackathon.backend.Dto.UserDto.LoginUserDto;
 import com.hackathon.backend.Dto.UserDto.RegisterUserDto;
+import com.hackathon.backend.Dto.UserDto.VerifyDto;
 import com.hackathon.backend.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,17 @@ public class UserController {
         return userService.RegisterUser(registerUserDto);
     }
 
+    @PostMapping(path = "${USER_VERIFICATION_PATH}")
+    public ResponseEntity<?> verifyUserDetails(@PathVariable("email") String email,
+                                               @PathVariable("token") String token){
+        return userService.VerifyUser(email);
+    }
+
+    @PostMapping(path = "${USER_SEND_VERIFICATION_PATH}")
+    public ResponseEntity<?> sendVerificationLink(@RequestBody VerifyDto verifyDto){
+        return userService.sendVerificationLink(verifyDto);
+    }
+
     @PostMapping(path="${USER_LOGIN_PATH}")
     public ResponseEntity<?> loginUser(@RequestBody LoginUserDto loginUserDto) {
         return userService.LoginUser(loginUserDto);
@@ -45,9 +57,5 @@ public class UserController {
 
     }
 
-    @PostMapping(path = "${USER_VERIFICATION_PATH}")
-    public ResponseEntity<?> verifyUserDetails(@PathVariable("email") String email,
-                                               @PathVariable("token") String token){
-        return userService.VerifyUser(email,token);
-    }
+
 }

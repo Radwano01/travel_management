@@ -2,6 +2,7 @@ package com.hackathon.backend.Controllers;
 
 import com.hackathon.backend.Dto.HotelDto.HotelDto;
 import com.hackathon.backend.Dto.HotelDto.RoomDto;
+import com.hackathon.backend.Dto.payment.PaymentDto;
 import com.hackathon.backend.Services.HotelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,43 +20,29 @@ public class HotelController {
         this.hotelService = hotelService;
     }
 
-    @PostMapping(path = "${HOTEL_CREATE_HOTEL_PATH}")
+    @PostMapping(path = "${HOTEL_CREATE_PATH}")
     public ResponseEntity<?> createHotel(@RequestBody HotelDto hotelDto){
         return hotelService.createHotel(hotelDto);
     }
 
-    @PostMapping(path = "${HOTEL_CREATE_ROOM_PATH}")
-    public ResponseEntity<?> createRoom(@RequestBody RoomDto roomDto){
-        return hotelService.createNewRoom(roomDto);
-    }
-
-    @GetMapping(path = "${HOTEL_GET_HOTELS_PATH}")
+    @GetMapping(path = "${HOTEL_GET_PATH}")
     public ResponseEntity<?> getAllHotel(){
         return hotelService.getAllHotels();
     }
 
-    @GetMapping(path = "${HOTEL_GET_ROOMS_PATH}")
-    public ResponseEntity<?> getAllRoomsFromHotel(@RequestBody HotelDto hotelDto){
-        return hotelService.getAllRoomsFromHotel(hotelDto);
+    @GetMapping(path = "${HOTEL_GET_SINGLE_PATH}")
+    public ResponseEntity<?> getSingleHotel(@PathVariable int hotelID){
+        return hotelService.getSingleHotel(hotelID);
     }
 
-    @PutMapping(path = "${HOTEL_EDIT_HOTEL_PATH}")
-    public ResponseEntity<?> editHotel(@PathVariable int id, @RequestBody HotelDto hotelDto){
-        return hotelService.editHotel(id, hotelDto);
+    @PutMapping(path = "${HOTEL_EDIT_PATH}")
+    public ResponseEntity<?> editHotel(@PathVariable("hotelID") int hotelID, @RequestBody HotelDto hotelDto){
+        return hotelService.editHotel(hotelID, hotelDto);
     }
 
-    @PutMapping(path = "${HOTEL_EDIT_ROOM_PATH}")
-    public ResponseEntity<?> editRoom(@PathVariable int id, @RequestBody RoomDto roomDto){
-        return hotelService.editRoom(id,roomDto);
+    @DeleteMapping(path = "${HOTEL_DELETE_PATH}")
+    public ResponseEntity<?> deleteHotel(@PathVariable("hotelID") int hotelID){
+        return hotelService.deleteHotel(hotelID);
     }
 
-    @DeleteMapping(path = "${HOTEL_DELETE_HOTEL_PATH}")
-    public ResponseEntity<?> deleteHotel(@PathVariable int id){
-        return hotelService.deleteHotel(id);
-    }
-
-    @DeleteMapping(path = "${HOTEL_DELETE_ROOM_PATH}")
-    public ResponseEntity<?> deleteRoom(@PathVariable int id){
-        return hotelService.deleteRooms(id);
-    }
 }

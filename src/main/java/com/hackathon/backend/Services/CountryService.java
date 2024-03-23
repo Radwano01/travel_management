@@ -53,10 +53,19 @@ public class CountryService {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    public ResponseEntity<?> deleteCountry(int id){
+    public ResponseEntity<?> getSingleCountry(int countryID) {
         try{
-            countryRepository.deleteById(id);
+            CountryEntity countryEntity = countryRepository.findById(countryID)
+                    .orElseThrow(()-> new EntityNotFoundException("Country is Not Found: "+countryID));
+            return new ResponseEntity<>(countryEntity, HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> deleteCountry(int countryID){
+        try{
+            countryRepository.deleteById(countryID);
             return new ResponseEntity<>("Country Deleted Successfully", HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -64,9 +73,9 @@ public class CountryService {
     }
 
     @Transactional
-    public ResponseEntity<?> editCountry(int id, CountryDto countryDto){
+    public ResponseEntity<?> editCountry(int countryID, CountryDto countryDto){
         try {
-            CountryEntity countryEntity = countryRepository.findById(id)
+            CountryEntity countryEntity = countryRepository.findById(countryID)
                     .orElseThrow(()-> new EntityNotFoundException("Country Id Not Found"));
             countryEntity.setCountry(countryDto.getCountry());
             countryRepository.save(countryEntity);
@@ -75,5 +84,6 @@ public class CountryService {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 }

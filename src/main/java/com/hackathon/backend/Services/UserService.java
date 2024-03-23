@@ -1,9 +1,6 @@
 package com.hackathon.backend.Services;
 
-import com.hackathon.backend.Dto.UserDto.AuthResponseDto;
-import com.hackathon.backend.Dto.UserDto.EditUserDto;
-import com.hackathon.backend.Dto.UserDto.LoginUserDto;
-import com.hackathon.backend.Dto.UserDto.RegisterUserDto;
+import com.hackathon.backend.Dto.UserDto.*;
 import com.hackathon.backend.Entities.RoleEntity;
 import com.hackathon.backend.Entities.UserEntity;
 import com.hackathon.backend.Repositories.RoleRepository;
@@ -14,6 +11,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,15 +30,20 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final TodoListRepository todoListRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTGenerator jwtGenerator;
+    private JavaMailSender javaMailSender;
 
-    public UserService(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, TodoListRepository todoListRepository, PasswordEncoder passwordEncoder, JWTGenerator jwtGenerator) {
+    public UserService(AuthenticationManager authenticationManager,
+                       UserRepository userRepository,
+                       RoleRepository roleRepository,
+                       JavaMailSender javaMailSender,
+                       PasswordEncoder passwordEncoder,
+                       JWTGenerator jwtGenerator) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
-        this.todoListRepository = todoListRepository;
+        this.javaMailSender = javaMailSender;
         this.passwordEncoder = passwordEncoder;
         this.jwtGenerator = jwtGenerator;
     }
@@ -52,16 +56,19 @@ public class UserService {
                 RoleEntity roleEntity = roleRepository.findByRole("USER")
                         .orElseThrow(()-> new EntityNotFoundException("this Role is Not Found"));
 
-                UserEntity userEntity = new UserEntity();
-                userEntity.setEmail(registerUserDto.getEmail());
-                userEntity.setUsername(registerUserDto.getUsername());
-                userEntity.setPassword(passwordEncoder.encode(registerUserDto.getPassword()));
-                userEntity.setRole(Collections.singletonList(roleEntity));
+                boolean existsUsername = userRepository.existsUsernameByUsername(registerUserDto.getUsername());
 
-                userRepository.save(userEntity);
-
-
-                return new ResponseEntity<>("Account Created", HttpStatus.OK);
+                if(!existsUsername) {
+                    UserEntity userEntity = new UserEntity();
+                    userEntity.setEmail(registerUserDto.getEmail());
+                    userEntity.setUsername(registerUserDto.getUsername());
+                    userEntity.setPassword(passwordEncoder.encode(registerUserDto.getPassword()));
+                    userEntity.setRole(Collections.singletonList(roleEntity));
+                    userRepository.save(userEntity);
+                    return new ResponseEntity<>("Account Created", HttpStatus.OK);
+                }else{
+                    return new ResponseEntity<>("Username Exists", HttpStatus.FOUND);
+                }
 
             }else{
                 return new ResponseEntity<>("Email exists", HttpStatus.BAD_REQUEST);
@@ -129,17 +136,35 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<?> VerifyUser(String email,String token) {
+    public ResponseEntity<?> VerifyUser(String email) {
         try{
             UserEntity userEntity = userRepository.findUserByEmail(email)
                     .orElseThrow(()-> new EntityNotFoundException("Email not Found! "+email));
-            boolean checkValidationToken = jwtGenerator.validateToken(token);
-            if(checkValidationToken) {
-                userEntity.setVerification_status(true);
-                return new ResponseEntity<>("Email Verified", HttpStatus.OK);
+            if(userEntity.isVerification_status()){
+                return new ResponseEntity<>("User Verified already!", HttpStatus.BAD_REQUEST);
             }else{
-                return new ResponseEntity<>("Token is Wrong!" ,HttpStatus.BAD_REQUEST);
+                userEntity.setVerification_status(true);
+                userRepository.save(userEntity);
+                return new ResponseEntity<>("User has been verified", HttpStatus.OK);
             }
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> sendVerificationLink(VerifyDto verifyDto) {
+        try{
+            String username = jwtGenerator.getUsernameFromJWT(verifyDto.getToken());
+            UserEntity user = userRepository.findIdByUsername(username)
+                    .orElseThrow(()-> new EntityNotFoundException("Username is Not Found"));
+            String verificationLink = "${VERIFY_LINK_TO_USER}"+user.getEmail()+"/"+verifyDto.getToken();
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+            mailMessage.setTo(user.getEmail());
+            mailMessage.setSubject("Email Verification From Hackathon Project");
+            mailMessage.setText("Please Click to the link to verify your account: "+verificationLink);
+
+                javaMailSender.send(mailMessage);
+                return new ResponseEntity<>("Verification email sent", HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

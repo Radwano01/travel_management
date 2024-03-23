@@ -26,13 +26,18 @@ public class CountryController {
         return countryService.getAllCountries();
     }
 
+    @GetMapping(path = "${COUNTRY_GET_SINGLE_PATH}")
+    public ResponseEntity<?> getSingleCountry(@PathVariable("countryID") int countryID){
+        return countryService.getSingleCountry(countryID);
+    }
+
     @PutMapping(path = "${COUNTRY_EDIT_PATH}")
-    public ResponseEntity<?> editCountry(@PathVariable("id") int id, @RequestBody CountryDto countryDto){
-        return countryService.editCountry(id,countryDto);
+    public ResponseEntity<?> editCountry(@PathVariable("countryID") int countryID, @RequestBody CountryDto countryDto){
+        return countryService.editCountry(countryID,countryDto);
     }
 
     @DeleteMapping(path = "${COUNTRY_DELETE_PATH}")
-    public ResponseEntity<?> deleteCountry(@PathVariable("id") int id){
-        return countryService.deleteCountry(id);
+    public ResponseEntity<?> deleteCountry(@PathVariable("countryID") int countryID){
+        return countryService.deleteCountry(countryID);
     }
 }

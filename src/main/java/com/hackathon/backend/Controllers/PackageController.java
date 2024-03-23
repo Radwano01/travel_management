@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Path;
+
 @Controller
 @RequestMapping(path = "${PACKAGE_API_PATH}")
 public class PackageController {
@@ -42,6 +44,12 @@ public class PackageController {
     @GetMapping(path = "${PACKAGE_GET_PACKAGES_PATH}")
     public ResponseEntity<?> getAllPackages(){
         return packageService.getAllPackages();
+    }
+
+
+    @GetMapping(path = "${PACKAGE_GET_SINGLE_PATH}")
+    public ResponseEntity<?> getSinglePackage(@PathVariable("packageID") int packageID){
+        return packageService.getSinglePackage(packageID);
     }
 
     @GetMapping(path = "${PACKAGE_GET_PACKAGES_FROM_COUNTRY_PATH}")
