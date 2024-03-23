@@ -163,8 +163,8 @@ public class UserService {
             mailMessage.setSubject("Email Verification From Hackathon Project");
             mailMessage.setText("Please Click to the link to verify your account: "+verificationLink);
 
-                javaMailSender.send(mailMessage);
-                return new ResponseEntity<>("Verification email sent", HttpStatus.OK);
+            javaMailSender.send(mailMessage);
+            return new ResponseEntity<>("Verification email sent", HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
