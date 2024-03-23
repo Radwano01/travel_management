@@ -24,20 +24,19 @@ public class RoomController {
     @PostMapping(path = "${ROOM_CREATE_PATH}")
     public ResponseEntity<?> createRoom(@RequestBody RoomDto roomDto){
     return roomService.createNewRoom(roomDto);
-    }
+}
 
     @GetMapping(path = "${ROOM_GET_HOTEL_PATH}")
-    public ResponseEntity<?> getAllRoomsFromHotel(@RequestBody HotelDto hotelDto){
-        return roomService.getAllRoomsFromHotel(hotelDto);
+    public ResponseEntity<?> getAllRoomsFromHotel(@PathVariable String hotelName){
+        return roomService.getAllRoomsFromHotel(hotelName);
     }
-
     @GetMapping(path = "${ROOM_GET_VALID_PATH}")
     public ResponseEntity<?> getValidVisas(){
         return roomService.getValidRooms();
     }
 
     @GetMapping(path = "${ROOM_ORDERED_PATH}")
-    public ResponseEntity<?> getAllUserRoomPayment(@PathVariable("token") String token){
+    public ResponseEntity<?> getAllUserRoomPayment(@RequestParam("token") String token){
         return roomService.getUserRoomPayment(token);
     }
     @PutMapping(path = "${ROOM_EDIT_SINGLE_STATUS_PATH}")

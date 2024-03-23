@@ -66,14 +66,14 @@ public class RoomService {
         }
     }
 
-    public ResponseEntity<?> getAllRoomsFromHotel(HotelDto hotelDto){
+    public ResponseEntity<?> getAllRoomsFromHotel(String hotelName){
         try{
             List<RoomEntity> roomEntities = roomRepository.findAll();
             List<RoomDto> dto = new ArrayList<>();
             for(RoomEntity rooms:roomEntities){
                 String validHotel = rooms.getHotelEntityList().stream()
                         .map(hotel-> hotel.getHotelName()).collect(Collectors.joining(", "));
-                if(validHotel.contains(hotelDto.getHotelName())){
+                if(validHotel.contains(hotelName)){
                     RoomDto roomDto = new RoomDto();
                     roomDto.setId(rooms.getId());
                     roomDto.setFloor(rooms.getFloor());
