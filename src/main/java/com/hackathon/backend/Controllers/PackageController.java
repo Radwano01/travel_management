@@ -27,18 +27,18 @@ public class PackageController {
     }
 
     @PostMapping(path = "${PACKAGE_CREATE_BENEFIT_PATH}")
-    public ResponseEntity<?> createBenefitForPackage(@RequestBody BenefitDto benefitDto){
-        return packageService.createBenefitForPackage(benefitDto);
+    public ResponseEntity<?> createBenefitForPackage(@PathVariable("packageID") int packageID, @RequestBody BenefitDto benefitDto){
+        return packageService.createBenefitForPackage(packageID,benefitDto);
     }
 
     @PostMapping(path = "${PACKAGE_CREATE_ROADMAP_PATH}")
-    public ResponseEntity<?> createRoadmapForPackage(@RequestBody PackageRoadmapDto roadmapDto) {
-        return packageService.createRoadmapForPackage(roadmapDto);
+    public ResponseEntity<?> createRoadmapForPackage(@PathVariable("packageID") int packageID, @RequestBody PackageRoadmapDto roadmapDto) {
+        return packageService.createRoadmapForPackage(packageID,roadmapDto);
     }
 
     @PostMapping(path = "${PACKAGE_CREATE_TODO_PATH}")
-    public ResponseEntity<?> createTodoForPackage(@RequestBody PackageTodosDto todosDto){
-        return packageService.createTodosForPackage(todosDto);
+    public ResponseEntity<?> createTodoForPackage(@PathVariable("packageID") int packageID, @RequestBody PackageTodosDto todosDto){
+        return packageService.createTodosForPackage(packageID,todosDto);
     }
 
     @GetMapping(path = "${PACKAGE_GET_PACKAGES_PATH}")

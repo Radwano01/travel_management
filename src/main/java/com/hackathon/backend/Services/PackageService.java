@@ -59,11 +59,11 @@ public class PackageService {
         }
     }
     @Transactional
-    public ResponseEntity<?> createBenefitForPackage(BenefitDto benefitDto) {
+    public ResponseEntity<?> createBenefitForPackage(int packageID, BenefitDto benefitDto) {
         try {
             boolean existsBenefit = benefitRepository.existsByBenefit(benefitDto.getBenefit());
             if (!existsBenefit) {
-                PackageEntity packageEntity = packageRepository.findById(benefitDto.getPackageId())
+                PackageEntity packageEntity = packageRepository.findById(packageID)
                         .orElseThrow(()-> new EntityNotFoundException("Package Id is Not Found"));
 
                 BenefitEntity benefitEntity = new BenefitEntity();
@@ -82,10 +82,10 @@ public class PackageService {
         }
     }
     @Transactional
-    public ResponseEntity<?> createRoadmapForPackage(PackageRoadmapDto roadmapDto){
+    public ResponseEntity<?> createRoadmapForPackage(int packageID,PackageRoadmapDto roadmapDto){
         try{
             boolean existsRoadmap = roadmapRepository.existsByRoadmap(roadmapDto.getRoadmap());
-            PackageEntity packageEntity = packageRepository.findById(roadmapDto.getPackageId())
+            PackageEntity packageEntity = packageRepository.findById(packageID)
                     .orElseThrow(()-> new EntityNotFoundException("Package Id is Not Found"));
             if(!existsRoadmap){
                 RoadmapEntity roadmapEntity = new RoadmapEntity();
@@ -103,10 +103,10 @@ public class PackageService {
         }
     }
     @Transactional
-    public ResponseEntity<?> createTodosForPackage(PackageTodosDto todosDto){
+    public ResponseEntity<?> createTodosForPackage(int packageID, PackageTodosDto todosDto){
         try{
             boolean existsTodos = todoListRepository.existsByTodos(todosDto.getTodos());
-            PackageEntity packageEntity = packageRepository.findById(todosDto.getPackageId())
+            PackageEntity packageEntity = packageRepository.findById(packageID)
                     .orElseThrow(()-> new EntityNotFoundException("Package Id is Not Found"));
             if(!existsTodos){
                 TodoListEntity todoListEntity = new TodoListEntity();

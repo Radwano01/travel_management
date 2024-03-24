@@ -4,7 +4,6 @@ public class PackageTodosDto {
 
     private int id;
     private String todos;
-    private int packageId;
     private Integer coins;
     private boolean complete;
 
@@ -31,14 +30,6 @@ public class PackageTodosDto {
 
     public void setComplete(boolean complete) {
         this.complete = complete;
-    }
-
-    public int getPackageId() {
-        return packageId;
-    }
-
-    public void setPackageId(int packageId) {
-        this.packageId = packageId;
     }
 
     public Integer getCoins() {
