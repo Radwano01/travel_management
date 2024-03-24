@@ -98,17 +98,17 @@ public class PackageController {
     }
 
     @PutMapping(path = "${PACKAGE_EDIT_BENEFIT_PATH}")
-    public ResponseEntity<?> editBenefit(@PathVariable int id, @RequestBody BenefitDto benefitDto){
-        return packageService.editBenefit(id, benefitDto);
+    public ResponseEntity<?> editBenefit(@PathVariable("benefitID") int benefitID, @RequestBody BenefitDto benefitDto){
+        return packageService.editBenefit(benefitID, benefitDto);
     }
 
     @PutMapping(path = "${PACKAGE_EDIT_ROADMAP_PATH}")
-    public ResponseEntity<?> editRoadmap(@PathVariable("id") int id,@RequestBody PackageRoadmapDto roadmapDto){
-        return packageService.editRoadmap(id, roadmapDto);
+    public ResponseEntity<?> editRoadmap(@PathVariable("roadmapID") int roadmapID,@RequestBody PackageRoadmapDto roadmapDto){
+        return packageService.editRoadmap(roadmapID, roadmapDto);
     }
 
     @PutMapping(path = "${PACKAGE_EDIT_TODO_PATH}")
-    public ResponseEntity<?> editTodo(@PathVariable("id") int id,@RequestBody PackageTodosDto todosDto){
-        return packageService.editTodos(id, todosDto);
+    public ResponseEntity<?> editTodo(@PathVariable("todoID") int todoID,@RequestBody PackageTodosDto todosDto){
+        return packageService.editTodos(todoID, todosDto);
     }
 }

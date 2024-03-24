@@ -238,10 +238,10 @@ public class PackageService {
         }
     }
     @Transactional
-    public ResponseEntity<?> editBenefit(int id,BenefitDto benefitDto){
+    public ResponseEntity<?> editBenefit(int benefitID,BenefitDto benefitDto){
         try{
-            BenefitEntity benefitEntity = benefitRepository.findById(id)
-                    .orElseThrow(()-> new EntityNotFoundException("Benefit is Not Found"));
+            BenefitEntity benefitEntity = benefitRepository.findById(benefitID)
+                    .orElseThrow(()-> new EntityNotFoundException("Benefit Id is Not Found"));
             if(benefitDto.getBenefit() != null){
                 benefitEntity.setBenefit(benefitDto.getBenefit());
             }
@@ -251,9 +251,9 @@ public class PackageService {
         }
     }
     @Transactional
-    public ResponseEntity<?> editRoadmap(int id, PackageRoadmapDto roadmapDto){
+    public ResponseEntity<?> editRoadmap(int roadmapID, PackageRoadmapDto roadmapDto){
         try{
-            RoadmapEntity roadmapEntity = roadmapRepository.findById(id)
+            RoadmapEntity roadmapEntity = roadmapRepository.findById(roadmapID)
                     .orElseThrow(()-> new EntityNotFoundException("Roadmap Id Not Found"));
 
             if(roadmapDto.getRoadmap() != null){
@@ -266,9 +266,9 @@ public class PackageService {
         }
     }
     @Transactional
-    public ResponseEntity<?> editTodos(int id, PackageTodosDto todosDto){
+    public ResponseEntity<?> editTodos(int todoID, PackageTodosDto todosDto){
         try{
-            TodoListEntity todoListEntity = todoListRepository.findById(id)
+            TodoListEntity todoListEntity = todoListRepository.findById(todoID)
                     .orElseThrow(()-> new EntityNotFoundException("Todos Id Not Found"));
 
             if(todosDto.getTodos() != null){
