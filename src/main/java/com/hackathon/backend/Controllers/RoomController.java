@@ -35,6 +35,10 @@ public class RoomController {
     public ResponseEntity<?> getAllUserRoomPayment(@RequestParam("token") String token){
         return roomService.getUserRoomPayment(token);
     }
+    @GetMapping(path = "${ROOM_GET_SINGLE_PATH}")
+    public ResponseEntity<?> getSingleRoom(@PathVariable("roomID") int roomID){
+        return roomService.getSingleRoom(roomID);
+    }
     @PutMapping(path = "${ROOM_EDIT_SINGLE_STATUS_PATH}")
     public ResponseEntity<?> switchSingleRoomStatus(@PathVariable("roomID") int roomID){
         return roomService.switchSingleRoomStatusToEmpty(roomID);

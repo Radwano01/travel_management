@@ -35,6 +35,11 @@ public class HotelController {
         return hotelService.getSingleHotel(hotelID);
     }
 
+    @GetMapping(path = "${HOTEL_GET_HOTELS_INFO_PATH}")
+    public ResponseEntity<?> getHotelInfo(){
+        return hotelService.getHotelInfo();
+    }
+
     @PutMapping(path = "${HOTEL_EDIT_PATH}")
     public ResponseEntity<?> editHotel(@PathVariable("hotelID") int hotelID, @RequestBody HotelDto hotelDto){
         return hotelService.editHotel(hotelID, hotelDto);

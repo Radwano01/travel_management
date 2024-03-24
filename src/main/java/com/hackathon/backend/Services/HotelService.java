@@ -2,13 +2,17 @@ package com.hackathon.backend.Services;
 
 
 import com.hackathon.backend.Dto.HotelDto.HotelDto;
+import com.hackathon.backend.Dto.PlaneDto.PlaneDto;
 import com.hackathon.backend.Entities.HotelEntity;
+import com.hackathon.backend.Entities.PlaneEntity;
 import com.hackathon.backend.Repositories.HotelRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -59,6 +63,27 @@ public class HotelService {
         }
     }
 
+    public ResponseEntity<?> getHotelInfo() {
+        try{
+            List<HotelEntity> hotelEntityList = hotelRepository.findAll();
+            List<HotelDto> dto = new ArrayList<>();
+            if(!hotelEntityList.isEmpty()){
+                for(HotelEntity hotel:hotelEntityList) {
+                    HotelDto hotelDto = new HotelDto();
+                    hotelDto.setId(hotel.getId());
+                    hotelDto.setHotelName(hotel.getHotelName());
+                    hotelDto.setCountry(hotel.getCountry());
+                    dto.add(hotelDto);
+                }
+                return new ResponseEntity<>(dto, HttpStatus.OK);
+            }else{
+                return new ResponseEntity<>("Hotels Data is Empty", HttpStatus.NOT_FOUND);
+            }
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @Transactional
     public ResponseEntity<?> editHotel(int hotelID,HotelDto hotelDto){
         try{
@@ -84,6 +109,5 @@ public class HotelService {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
 }

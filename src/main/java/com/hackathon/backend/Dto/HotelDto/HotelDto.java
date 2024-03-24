@@ -2,9 +2,18 @@ package com.hackathon.backend.Dto.HotelDto;
 
 public class HotelDto {
 
+    private int id;
     private String hotelName;
     private String country;
 
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getHotelName() {
         return hotelName;

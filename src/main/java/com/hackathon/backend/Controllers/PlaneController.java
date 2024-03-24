@@ -37,6 +37,11 @@ public class PlaneController {
         return planeService.getSinglePlane(planeID);
     }
 
+    @GetMapping(path = "${PLANE_GET_PLANES_INFO_PATH}")
+    public ResponseEntity<?> getPlanesInfo(){
+        return planeService.getPlaneInfo();
+    }
+
     @PutMapping(path="${PLANE_EDIT_PATH}")
     public ResponseEntity<?> editPlane(@PathVariable("planeID") int planeID,@RequestBody PlaneDto planeDto){
         return planeService.editPlane(planeID, planeDto);

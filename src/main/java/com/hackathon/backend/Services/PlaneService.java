@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -60,6 +61,31 @@ public class PlaneService{
             PlaneEntity planeEntity = planeRepository.findById(planeID)
                     .orElseThrow(()-> new EntityNotFoundException("Hotel Id is Not Found: "+planeID));
             return  new ResponseEntity<>(planeEntity, HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> getPlaneInfo(){
+        try{
+            List<PlaneEntity> planeEntityList = planeRepository.findAll();
+            List<PlaneDto> dto = new ArrayList<>();
+            if(!planeEntityList.isEmpty()){
+                for(PlaneEntity plane:planeEntityList) {
+                    PlaneDto planeDto = new PlaneDto();
+                    planeDto.setId(plane.getId());
+                    planeDto.setPlaneName(plane.getPlaneName());
+                    planeDto.setSitsCount(plane.getSitsCount());
+                    planeDto.setAirportLaunch(plane.getAirportLaunch());
+                    planeDto.setAirportLand(plane.getAirportLand());
+                    planeDto.setTimeLaunch(plane.getTimeLaunch());
+                    planeDto.setTimeLand(plane.getTimeLand());
+                    dto.add(planeDto);
+                }
+                return new ResponseEntity<>(dto, HttpStatus.OK);
+            }else{
+                return new ResponseEntity<>("Planes Data is Empty", HttpStatus.NOT_FOUND);
+            }
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

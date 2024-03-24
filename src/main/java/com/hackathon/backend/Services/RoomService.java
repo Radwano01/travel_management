@@ -7,6 +7,7 @@ import com.hackathon.backend.Dto.payment.PaymentDto;
 import com.hackathon.backend.Entities.HotelEntity;
 import com.hackathon.backend.Entities.RoomEntity;
 import com.hackathon.backend.Entities.UserEntity;
+import com.hackathon.backend.Entities.VisaEntity;
 import com.hackathon.backend.Repositories.HotelRepository;
 import com.hackathon.backend.Repositories.RoomRepository;
 import com.hackathon.backend.Repositories.UserRepository;
@@ -50,6 +51,7 @@ public class RoomService {
             HotelEntity hotelEntity = hotelRepository.findById(hotelID)
                     .orElseThrow(()-> new EntityNotFoundException("Hotel is Not Found"));
             RoomEntity roomEntity = new RoomEntity();
+            roomEntity.setHotelName(roomDto.getHotelName());
             roomEntity.setFloor(roomDto.getFloor());
             roomEntity.setDoorNumber(roomDto.getDoorNumber());
             roomEntity.setRoomsNumber(roomDto.getRoomsNumber());
@@ -62,6 +64,16 @@ public class RoomService {
             roomRepository.save(roomEntity);
             hotelEntity.getRooms().add(roomEntity);
             return new ResponseEntity<>("Rooms created Successfully", HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> getSingleRoom(int roomID) {
+        try{
+            RoomEntity roomEntity = roomRepository.findById(roomID)
+                    .orElseThrow(()-> new EntityNotFoundException("Room id is Not Found: "+roomID));
+            return new ResponseEntity<>(roomEntity, HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -160,6 +172,9 @@ public class RoomService {
         try{
             RoomEntity roomEntity = roomRepository.findById(roomID)
                     .orElseThrow(()-> new EntityNotFoundException("Room Id is Not Found"));
+            if(roomDto.getHotelName() != null){
+                roomEntity.setHotelName(roomDto.getHotelName());
+            }
             if(roomDto.getFloor() != null){
                 roomEntity.setFloor(roomDto.getFloor());
             }

@@ -14,6 +14,7 @@ public class RoomEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    private String hotelName;
     private int floor;
     private int doorNumber;
     private int roomsNumber;
@@ -36,6 +37,14 @@ public class RoomEntity {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getHotelName() {
+        return hotelName;
+    }
+
+    public void setHotelName(String hotelName) {
+        this.hotelName = hotelName;
     }
 
     public int getFloor() {

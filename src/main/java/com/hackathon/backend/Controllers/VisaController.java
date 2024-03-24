@@ -35,7 +35,7 @@ public class VisaController {
     }
 
     @GetMapping(path = "${VISA_GET_SINGLE_PATH}")
-    public ResponseEntity<?> getSingleVisa(@PathVariable("visaID") int visaID){
+    public ResponseEntity<?> getSingleVisa(@PathVariable("visaID") int visaID) {
         return visaService.getSingleVisa(visaID);
     }
 
