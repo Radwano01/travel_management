@@ -44,9 +44,10 @@ public class RoomService {
     }
 
 
-    public ResponseEntity<?> createNewRoom(RoomDto roomDto) {
+    @Transactional
+    public ResponseEntity<?> createNewRoom(int hotelID,RoomDto roomDto) {
         try{
-            HotelEntity hotelEntity = hotelRepository.findByHotelName(roomDto.getHotelName())
+            HotelEntity hotelEntity = hotelRepository.findById(hotelID)
                     .orElseThrow(()-> new EntityNotFoundException("Hotel is Not Found"));
             RoomEntity roomEntity = new RoomEntity();
             roomEntity.setFloor(roomDto.getFloor());
@@ -54,64 +55,37 @@ public class RoomService {
             roomEntity.setRoomsNumber(roomDto.getRoomsNumber());
             roomEntity.setBathroomsNumber(roomDto.getBathroomsNumber());
             roomEntity.setBedsNumber(roomDto.getRoomsNumber());
-            roomEntity.setHotelEntityList(Collections.singletonList(hotelEntity));
             roomEntity.setPrice(roomDto.getPrice());
             roomEntity.setStatus(roomDto.getStatus());
             roomEntity.setUserId(1);
 
             roomRepository.save(roomEntity);
+            hotelEntity.getRooms().add(roomEntity);
             return new ResponseEntity<>("Rooms created Successfully", HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public ResponseEntity<?> getAllRoomsFromHotel(String hotelName){
-        try{
-            List<RoomEntity> roomEntities = roomRepository.findAll();
-            List<RoomDto> dto = new ArrayList<>();
-            for(RoomEntity rooms:roomEntities){
-                String validHotel = rooms.getHotelEntityList().stream()
-                        .map(hotel-> hotel.getHotelName()).collect(Collectors.joining(", "));
-                if(validHotel.contains(hotelName)){
-                    RoomDto roomDto = new RoomDto();
-                    roomDto.setId(rooms.getId());
-                    roomDto.setFloor(rooms.getFloor());
-                    roomDto.setDoorNumber(rooms.getDoorNumber());
-                    roomDto.setRoomsNumber(rooms.getRoomsNumber());
-                    roomDto.setBathroomsNumber(rooms.getBathroomsNumber());
-                    roomDto.setBedsNumber(rooms.getBedsNumber());
-                    roomDto.setHotelName(validHotel);
-                    roomDto.setPrice(rooms.getPrice());
-                    roomDto.setStatus(rooms.getStatus());
-                    dto.add(roomDto);
-                }
-            }
-            return  new ResponseEntity<>(dto, HttpStatus.OK);
-        }catch (Exception e){
-            return  new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
     public ResponseEntity<?> getValidRooms(){
         try{
-            List<RoomEntity> roomEntities = roomRepository.findAll();
+            List<HotelEntity> hotelEntityList = hotelRepository.findAll();
             List<RoomDto> dto = new ArrayList<>();
-            for(RoomEntity room:roomEntities){
-                String validHotel = room.getHotelEntityList().stream()
-                        .map(hotel-> hotel.getHotelName()).collect(Collectors.joining(", "));
-                if(room.getStatus().equals("empty")){
-                    RoomDto roomDto = new RoomDto();
-                    roomDto.setId(room.getId());
-                    roomDto.setFloor(room.getFloor());
-                    roomDto.setDoorNumber(room.getDoorNumber());
-                    roomDto.setRoomsNumber(room.getRoomsNumber());
-                    roomDto.setBathroomsNumber(room.getBathroomsNumber());
-                    roomDto.setBedsNumber(room.getBedsNumber());
-                    roomDto.setHotelName(validHotel);
-                    roomDto.setPrice(room.getPrice());
-                    roomDto.setStatus(room.getStatus());
-                    dto.add(roomDto);
+            for(HotelEntity hotel:hotelEntityList){
+                for(RoomEntity room:hotel.getRooms()){
+                    String roomStatus = room.getStatus();
+                    if(roomStatus.contains("empty")){
+                        RoomDto roomDto = new RoomDto();
+                        roomDto.setId(room.getId());
+                        roomDto.setFloor(room.getFloor());
+                        roomDto.setDoorNumber(room.getDoorNumber());
+                        roomDto.setRoomsNumber(room.getRoomsNumber());
+                        roomDto.setBathroomsNumber(room.getBathroomsNumber());
+                        roomDto.setBedsNumber(room.getBedsNumber());
+                        roomDto.setPrice(room.getPrice());
+                        roomDto.setStatus(room.getStatus());
+                        dto.add(roomDto);
+                    }
                 }
             }
             return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -162,8 +136,6 @@ public class RoomService {
             }
             List<RoomDto> dto = new ArrayList<>();
             for(RoomEntity room : userRooms){
-                String validHotel = room.getHotelEntityList().stream()
-                        .map(hotel -> hotel.getHotelName()).collect(Collectors.joining(", "));
 
                 RoomDto roomDto = new RoomDto();
                 roomDto.setId(room.getId());
@@ -172,7 +144,6 @@ public class RoomService {
                 roomDto.setRoomsNumber(room.getRoomsNumber());
                 roomDto.setBathroomsNumber(room.getBathroomsNumber());
                 roomDto.setBedsNumber(room.getBedsNumber());
-                roomDto.setHotelName(validHotel);
                 roomDto.setPrice(room.getPrice());
                 roomDto.setStatus(room.getStatus());
                 dto.add(roomDto);
@@ -209,11 +180,6 @@ public class RoomService {
             }
             if(roomDto.getStatus() != null){
                 roomEntity.setStatus(roomDto.getStatus());
-            }
-            if(roomDto.getHotelName() != null){
-                HotelEntity hotelEntity = hotelRepository.findByHotelName(roomDto.getHotelName())
-                        .orElseThrow(()-> new EntityNotFoundException("Hotel is Not Found"));
-                roomEntity.setHotelEntityList(Collections.singletonList(hotelEntity));
             }
             return new ResponseEntity<>("Room updated Successfully",HttpStatus.OK);
         }catch (Exception e){

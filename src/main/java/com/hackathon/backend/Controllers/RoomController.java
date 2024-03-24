@@ -22,14 +22,10 @@ public class RoomController {
     }
 
     @PostMapping(path = "${ROOM_CREATE_PATH}")
-    public ResponseEntity<?> createRoom(@RequestBody RoomDto roomDto){
-    return roomService.createNewRoom(roomDto);
+    public ResponseEntity<?> createRoom(@PathVariable("hotelID") int hotelID ,@RequestBody RoomDto roomDto){
+    return roomService.createNewRoom(hotelID,roomDto);
 }
 
-    @GetMapping(path = "${ROOM_GET_HOTEL_PATH}")
-    public ResponseEntity<?> getAllRoomsFromHotel(@PathVariable String hotelName){
-        return roomService.getAllRoomsFromHotel(hotelName);
-    }
     @GetMapping(path = "${ROOM_GET_VALID_PATH}")
     public ResponseEntity<?> getValidVisas(){
         return roomService.getValidRooms();

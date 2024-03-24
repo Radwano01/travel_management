@@ -28,6 +28,7 @@ public class HotelService {
             if(!existsHotel){
                 HotelEntity hotelEntity = new HotelEntity();
                 hotelEntity.setHotelName(hotelDto.getHotelName());
+                hotelEntity.setCountry(hotelDto.getCountry());
                 hotelRepository.save(hotelEntity);
                 return new ResponseEntity<>("Hotel created Successfully", HttpStatus.OK);
             }else{
@@ -65,6 +66,9 @@ public class HotelService {
                     .orElseThrow(()-> new EntityNotFoundException("Hotel Id is Not Found"));
             if(hotelDto.getHotelName() != null){
             hotelEntity.setHotelName(hotelDto.getHotelName());
+            }
+            if(hotelDto.getCountry() != null){
+                hotelEntity.setCountry(hotelDto.getCountry());
             }
             return new ResponseEntity<>("Hotel updated Successfully", HttpStatus.OK);
         }catch (Exception e){

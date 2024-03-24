@@ -8,8 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface HotelRepository extends JpaRepository<HotelEntity, Integer> {
-
         boolean existsByHotelName(String hotelName);
-
-        Optional<HotelEntity> findByHotelName(String hotelName);
 }
+

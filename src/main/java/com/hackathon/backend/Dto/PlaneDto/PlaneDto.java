@@ -6,6 +6,10 @@ public class PlaneDto {
 
     private String planeName;
     private Integer sitsCount;
+    private String airportLaunch;
+    private String airportLand;
+    private String timeLaunch;
+    private String timeLand;
 
     public int getId() {
         return id;
@@ -29,5 +33,37 @@ public class PlaneDto {
 
     public void setSitsCount(Integer sitsCount) {
         this.sitsCount = sitsCount;
+    }
+
+    public String getAirportLaunch() {
+        return airportLaunch;
+    }
+
+    public void setAirportLaunch(String airportLaunch) {
+        this.airportLaunch = airportLaunch;
+    }
+
+    public String getAirportLand() {
+        return airportLand;
+    }
+
+    public void setAirportLand(String airportLand) {
+        this.airportLand = airportLand;
+    }
+
+    public String getTimeLaunch() {
+        return timeLaunch;
+    }
+
+    public void setTimeLaunch(String timeLaunch) {
+        this.timeLaunch = timeLaunch;
+    }
+
+    public String getTimeLand() {
+        return timeLand;
+    }
+
+    public void setTimeLand(String timeLand) {
+        this.timeLand = timeLand;
     }
 }

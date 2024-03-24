@@ -16,6 +16,13 @@ public class CountryEntity {
     @Column(name = "country")
     private String country;
 
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "country_detail",
+            joinColumns = @JoinColumn(name = "country_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "details_id", referencedColumnName = "id"))
+    private List<CountryDetailsEntity> countryDetails = new ArrayList<>();
+
     public CountryEntity(){}
 
     public CountryEntity(String country){
@@ -38,4 +45,12 @@ public class CountryEntity {
         this.country = country;
     }
 
+
+    public List<CountryDetailsEntity> getCountryDetails() {
+        return countryDetails;
+    }
+
+    public void setCountryDetails(List<CountryDetailsEntity> countryDetails) {
+        this.countryDetails = countryDetails;
+    }
 }

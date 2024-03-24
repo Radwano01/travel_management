@@ -2,6 +2,7 @@ package com.hackathon.backend.Services;
 
 
 import com.hackathon.backend.Dto.PlaneDto.PlaneDto;
+import com.hackathon.backend.Entities.HotelEntity;
 import com.hackathon.backend.Entities.PlaneEntity;
 import com.hackathon.backend.Repositories.PlaneRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,6 +31,11 @@ public class PlaneService{
                 PlaneEntity planeEntity = new PlaneEntity();
                 planeEntity.setPlaneName(planeDto.getPlaneName());
                 planeEntity.setSitsCount(planeDto.getSitsCount());
+                planeEntity.setAirportLaunch(planeDto.getAirportLaunch());
+                planeEntity.setAirportLand(planeDto.getAirportLand());
+                planeEntity.setTimeLaunch(planeDto.getTimeLaunch());
+                planeEntity.setTimeLand(planeDto.getAirportLand());
+
                 planeRepository.save(planeEntity);
                 return new ResponseEntity<>("Plane Name created Successfully", HttpStatus.OK);
             }else{
@@ -52,8 +58,8 @@ public class PlaneService{
     public ResponseEntity<?> getSinglePlane(int planeID) {
         try{
             PlaneEntity planeEntity = planeRepository.findById(planeID)
-                    .orElseThrow(()-> new EntityNotFoundException("Plane Id is Not Found"));
-            return new ResponseEntity<>(planeEntity, HttpStatus.OK);
+                    .orElseThrow(()-> new EntityNotFoundException("Hotel Id is Not Found: "+planeID));
+            return  new ResponseEntity<>(planeEntity, HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -69,6 +75,18 @@ public class PlaneService{
             }
             if(planeDto.getSitsCount() != null){
                 planeEntity.setSitsCount(planeDto.getSitsCount());
+            }
+            if(planeDto.getAirportLaunch() != null){
+                planeEntity.setAirportLaunch(planeDto.getAirportLaunch());
+            }
+            if(planeDto.getAirportLand() != null){
+                planeEntity.setAirportLand(planeDto.getAirportLand());
+            }
+            if(planeDto.getTimeLaunch() != null){
+                planeEntity.setTimeLaunch(planeDto.getTimeLaunch());
+            }
+            if(planeDto.getTimeLand() != null){
+                planeEntity.setTimeLand(planeDto.getTimeLand());
             }
             return new ResponseEntity<>("Plane updated Successfully", HttpStatus.OK);
         }catch (Exception e){

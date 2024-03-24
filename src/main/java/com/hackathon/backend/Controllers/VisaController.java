@@ -20,18 +20,13 @@ public class VisaController {
     }
 
     @PostMapping(path = "${VISA_CREATE_PATH}")
-    public ResponseEntity<?> createVisa(@RequestBody VisaDto visaDto){
-        return visaService.createVisa(visaDto);
+    public ResponseEntity<?> createVisa(@PathVariable("planeID") int planeID,@RequestBody VisaDto visaDto){
+        return visaService.createVisa(planeID,visaDto);
     }
 
     @PutMapping(path = "${VISA_EDIT_PATH}")
     public ResponseEntity<?> editVisa(@PathVariable("visaID") int visaID, @RequestBody VisaDto visaDto){
         return visaService.editVisa(visaID, visaDto);
-    }
-
-    @GetMapping(path = "${VISA_GET_PATH}")
-    public ResponseEntity<?> getAllVisasFromPlane(@RequestBody VisaDto visaDto){
-        return visaService.getAllVisasFromPlane(visaDto);
     }
 
     @GetMapping(path = "${VISA_GET_VALID_PATH}")

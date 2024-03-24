@@ -41,62 +41,26 @@ public class VisaService {
         this.userRepository = userRepository;
     }
 
-    public ResponseEntity<?> createVisa(VisaDto visaDto){
+
+    @Transactional
+    public ResponseEntity<?> createVisa(int planeID,VisaDto visaDto){
         try{
-            boolean existsPlace = visaRepository.existsByPlaceNumber(visaDto.getPlaceNumber());
-            PlaneEntity planeEntity = planeRepository.findByPlaneName(visaDto.getPlaneName())
+            PlaneEntity planeEntity = planeRepository.findById(planeID)
                     .orElseThrow(()-> new EntityNotFoundException("Plane is Not Found"));
-
-            if(!existsPlace) {
-                long numberOfSeats = visaRepository.count();
-                if (numberOfSeats >= 100) {
-                    return new ResponseEntity<>("Cannot create new visa. Maximum seat capacity reached.", HttpStatus.BAD_REQUEST);
-                }
-
+            if(planeEntity.getSitsCount() >= 100){
+                return new ResponseEntity<>("Plane Visas jumped above 100 "+planeEntity.getPlaneName(), HttpStatus.BAD_REQUEST);
+            }else {
                 VisaEntity visaEntity = new VisaEntity();
-                visaEntity.setAirportLaunch(visaDto.getAirportLaunch());
-                visaEntity.setAirportLand(visaDto.getAirportLand());
-                visaEntity.setTimeLaunch(visaDto.getTimeLaunch());
-                visaEntity.setTimeLand(visaDto.getTimeLand());
                 visaEntity.setPlaceNumber(visaDto.getPlaceNumber());
+                visaEntity.setPlaneName(visaDto.getPlaneName());
                 visaEntity.setPrice(visaDto.getPrice());
                 visaEntity.setStatus(visaDto.getStatus());
-                visaEntity.setPlaneEntityList(Collections.singletonList(planeEntity));
                 visaEntity.setUserId(1);
                 visaRepository.save(visaEntity);
-            }else{
-                return new ResponseEntity<>("Visa place Already valid", HttpStatus.FOUND);
+
+                planeEntity.getVisas().add(visaEntity);
+                return new ResponseEntity<>("Visa Created Successfully", HttpStatus.OK);
             }
-
-            return new ResponseEntity<>("Visa Created Successfully", HttpStatus.OK);
-
-        }catch (Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public ResponseEntity<?> getAllVisasFromPlane(VisaDto visaDto){
-        try{
-            List<VisaEntity> visaEntityList = visaRepository.findAll();
-            List<VisaDto> dto = new ArrayList<>();
-            for(VisaEntity visa:visaEntityList){
-                String validPlane = visa.getPlaneEntityList().stream()
-                        .map(plane-> plane.getPlaneName()).collect(Collectors.joining());
-                if(validPlane.contains(visaDto.getPlaneName())){
-                    VisaDto visaEntity = new VisaDto();
-                    visaEntity.setId(visa.getId());
-                    visaEntity.setAirportLaunch(visa.getAirportLaunch());
-                    visaEntity.setAirportLand(visa.getAirportLand());
-                    visaEntity.setTimeLaunch(visa.getTimeLaunch());
-                    visaEntity.setTimeLand(visa.getTimeLand());
-                    visaEntity.setPlaceNumber(visa.getPlaceNumber());
-                    visaEntity.setPrice(visa.getPrice());
-                    visaEntity.setPlaneName(validPlane);
-                    visaEntity.setStatus(visa.getStatus());
-                    dto.add(visaEntity);
-                }
-            }
-            return new ResponseEntity<>(dto, HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -117,18 +81,12 @@ public class VisaService {
             List<VisaEntity> visaEntityList = visaRepository.findAll();
             List<VisaDto> dto = new ArrayList<>();
             for(VisaEntity visa:visaEntityList){
-                String validPlane = visa.getPlaneEntityList().stream()
-                        .map(plane-> plane.getPlaneName()).collect(Collectors.joining());
                 if(visa.getStatus().equals("empty")){
                     VisaDto visaDto = new VisaDto();
                     visaDto.setId(visa.getId());
-                    visaDto.setAirportLaunch(visa.getAirportLaunch());
-                    visaDto.setAirportLand(visa.getAirportLand());
-                    visaDto.setTimeLaunch(visa.getTimeLaunch());
-                    visaDto.setTimeLand(visa.getTimeLand());
                     visaDto.setPlaceNumber(visa.getPlaceNumber());
                     visaDto.setPrice(visa.getPrice());
-                    visaDto.setPlaneName(validPlane);
+                    visaDto.setPlaneName(visa.getPlaneName());
                     visaDto.setStatus(visa.getStatus());
                     dto.add(visaDto);
                 }
@@ -144,18 +102,6 @@ public class VisaService {
         try{
             VisaEntity visaEntity = visaRepository.findById(visaID)
                     .orElseThrow(()-> new EntityNotFoundException("Visa Id is Not Found"));
-            if(visaDto.getAirportLaunch() != null){
-                visaEntity.setAirportLaunch(visaDto.getAirportLaunch());
-            }
-            if(visaDto.getAirportLand() != null){
-                visaEntity.setAirportLand(visaDto.getAirportLand());
-            }
-            if(visaDto.getTimeLaunch() != null){
-                visaEntity.setTimeLaunch(visaDto.getTimeLaunch());
-            }
-            if(visaDto.getTimeLand() != null){
-                visaEntity.setTimeLand(visaDto.getTimeLand());
-            }
             if(visaDto.getPlaceNumber() != null){
                 visaEntity.setPlaceNumber(visaDto.getPlaceNumber());
             }
@@ -206,25 +152,18 @@ public class VisaService {
 
     public ResponseEntity<?> getUserVisaPayment(String token){
         try{
-            List<VisaEntity> visaEntity = visaRepository.findAll();
             List<VisaDto> dto = new ArrayList<>();
             int userId = getUserIdFromToken(token);
+            List<VisaEntity> visaEntity = visaRepository.findByUserId(userId);
             for(VisaEntity visa:visaEntity){
-                String validPlane = visa.getPlaneEntityList().stream()
-                        .map(plane-> plane.getPlaneName()).collect(Collectors.joining());
                 if(visa.getUserId() == userId){
                     VisaDto visaDto = new VisaDto();
                     visaDto.setId(visa.getId());
-                    visaDto.setAirportLaunch(visa.getAirportLaunch());
-                    visaDto.setAirportLand(visa.getAirportLand());
-                    visaDto.setTimeLaunch(visa.getTimeLaunch());
-                    visaDto.setTimeLand(visa.getTimeLand());
                     visaDto.setPlaceNumber(visa.getPlaceNumber());
                     visaDto.setPrice(visa.getPrice());
-                    visaDto.setPlaneName(validPlane);
+                    visaDto.setPlaneName(visa.getPlaneName());
                     visaDto.setStatus(visa.getStatus());
                     dto.add(visaDto);
-                    break;
                 }else{
                     return new ResponseEntity<>("UserId doesn't match the valid UserId", HttpStatus.BAD_REQUEST);
                 }

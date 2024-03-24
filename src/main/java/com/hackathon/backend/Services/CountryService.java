@@ -1,9 +1,12 @@
 package com.hackathon.backend.Services;
 
+import com.hackathon.backend.Dto.CountryDto.CountryDetailsDto;
 import com.hackathon.backend.Dto.CountryDto.CountryDto;
 
+import com.hackathon.backend.Entities.CountryDetailsEntity;
 import com.hackathon.backend.Entities.CountryEntity;
 
+import com.hackathon.backend.Repositories.CountryDetailsRepository;
 import com.hackathon.backend.Repositories.CountryRepository;
 
 import com.hackathon.backend.Repositories.TodoListRepository;
@@ -14,18 +17,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
 public class CountryService {
 
     private final CountryRepository countryRepository;
+    private final CountryDetailsRepository countryDetailsRepository;
 
     @Autowired
-    public CountryService(CountryRepository countryRepository) {
+    public CountryService(CountryRepository countryRepository,
+                          CountryDetailsRepository countryDetailsRepository) {
 
 
         this.countryRepository = countryRepository;
+        this.countryDetailsRepository = countryDetailsRepository;
     }
 
     public ResponseEntity<?> createCountry(CountryDto countryDto) {
@@ -40,6 +47,28 @@ public class CountryService {
                 return new ResponseEntity<>("Country Already Valid", HttpStatus.CONFLICT);
             }
 
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+    @Transactional
+    public ResponseEntity<?> createCountryDetails(int countryID,CountryDetailsDto countryDetailsDto){
+        try{
+            CountryEntity countryEntity = countryRepository.findById(countryID)
+                        .orElseThrow(()-> new EntityNotFoundException("Country Id is Not Found"));
+            CountryDetailsEntity countryDetailsEntity = new CountryDetailsEntity();
+            countryDetailsEntity.setPlace(countryDetailsDto.getPlace());
+            countryDetailsEntity.setDescription(countryDetailsDto.getDescription());
+            countryDetailsEntity.setImageOne(countryDetailsDto.getImageOne());
+            countryDetailsEntity.setImageTwo(countryDetailsDto.getImageTwo());
+            countryDetailsEntity.setImageThree(countryDetailsDto.getImageThree());
+            countryDetailsRepository.save(countryDetailsEntity);
+
+            countryEntity.getCountryDetails().add(countryDetailsEntity);
+            return new ResponseEntity<>("Country Details added Successfully", HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -63,10 +92,38 @@ public class CountryService {
         }
     }
 
+    public ResponseEntity<?> getAllCountriesDetails(){
+        try {
+            List<CountryDetailsEntity> countryDetailsEntities = countryDetailsRepository.findAll();
+            return new ResponseEntity<>(countryDetailsEntities, HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> getSingleCountryDetails(int countryDetailsID) {
+        try{
+            CountryDetailsEntity countryEntity = countryDetailsRepository.findById(countryDetailsID)
+                    .orElseThrow(()-> new EntityNotFoundException("Country Details is Not Found: "+countryDetailsID));
+            return new ResponseEntity<>(countryEntity, HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public ResponseEntity<?> deleteCountry(int countryID){
         try{
             countryRepository.deleteById(countryID);
             return new ResponseEntity<>("Country Deleted Successfully", HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> deleteCountryDetails(int countryDetailsID){
+        try{
+            countryDetailsRepository.deleteById(countryDetailsID);
+            return new ResponseEntity<>("Country Details Deleted Successfully", HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -77,7 +134,9 @@ public class CountryService {
         try {
             CountryEntity countryEntity = countryRepository.findById(countryID)
                     .orElseThrow(()-> new EntityNotFoundException("Country Id Not Found"));
-            countryEntity.setCountry(countryDto.getCountry());
+            if(countryDto.getCountry() != null){
+                countryEntity.setCountry(countryDto.getCountry());
+            }
             countryRepository.save(countryEntity);
             return new ResponseEntity<>("Country updated Successfully", HttpStatus.OK);
         }catch (Exception e){
@@ -85,5 +144,30 @@ public class CountryService {
         }
     }
 
+    @Transactional
+    public ResponseEntity<?> editCountryDetails(int countryDetailsID, CountryDetailsDto countryDetailsDto){
+        try {
+            CountryDetailsEntity countryDetailsEntity = countryDetailsRepository.findById(countryDetailsID)
+                    .orElseThrow(()-> new EntityNotFoundException("Country Details Id Not Found"));
+            if(countryDetailsDto.getPlace() != null){
+                countryDetailsEntity.setPlace(countryDetailsDto.getPlace());
+            }
+            if(countryDetailsDto.getImageOne() != null){
+                countryDetailsEntity.setImageOne(countryDetailsDto.getImageOne());
+            }
+            if(countryDetailsDto.getImageTwo() != null){
+                countryDetailsEntity.setImageTwo(countryDetailsDto.getImageTwo());
+            }
+            if(countryDetailsDto.getImageThree() != null){
+                countryDetailsEntity.setImageThree(countryDetailsDto.getImageThree());
+            }
+            if(countryDetailsDto.getDescription() != null){
+                countryDetailsEntity.setDescription(countryDetailsDto.getDescription());
+            }
+            return new ResponseEntity<>("Country updated Successfully", HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }

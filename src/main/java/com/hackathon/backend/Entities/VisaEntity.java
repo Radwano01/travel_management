@@ -13,10 +13,7 @@ public class VisaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String airportLaunch;
-    private String airportLand;
-    private String timeLaunch;
-    private String timeLand;
+    private String planeName;
     private Integer placeNumber;
     private Integer price;
     private String status;
@@ -29,12 +26,6 @@ public class VisaEntity {
     private Integer userId;
 
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "visa_plane", joinColumns = @JoinColumn(name = "visa_id", referencedColumnName = "id"),
-        inverseJoinColumns = @JoinColumn(name = "plane_id", referencedColumnName = "id"))
-    private List<PlaneEntity> planeEntityList = new ArrayList<>();
-
-
     public int getId() {
         return id;
     }
@@ -43,36 +34,12 @@ public class VisaEntity {
         this.id = id;
     }
 
-    public String getAirportLaunch() {
-        return airportLaunch;
+    public String getPlaneName() {
+        return planeName;
     }
 
-    public void setAirportLaunch(String airportLaunch) {
-        this.airportLaunch = airportLaunch;
-    }
-
-    public String getAirportLand() {
-        return airportLand;
-    }
-
-    public void setAirportLand(String airportLand) {
-        this.airportLand = airportLand;
-    }
-
-    public String getTimeLaunch() {
-        return timeLaunch;
-    }
-
-    public void setTimeLaunch(String timeLaunch) {
-        this.timeLaunch = timeLaunch;
-    }
-
-    public String getTimeLand() {
-        return timeLand;
-    }
-
-    public void setTimeLand(String timeLand) {
-        this.timeLand = timeLand;
+    public void setPlaneName(String planeName) {
+        this.planeName = planeName;
     }
 
     public Integer getPlaceNumber() {
@@ -99,13 +66,6 @@ public class VisaEntity {
         this.status = status;
     }
 
-    public List<PlaneEntity> getPlaneEntityList() {
-        return planeEntityList;
-    }
-
-    public void setPlaneEntityList(List<PlaneEntity> planeEntityList) {
-        this.planeEntityList = planeEntityList;
-    }
 
     public int getUserId() {
         return userId;
@@ -114,4 +74,5 @@ public class VisaEntity {
     public void setUserId(int userId) {
         this.userId = userId;
     }
+
 }

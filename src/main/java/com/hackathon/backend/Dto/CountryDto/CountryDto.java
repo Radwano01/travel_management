@@ -20,4 +20,5 @@ public class CountryDto {
     public void setCountry(String country) {
         this.country = country;
     }
+
 }

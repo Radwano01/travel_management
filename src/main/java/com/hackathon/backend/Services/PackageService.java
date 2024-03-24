@@ -125,13 +125,25 @@ public class PackageService {
         }
     }
 
-
-
-
     public ResponseEntity<?> getAllPackages(){
         try{
             List<PackageEntity> packageEntityList = packageRepository.findAll();
-            return new ResponseEntity<>(packageEntityList, HttpStatus.OK);
+            List<PackageDto> dto = new ArrayList<>();
+            for(PackageEntity pack:packageEntityList){
+
+                PackageDto packageDto = new PackageDto();
+                packageDto.setId(pack.getId());
+                packageDto.setPackageName(pack.getPackageName());
+                packageDto.setCountry((pack.getCountry().getCountry()));
+                packageDto.setDescription(pack.getDescription());
+                packageDto.setPrice(pack.getPrice());
+                packageDto.setBenefit(pack.getBenefits());
+                packageDto.setTodo(pack.getTodos());
+                packageDto.setRoadmap(pack.getRoadmaps());
+                dto.add(packageDto);
+
+            }
+            return new ResponseEntity<>(dto, HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -162,6 +174,9 @@ public class PackageService {
                     packageDto1.setCountry(validPackage);
                     packageDto1.setDescription(pack.getDescription());
                     packageDto1.setPrice(pack.getPrice());
+                    packageDto1.setBenefit(pack.getBenefits());
+                    packageDto1.setTodo(pack.getTodos());
+                    packageDto1.setRoadmap(pack.getRoadmaps());
                     dto.add(packageDto1);
                 }else{
                     return new ResponseEntity<>("Country Has No Packages", HttpStatus.NOT_FOUND);
@@ -196,9 +211,6 @@ public class PackageService {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
-
 
     @Transactional
     public ResponseEntity<?> editPackage(int id,PackageDto packageDto){

@@ -9,8 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface PlaneRepository extends JpaRepository<PlaneEntity, Integer> {
-
     boolean existsByPlaneName(String planeName);
 
-    Optional<PlaneEntity> findByPlaneName(String planeName);
 }

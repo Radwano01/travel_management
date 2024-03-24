@@ -9,6 +9,5 @@ import java.util.List;
 
 @Repository
 public interface VisaRepository extends JpaRepository<VisaEntity, Integer> {
-
-    boolean existsByPlaceNumber(Integer placeNumber);
+    List<VisaEntity> findByUserId(int userId);
 }

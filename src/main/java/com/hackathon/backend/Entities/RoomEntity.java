@@ -29,10 +29,6 @@ public class RoomEntity {
     @Column(name = "user_id")
     private int userId;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "hotel_room", joinColumns = @JoinColumn(name = "room_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "hotel_id", referencedColumnName = "id"))
-    private List<HotelEntity> hotelEntityList = new ArrayList<>();
 
     public int getId() {
         return id;
@@ -80,14 +76,6 @@ public class RoomEntity {
 
     public void setBedsNumber(int bedsNumber) {
         this.bedsNumber = bedsNumber;
-    }
-
-    public List<HotelEntity> getHotelEntityList() {
-        return hotelEntityList;
-    }
-
-    public void setHotelEntityList(List<HotelEntity> hotelEntityList) {
-        this.hotelEntityList = hotelEntityList;
     }
 
     public int getPrice() {
