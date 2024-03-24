@@ -334,10 +334,9 @@
 #### Create Benefit for Package
 
 - **Method:** `POST`
-- **Path:** `/api/v1/packages/benefits`
+- **Path:** `/api/v1/packages/benefits/{packageID}`
 - **Input:**
   - JSON object with the following fields:
-    - `packageId` (integer): ID of the package to associate the benefit with
     - `benefit` (string): Benefit to add to the package
 - **Response:**
   - `200 OK` if the benefit is successfully created for the package
@@ -346,10 +345,9 @@
 #### Create Roadmap for Package
 
 - **Method:** `POST`
-- **Path:** `/api/v1/packages/roadmaps`
+- **Path:** `/api/v1/packages/roadmaps/{packageID}`
 - **Input:**
   - JSON object with the following fields:
-    - `packageId` (integer): ID of the package to associate the roadmap with
     - `roadmap` (string): Roadmap to add to the package
 - **Response:**
   - `200 OK` if the roadmap is successfully created for the package
@@ -358,10 +356,9 @@
 #### Create Todos for Package
 
 - **Method:** `POST`
-- **Path:** `/api/v1/packages/todos`
+- **Path:** `/api/v1/packages/todos/{packageID}`
 - **Input:**
   - JSON object with the following fields:
-    - `packageId` (integer): ID of the package to associate the todos with
     - `todos` (string): Todos to add to the package
     - `coins` (integer): Coins associated with the todos
 - **Response:**
