@@ -5,5 +5,4 @@ RUN mvn clean package -DskipTests
 FROM openjdk:17.0.1-jdk-slim
 COPY --from=build target/*.jar app.jar
 EXPOSE 8080
-ENV HOST=0.0.0.0
 ENTRYPOINT ["java", "-jar", "/app.jar"]
