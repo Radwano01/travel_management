@@ -28,16 +28,6 @@ public class RoadmapEntity {
         this.id = id;
     }
 
-
-
-//    public List<CountryEntity> getCountryEntity() {
-//        return countryEntity;
-//    }
-//
-//    public void setCountryEntity(List<CountryEntity> countryEntity) {
-//        this.countryEntity = countryEntity;
-//    }
-
     public String getRoadmap() {
         return roadmap;
     }

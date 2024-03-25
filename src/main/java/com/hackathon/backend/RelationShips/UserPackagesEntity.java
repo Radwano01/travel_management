@@ -20,7 +20,7 @@ public class UserPackagesEntity {
     @Column(name = "user_id")
     private int userId;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "package_id", insertable = false, updatable = false)
     private PackageEntity packageEntity;
 

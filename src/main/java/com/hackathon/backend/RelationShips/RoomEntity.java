@@ -25,7 +25,7 @@ public class RoomEntity {
     private int price;
     private String status;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private UserEntity userEntity;
 

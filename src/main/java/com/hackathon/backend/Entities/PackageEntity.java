@@ -19,7 +19,7 @@ public class PackageEntity {
 
     private String packageName;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "country")
     private CountryEntity country;
     private String description;

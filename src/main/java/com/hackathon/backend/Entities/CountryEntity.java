@@ -2,6 +2,7 @@ package com.hackathon.backend.Entities;
 
 import com.hackathon.backend.RelationShips.CountryDetailsEntity;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Cascade;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class CountryEntity {
             joinColumns = @JoinColumn(name = "country_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "details_id", referencedColumnName = "id"))
     private List<CountryDetailsEntity> countryDetails = new ArrayList<>();
+
 
     public CountryEntity(){}
 
