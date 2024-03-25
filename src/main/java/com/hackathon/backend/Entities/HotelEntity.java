@@ -12,14 +12,14 @@ public class HotelEntity {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
     private String country;
 
     private String hotelName;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "hotel_room", joinColumns = @JoinColumn(name = "hotel_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "room_id", referencedColumnName = "id"))
     private List<RoomEntity> rooms = new ArrayList<>();

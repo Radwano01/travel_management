@@ -112,7 +112,12 @@ public class CountryService {
     public ResponseEntity<?> deleteCountry(int countryID){
         try{
             countryRepository.deleteById(countryID);
-            return new ResponseEntity<>("Country Deleted Successfully", HttpStatus.OK);
+            boolean isDeleted = !countryRepository.existsById(countryID);
+            if (isDeleted) {
+                return new ResponseEntity<>("Country Deleted Successfully", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Country Not Found", HttpStatus.NOT_FOUND);
+            }
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -121,7 +126,12 @@ public class CountryService {
     public ResponseEntity<?> deleteCountryDetails(int countryDetailsID){
         try{
             countryDetailsRepository.deleteById(countryDetailsID);
-            return new ResponseEntity<>("Country Details Deleted Successfully", HttpStatus.OK);
+            boolean isDeleted = !countryDetailsRepository.existsById(countryDetailsID);
+            if (isDeleted) {
+                return new ResponseEntity<>("Country Details Deleted Successfully", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Country Details Not Found", HttpStatus.NOT_FOUND);
+            }
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

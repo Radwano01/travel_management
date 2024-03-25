@@ -10,19 +10,22 @@ import jakarta.persistence.*;
 public class UserPackagesEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private UserEntity userEntity;
 
     @Column(name = "user_id")
     private int userId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "package_id")
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "package_id", insertable = false, updatable = false)
     private PackageEntity packageEntity;
+
+    @Column(name = "package_id")
+    private int packageId;
 
     public int getId() {
         return id;
@@ -32,13 +35,6 @@ public class UserPackagesEntity {
         this.id = id;
     }
 
-    public PackageEntity getPackageEntity() {
-        return packageEntity;
-    }
-
-    public void setPackageEntity(PackageEntity packageEntity) {
-        this.packageEntity = packageEntity;
-    }
 
     public int getUserId() {
         return userId;
@@ -46,5 +42,13 @@ public class UserPackagesEntity {
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public int getPackageID() {
+        return packageId;
+    }
+
+    public void setPackageID(int packageID) {
+        this.packageId = packageID;
     }
 }

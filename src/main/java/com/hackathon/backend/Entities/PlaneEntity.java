@@ -12,7 +12,7 @@ import java.util.List;
 public class PlaneEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
     private String planeName;
@@ -23,7 +23,7 @@ public class PlaneEntity {
     private String timeLaunch;
     private String timeLand;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "plane_visa", joinColumns = @JoinColumn(name = "plane_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "visa_id", referencedColumnName = "id"))
     private List<VisaEntity> visas = new ArrayList<>();

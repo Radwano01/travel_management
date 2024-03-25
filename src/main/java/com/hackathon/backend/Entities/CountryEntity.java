@@ -11,14 +11,14 @@ import java.util.List;
 public class CountryEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
     @Column(name = "country")
     private String country;
 
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "country_detail",
             joinColumns = @JoinColumn(name = "country_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "details_id", referencedColumnName = "id"))

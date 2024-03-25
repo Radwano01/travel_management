@@ -14,7 +14,7 @@ import java.util.List;
 public class PackageEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
     private String packageName;
@@ -25,18 +25,18 @@ public class PackageEntity {
     private String description;
     private Integer price;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "package_benefit",
             joinColumns = @JoinColumn(name = "package_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "benefit_id", referencedColumnName = "id"))
     private List<BenefitEntity> benefits = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "package_roadmap", joinColumns = @JoinColumn(name = "package_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "roadmap_id", referencedColumnName = "id"))
     private List<RoadmapEntity> roadmaps = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "package_todos", joinColumns = @JoinColumn(name = "package_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "todos_id", referencedColumnName = "id"))
     private List<TodoListEntity> todos = new ArrayList<>();
