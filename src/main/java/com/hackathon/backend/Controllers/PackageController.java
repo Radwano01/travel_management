@@ -4,6 +4,7 @@ import com.hackathon.backend.Dto.PackageDto.BenefitDto;
 import com.hackathon.backend.Dto.PackageDto.PackageDto;
 import com.hackathon.backend.Dto.PackageDto.PackageRoadmapDto;
 import com.hackathon.backend.Dto.PackageDto.PackageTodosDto;
+import com.hackathon.backend.Dto.payment.PaymentDto;
 import com.hackathon.backend.Services.PackageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -111,5 +112,10 @@ public class PackageController {
     @PutMapping(path = "${PACKAGE_EDIT_TODO_PATH}")
     public ResponseEntity<?> editTodo(@PathVariable("todoID") int todoID,@RequestBody PackageTodosDto todosDto){
         return packageService.editTodos(todoID, todosDto);
+    }
+
+    @PostMapping(path = "${PACKAGE_PAYMENT_PATH}")
+    public ResponseEntity<?> payment(PaymentDto paymentDto){
+        return packageService.payment(paymentDto);
     }
 }

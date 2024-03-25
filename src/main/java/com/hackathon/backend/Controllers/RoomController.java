@@ -1,7 +1,6 @@
 package com.hackathon.backend.Controllers;
 
 
-import com.hackathon.backend.Dto.HotelDto.HotelDto;
 import com.hackathon.backend.Dto.HotelDto.RoomDto;
 import com.hackathon.backend.Dto.payment.PaymentDto;
 import com.hackathon.backend.Services.RoomService;
@@ -33,9 +32,10 @@ public class RoomController {
     }
 
     @GetMapping(path = "${ROOM_ORDERED_PATH}")
-    public ResponseEntity<?> getAllUserRoomPayment(@RequestParam("token") String token){
+    public ResponseEntity<?> getAllUserRoomPayment(@PathVariable("token") String token) {
         return roomService.getUserRoomPayment(token);
     }
+
     @GetMapping(path = "${ROOM_GET_SINGLE_PATH}")
     public ResponseEntity<?> getSingleRoom(@PathVariable("roomID") int roomID){
         return roomService.getSingleRoom(roomID);

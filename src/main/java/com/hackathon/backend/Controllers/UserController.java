@@ -29,13 +29,13 @@ public class UserController {
 
     @PostMapping(path = "${USER_VERIFICATION_PATH}")
     public ResponseEntity<?> verifyUserDetails(@PathVariable("email") String email,
-                                               @PathVariable("token") String token){
+                                               @RequestParam(required = true) String token){
         return userService.VerifyUser(email);
     }
 
     @PostMapping(path = "${USER_SEND_VERIFICATION_PATH}")
-    public ResponseEntity<?> sendVerificationLink(@RequestBody VerifyDto verifyDto){
-        return userService.sendVerificationLink(verifyDto);
+    public ResponseEntity<?> sendVerificationLink(@PathVariable("token") String token){
+        return userService.sendVerificationLink(token);
     }
 
     @PostMapping(path="${USER_LOGIN_PATH}")
@@ -44,16 +44,12 @@ public class UserController {
     }
 
     @DeleteMapping(path="${USER_DELETE_PATH}")
-    public ResponseEntity<?> removeUserDetails(@PathVariable("id") int id){
-        return userService.DeleteUser(id);
+    public ResponseEntity<?> removeUserDetails(@PathVariable("userID") int userID){
+        return userService.DeleteUser(userID);
     }
 
     @PutMapping(path="${USER_EDIT_PATH}")
-    public ResponseEntity<?> editUserDetails(@PathVariable("id") int id,
-                                             @RequestParam(required = false) String email,
-                                             @RequestParam(required = false) String username,
-                                             @RequestParam(required = false) String password,
-                                             @RequestBody EditUserDto editUserDto){
+    public ResponseEntity<?> editUserDetails(@RequestBody EditUserDto editUserDto){
         return userService.EditUser(editUserDto);
 
     }

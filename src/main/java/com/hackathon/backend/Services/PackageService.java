@@ -4,11 +4,13 @@ import com.hackathon.backend.Dto.PackageDto.BenefitDto;
 import com.hackathon.backend.Dto.PackageDto.PackageDto;
 import com.hackathon.backend.Dto.PackageDto.PackageRoadmapDto;
 import com.hackathon.backend.Dto.PackageDto.PackageTodosDto;
+import com.hackathon.backend.Dto.payment.PaymentDto;
 import com.hackathon.backend.Entities.*;
 import com.hackathon.backend.RelationShips.BenefitEntity;
 import com.hackathon.backend.RelationShips.RoadmapEntity;
 import com.hackathon.backend.RelationShips.TodoListEntity;
 import com.hackathon.backend.Repositories.*;
+import com.hackathon.backend.Utilities.UserFromToken;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -25,17 +27,20 @@ public class PackageService {
     private final BenefitRepository benefitRepository;
     private final RoadmapRepository roadmapRepository;
     private final TodoListRepository todoListRepository;
+    private final UserFromToken userFromToken;
 
     public PackageService(PackageRepository packageRepository,
                           CountryRepository countryRepository,
                           BenefitRepository benefitRepository,
                           RoadmapRepository roadmapRepository,
-                          TodoListRepository todoListRepository) {
+                          TodoListRepository todoListRepository,
+                          UserFromToken userFromToken) {
         this.packageRepository = packageRepository;
         this.countryRepository = countryRepository;
         this.benefitRepository = benefitRepository;
         this.roadmapRepository = roadmapRepository;
         this.todoListRepository = todoListRepository;
+        this.userFromToken = userFromToken;
     }
 
     public ResponseEntity<?> createPackage(PackageDto packageDto) {
@@ -316,6 +321,23 @@ public class PackageService {
         try{
             todoListRepository.deleteById(id);
             return new ResponseEntity<>("Todos Deleted Successfully",HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> payment(PaymentDto paymentDto) {
+        try{
+            String token = paymentDto.getAccessToken();
+            int userId = userFromToken.getUserIdFromToken(token);
+            boolean userVerification = userFromToken.getUserVerificationFromToken(token);
+            PackageEntity packageEntity = packageRepository.findById(paymentDto.getPaymentId())
+                    .orElseThrow(()-> new EntityNotFoundException("Package Id is Not Found: "+paymentDto.getPaymentId()));
+            if(userVerification){
+
+            }
+
+            return null;
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -1,5 +1,6 @@
-package com.hackathon.backend.Entities;
+package com.hackathon.backend.RelationShips;
 
+import com.hackathon.backend.Entities.UserEntity;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;

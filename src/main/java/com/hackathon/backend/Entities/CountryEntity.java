@@ -1,5 +1,6 @@
 package com.hackathon.backend.Entities;
 
+import com.hackathon.backend.RelationShips.CountryDetailsEntity;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;

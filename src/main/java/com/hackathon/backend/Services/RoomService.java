@@ -1,47 +1,47 @@
 package com.hackathon.backend.Services;
 
 
-import com.hackathon.backend.Dto.HotelDto.HotelDto;
 import com.hackathon.backend.Dto.HotelDto.RoomDto;
 import com.hackathon.backend.Dto.payment.PaymentDto;
 import com.hackathon.backend.Entities.HotelEntity;
-import com.hackathon.backend.Entities.RoomEntity;
+import com.hackathon.backend.RelationShips.RoomEntity;
 import com.hackathon.backend.Entities.UserEntity;
-import com.hackathon.backend.Entities.VisaEntity;
 import com.hackathon.backend.Repositories.HotelRepository;
 import com.hackathon.backend.Repositories.RoomRepository;
 import com.hackathon.backend.Repositories.UserRepository;
 import com.hackathon.backend.Security.JWTGenerator;
+import com.hackathon.backend.Utilities.UserFromToken;
+import com.stripe.Stripe;
+import com.stripe.model.PaymentIntent;
+import com.stripe.model.StripeError;
+import com.stripe.param.PaymentIntentCreateParams;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 public class RoomService {
 
     private final HotelRepository hotelRepository;
     private final RoomRepository roomRepository;
+    private final UserFromToken userFromToken;
 
-    private final JWTGenerator jwtGenerator;
-    private final UserRepository userRepository;
+    @Value("${STRIPE_SECRET_KEY}")
+    private String stripeSecretKey;
 
     @Autowired
     public RoomService(HotelRepository hotelRepository,
-                       RoomRepository roomRepository,
-                       JWTGenerator jwtGenerator,
-                       UserRepository userRepository) {
+                       RoomRepository roomRepository, UserFromToken userFromToken) {
         this.hotelRepository = hotelRepository;
         this.roomRepository = roomRepository;
-        this.jwtGenerator = jwtGenerator;
-        this.userRepository = userRepository;
+        this.userFromToken = userFromToken;
     }
 
 
@@ -119,20 +119,45 @@ public class RoomService {
     public ResponseEntity<?> payment(PaymentDto paymentDto){
         try{
             String token = paymentDto.getAccessToken();
-            int userId = getUserIdFromToken(token);
-            boolean userVerification = getUserVerificationFromToken(token);
+            int userId = userFromToken.getUserIdFromToken(token);
+            boolean userVerification = userFromToken.getUserVerificationFromToken(token);
             if(userVerification) {
                 RoomEntity room = roomRepository.findById(paymentDto.getPaymentId())
                         .orElseThrow(() -> new EntityNotFoundException("Room id is not found"));
                 if (!room.getStatus().equals("full")) {
-                    room.setUserId(userId);
-                    room.setStatus("full");
-                    return new ResponseEntity<>("Room given to user id: " + userId, HttpStatus.OK);
+                    try {
+                        Stripe.apiKey = stripeSecretKey;
+                        PaymentIntentCreateParams.Builder paramsBuilder = new PaymentIntentCreateParams.Builder()
+                                .setCurrency("USD")
+                                .setAmount(1000L)
+                                .addPaymentMethodType("card")
+                                .setPaymentMethod(paymentDto.getPaymentIntent())
+                                .setConfirm(true)
+                                .setConfirmationMethod(PaymentIntentCreateParams.ConfirmationMethod.MANUAL)
+                                .setErrorOnRequiresAction(true);
+
+                        PaymentIntent paymentIntent = PaymentIntent.create(paramsBuilder.build());
+
+                        if (paymentIntent.getStatus().equals("succeeded")) {
+                            room.setUserId(userId);
+                            room.setStatus("full");
+                            return new ResponseEntity<>("Room has been assigned to user ID: " + userId, HttpStatus.OK);
+                        } else {
+                            StripeError lastError = paymentIntent.getLastPaymentError();
+                            if (lastError != null) {
+                                return new ResponseEntity<>("Payment failed: " + lastError.getMessage(), HttpStatus.PAYMENT_REQUIRED);
+                            } else {
+                                return new ResponseEntity<>("Payment failed. Please check your payment details and try again.", HttpStatus.PAYMENT_REQUIRED);
+                            }
+                        }
+                    } catch (Exception e) {
+                        return new ResponseEntity<>("Payment failed due to an error. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
+                    }
                 } else {
-                    return new ResponseEntity<>("Room has been taken!", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>("Room Not Valid!", HttpStatus.BAD_REQUEST);
                 }
             }else{
-                return new ResponseEntity<>("User is Not Verify it yet!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("User is Not Verified yet!", HttpStatus.BAD_REQUEST);
             }
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -141,7 +166,7 @@ public class RoomService {
 
     public ResponseEntity<?> getUserRoomPayment(String token){
         try{
-            int userId = getUserIdFromToken(token);
+            int userId = userFromToken.getUserIdFromToken(token);
             List<RoomEntity> userRooms = roomRepository.findByUserId(userId);
             if(userRooms.isEmpty()){
                 return new ResponseEntity<>("No rooms Found for the Provided user ID", HttpStatus.NOT_FOUND);
@@ -156,6 +181,7 @@ public class RoomService {
                 roomDto.setRoomsNumber(room.getRoomsNumber());
                 roomDto.setBathroomsNumber(room.getBathroomsNumber());
                 roomDto.setBedsNumber(room.getBedsNumber());
+                roomDto.setHotelName(room.getHotelName());
                 roomDto.setPrice(room.getPrice());
                 roomDto.setStatus(room.getStatus());
                 dto.add(roomDto);
@@ -234,20 +260,4 @@ public class RoomService {
         }
 
     }
-
-
-    private int getUserIdFromToken(String token){
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        UserEntity user = userRepository.findIdByUsername(username)
-                .orElseThrow(()-> new EntityNotFoundException("Username is Not Found"));
-        return user.getId();
-    }
-
-    private boolean getUserVerificationFromToken(String token){
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        UserEntity user = userRepository.findIdByUsername(username)
-                .orElseThrow(()-> new EntityNotFoundException("Username is Not Found"));
-        return user.isVerification_status();
-    }
-
 }

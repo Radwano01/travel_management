@@ -1,4 +1,4 @@
-package com.hackathon.backend.Entities;
+package com.hackathon.backend.RelationShips;
 
 
 import jakarta.persistence.*;

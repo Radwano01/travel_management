@@ -1,7 +1,7 @@
 package com.hackathon.backend.Security;
 
 
-import com.hackathon.backend.Entities.RoleEntity;
+import com.hackathon.backend.RelationShips.RoleEntity;
 import com.hackathon.backend.Entities.UserEntity;
 import com.hackathon.backend.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

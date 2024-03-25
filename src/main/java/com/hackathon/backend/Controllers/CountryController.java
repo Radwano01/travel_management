@@ -2,7 +2,6 @@ package com.hackathon.backend.Controllers;
 
 import com.hackathon.backend.Dto.CountryDto.CountryDetailsDto;
 import com.hackathon.backend.Dto.CountryDto.CountryDto;
-import com.hackathon.backend.Entities.CountryDetailsEntity;
 import com.hackathon.backend.Services.CountryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

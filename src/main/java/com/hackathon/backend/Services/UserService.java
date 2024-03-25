@@ -1,14 +1,14 @@
 package com.hackathon.backend.Services;
 
 import com.hackathon.backend.Dto.UserDto.*;
-import com.hackathon.backend.Entities.RoleEntity;
+import com.hackathon.backend.RelationShips.RoleEntity;
 import com.hackathon.backend.Entities.UserEntity;
 import com.hackathon.backend.Repositories.RoleRepository;
-import com.hackathon.backend.Repositories.TodoListRepository;
 import com.hackathon.backend.Repositories.UserRepository;
 import com.hackathon.backend.Security.JWTGenerator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
@@ -32,7 +32,11 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTGenerator jwtGenerator;
-    private JavaMailSender javaMailSender;
+    private final JavaMailSender javaMailSender;
+
+
+    @Value("${VERIFY_LINK_TO_USER}")
+    private String verifyLink;
 
     public UserService(AuthenticationManager authenticationManager,
                        UserRepository userRepository,
@@ -95,13 +99,13 @@ public class UserService {
 
 
     //delete
-    public ResponseEntity<?> DeleteUser(int id) {
+    public ResponseEntity<?> DeleteUser(int userID) {
         try{
-            boolean checkExistsEmail = userRepository.existsById(id);
+            boolean checkExistsEmail = userRepository.existsById(userID);
             if(!checkExistsEmail){
-                return new ResponseEntity<>("Account id not found: "+id, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Account id not found: "+userID, HttpStatus.BAD_REQUEST);
             }else{
-                userRepository.deleteById(id);
+                userRepository.deleteById(userID);
                 return new ResponseEntity<>("Account deleted successfully", HttpStatus.OK);
             }
         }catch (Exception e){
@@ -152,12 +156,12 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<?> sendVerificationLink(VerifyDto verifyDto) {
+    public ResponseEntity<?> sendVerificationLink(String token) {
         try{
-            String username = jwtGenerator.getUsernameFromJWT(verifyDto.getToken());
+            String username = jwtGenerator.getUsernameFromJWT(token);
             UserEntity user = userRepository.findIdByUsername(username)
                     .orElseThrow(()-> new EntityNotFoundException("Username is Not Found"));
-            String verificationLink = "${VERIFY_LINK_TO_USER}"+user.getEmail()+"/"+verifyDto.getToken();
+            String verificationLink = verifyLink+user.getEmail()+"/"+token;
             SimpleMailMessage mailMessage = new SimpleMailMessage();
             mailMessage.setTo(user.getEmail());
             mailMessage.setSubject("Email Verification From Hackathon Project");

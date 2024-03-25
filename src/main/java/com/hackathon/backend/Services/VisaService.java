@@ -5,40 +5,46 @@ import com.hackathon.backend.Dto.PlaneDto.VisaDto;
 import com.hackathon.backend.Dto.payment.PaymentDto;
 import com.hackathon.backend.Entities.PlaneEntity;
 import com.hackathon.backend.Entities.UserEntity;
-import com.hackathon.backend.Entities.VisaEntity;
+import com.hackathon.backend.RelationShips.RoomEntity;
+import com.hackathon.backend.RelationShips.VisaEntity;
 import com.hackathon.backend.Repositories.PlaneRepository;
 import com.hackathon.backend.Repositories.UserRepository;
 import com.hackathon.backend.Repositories.VisaRepository;
 import com.hackathon.backend.Security.JWTGenerator;
+import com.hackathon.backend.Utilities.UserFromToken;
+import com.stripe.Stripe;
+import com.stripe.model.PaymentIntent;
+import com.stripe.model.StripeError;
+import com.stripe.param.PaymentIntentCreateParams;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class VisaService {
 
     private final PlaneRepository planeRepository;
     private final VisaRepository visaRepository;
-    private final JWTGenerator jwtGenerator;
-    private final UserRepository userRepository;
+    private final UserFromToken userFromToken;
+
+    @Value("${STRIPE_SECRET_KEY}")
+    private String stripeSecretKey;
 
     @Autowired
     public VisaService(PlaneRepository planeRepository,
-                        VisaRepository visaRepository,
-                        JWTGenerator jwtGenerator,
-                        UserRepository userRepository){
+                       VisaRepository visaRepository,
+                       UserFromToken userFromToken){
         this.planeRepository = planeRepository;
         this.visaRepository = visaRepository;
-        this.jwtGenerator = jwtGenerator;
-        this.userRepository = userRepository;
+        this.userFromToken = userFromToken;
+
     }
 
 
@@ -130,30 +136,54 @@ public class VisaService {
     public ResponseEntity<?> payment(PaymentDto paymentDto){
         try{
             String token = paymentDto.getAccessToken();
-            int userId = getUserIdFromToken(token);
-            boolean userVerification = getUserVerificationFromToken(token);
+            int userId = userFromToken.getUserIdFromToken(token);
+            boolean userVerification = userFromToken.getUserVerificationFromToken(token);
             if(userVerification) {
                 VisaEntity visa = visaRepository.findById(paymentDto.getPaymentId())
                         .orElseThrow(() -> new EntityNotFoundException("Visa id is not found"));
                 if (!visa.getStatus().equals("full")) {
-                    visa.setUserId(userId);
-                    visa.setStatus("full");
-                    return new ResponseEntity<>("Visa given to user id: " + userId, HttpStatus.OK);
+                    try {
+                        Stripe.apiKey = stripeSecretKey;
+                        PaymentIntentCreateParams.Builder paramsBuilder = new PaymentIntentCreateParams.Builder()
+                                .setCurrency("USD")
+                                .setAmount(1000L)
+                                .addPaymentMethodType("card")
+                                .setPaymentMethod(paymentDto.getPaymentIntent())
+                                .setConfirm(true)
+                                .setConfirmationMethod(PaymentIntentCreateParams.ConfirmationMethod.MANUAL)
+                                .setErrorOnRequiresAction(true);
+
+                        PaymentIntent paymentIntent = PaymentIntent.create(paramsBuilder.build());
+
+                        if (paymentIntent.getStatus().equals("succeeded")) {
+                            visa.setUserId(userId);
+                            visa.setStatus("full");
+                            return new ResponseEntity<>("Visa has been assigned to user ID: " + userId, HttpStatus.OK);
+                        } else {
+                            StripeError lastError = paymentIntent.getLastPaymentError();
+                            if (lastError != null) {
+                                return new ResponseEntity<>("Payment failed: " + lastError.getMessage(), HttpStatus.PAYMENT_REQUIRED);
+                            } else {
+                                return new ResponseEntity<>("Payment failed. Please check your payment details and try again.", HttpStatus.PAYMENT_REQUIRED);
+                            }
+                        }
+                    } catch (Exception e) {
+                        return new ResponseEntity<>("Payment failed due to an error. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
+                    }
                 } else {
-                    return new ResponseEntity<>("Visa has been taken!", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>("Visa Not Valid!", HttpStatus.BAD_REQUEST);
                 }
             }else{
-                return new ResponseEntity<>("User is Not Verify it yet!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("User is Not Verified yet!", HttpStatus.BAD_REQUEST);
             }
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
     public ResponseEntity<?> getUserVisaPayment(String token){
         try{
             List<VisaDto> dto = new ArrayList<>();
-            int userId = getUserIdFromToken(token);
+            int userId = userFromToken.getUserIdFromToken(token);
             List<VisaEntity> visaEntity = visaRepository.findByUserId(userId);
             for(VisaEntity visa:visaEntity){
                 if(visa.getUserId() == userId){
@@ -205,19 +235,5 @@ public class VisaService {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-    }
-
-    private int getUserIdFromToken(String token){
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        UserEntity user = userRepository.findIdByUsername(username)
-                .orElseThrow(()-> new EntityNotFoundException("Username is Not Found"));
-        return user.getId();
-    }
-
-    private boolean getUserVerificationFromToken(String token){
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        UserEntity user = userRepository.findIdByUsername(username)
-                .orElseThrow(()-> new EntityNotFoundException("Username is Not Found"));
-        return user.isVerification_status();
     }
 }

@@ -1,10 +1,9 @@
 package com.hackathon.backend.Repositories;
 
-import com.hackathon.backend.Entities.RoleEntity;
+import com.hackathon.backend.RelationShips.RoleEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 
