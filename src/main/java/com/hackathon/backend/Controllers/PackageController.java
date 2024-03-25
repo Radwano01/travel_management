@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.file.Path;
 
 @Controller
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping(path = "${PACKAGE_API_PATH}")
 public class PackageController {
 
