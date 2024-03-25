@@ -15,7 +15,6 @@ public class CustomizationHost implements WebServerFactoryCustomizer<Configurabl
         try {
             factory.setAddress(InetAddress.getByName("0.0.0.0"));
         } catch (UnknownHostException e) {
-            // Handle the exception appropriately
             e.printStackTrace();
         }
     }
