@@ -388,12 +388,19 @@
 #### Get All Packages from Country
 
 - **Method:** `GET`
-- **Path:** `/api/v1/packages/country/packages`
-- **Input:**
-  - JSON object with the following fields:
-    - `country` (string): Country to filter packages
+- **Path:** `/api/v1/packages/country/{countryID}`
 - **Response:**
   - List of packages from the specified country as JSON objects
+  - `200 OK` if successful
+  - `404 NOT FOUND` if no packages are found for the provided country
+  - `500 INTERNAL SERVER ERROR` if an unexpected error occurs
+ 
+#### Get Packages (packageName,country,description) from Country
+
+- **Method:** `GET`
+- **Path:** `/api/v1/packages/package/{countryID}`
+- **Response:**
+- List of packages from the specified country as JSON objects
   - `200 OK` if successful
   - `404 NOT FOUND` if no packages are found for the provided country
   - `500 INTERNAL SERVER ERROR` if an unexpected error occurs
