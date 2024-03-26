@@ -53,11 +53,6 @@ public class PackageController {
         return packageService.getSinglePackage(packageID);
     }
 
-    @GetMapping(path = "${PACKAGE_GET_PACKAGES_FROM_COUNTRY_ID_PATH}")
-    public ResponseEntity<?> getAllPackagesFromCountry(@PathVariable("countryID") int countryID){
-        return packageService.getAllPackagesFromCountry(countryID);
-    }
-
     @GetMapping(path = "${PACKAGE_GET_BENEFITS_PATH}")
     public ResponseEntity<?> getAllBenefit(){
         return packageService.getAllBenefit();
