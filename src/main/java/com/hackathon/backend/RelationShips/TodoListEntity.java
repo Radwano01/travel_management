@@ -11,7 +11,7 @@ import java.util.List;
 public class TodoListEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private String todos;

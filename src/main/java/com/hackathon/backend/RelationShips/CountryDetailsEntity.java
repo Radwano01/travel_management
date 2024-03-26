@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 public class CountryDetailsEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private String place;

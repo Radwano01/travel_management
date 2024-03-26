@@ -23,8 +23,8 @@ public class PackageController {
     }
 
     @PostMapping(path = "${PACKAGE_CREATE_PACKAGE_PATH}")
-    public ResponseEntity<?> createPackage(@RequestBody PackageDto packageDto){
-        return packageService.createPackage(packageDto);
+    public ResponseEntity<?> createPackage(@PathVariable("countryID") int countryID, @RequestBody PackageDto packageDto){
+        return packageService.createPackage(countryID,packageDto);
     }
 
     @PostMapping(path = "${PACKAGE_CREATE_BENEFIT_PATH}")
@@ -74,28 +74,28 @@ public class PackageController {
     }
 
     @DeleteMapping(path = "${PACKAGE_DELETE_PACKAGE_PATH}")
-    public ResponseEntity<?> deletePackage(@PathVariable int id){
-        return packageService.deletePackage(id);
+    public ResponseEntity<?> deletePackage(@PathVariable("packageID") int packageID){
+        return packageService.deletePackage(packageID);
     }
 
     @DeleteMapping(path = "${PACKAGE_DELETE_BENEFIT_PATH}")
-    public ResponseEntity<?> deleteBenefit(@PathVariable int id){
-        return packageService.deleteBenefit(id);
+    public ResponseEntity<?> deleteBenefit(@PathVariable("packageID") int packageID,@PathVariable("benefitID") int benefitID){
+        return packageService.deleteBenefit(packageID,benefitID);
     }
 
     @DeleteMapping(path = "${PACKAGE_DELETE_ROADMAP_PATH}")
-    public ResponseEntity<?> deleteRoadmap(@PathVariable("id") int id){
-        return packageService.deleteRoadmap(id);
+    public ResponseEntity<?> deleteRoadmap(@PathVariable("packageID") int packageID,@PathVariable("roadmapID") int roadmapID){
+        return packageService.deleteRoadmap(packageID,roadmapID);
     }
 
     @DeleteMapping(path = "${PACKAGE_DELETE_TODO_PATH}")
-    public ResponseEntity<?> deleteTodo(@PathVariable("id") int id){
-        return packageService.deleteTodos(id);
+    public ResponseEntity<?> deleteTodo(@PathVariable("packageID") int packageID,@PathVariable("todoID") int todoID){
+        return packageService.deleteTodos(packageID,todoID);
     }
 
     @PutMapping(path = "${PACKAGE_EDIT_PACKAGE_PATH}")
-    public ResponseEntity<?> editPackage(@PathVariable int id, @RequestBody PackageDto packageDto){
-        return packageService.editPackage(id,packageDto);
+    public ResponseEntity<?> editPackage(@PathVariable("packageID") int packageID, @RequestBody PackageDto packageDto){
+        return packageService.editPackage(packageID,packageDto);
     }
 
     @PutMapping(path = "${PACKAGE_EDIT_BENEFIT_PATH}")
@@ -104,7 +104,7 @@ public class PackageController {
     }
 
     @PutMapping(path = "${PACKAGE_EDIT_ROADMAP_PATH}")
-    public ResponseEntity<?> editRoadmap(@PathVariable("roadmapID") int roadmapID,@RequestBody PackageRoadmapDto roadmapDto){
+    public ResponseEntity<?> editRoadmap(@PathVariable("roadmapID") int roadmapID, @RequestBody PackageRoadmapDto roadmapDto){
         return packageService.editRoadmap(roadmapID, roadmapDto);
     }
 

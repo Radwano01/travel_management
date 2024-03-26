@@ -11,7 +11,7 @@ import java.util.List;
 public class BenefitEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String benefit;
 

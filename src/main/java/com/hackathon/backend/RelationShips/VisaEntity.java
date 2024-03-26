@@ -12,7 +12,7 @@ import java.util.List;
 public class VisaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String planeName;
     private Integer placeNumber;

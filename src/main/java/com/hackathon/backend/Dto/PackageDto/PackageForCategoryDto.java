@@ -2,9 +2,11 @@ package com.hackathon.backend.Dto.PackageDto;
 
 public class PackageForCategoryDto {
         private int id;
+
+        private String title;
         private String packageName;
         private String Country;
-        private String Description;
+        private String packageImage;
 
     public int getId() {
         return id;
@@ -30,11 +32,20 @@ public class PackageForCategoryDto {
         Country = country;
     }
 
-    public String getDescription() {
-        return Description;
+
+    public String getPackageImage() {
+        return packageImage;
     }
 
-    public void setDescription(String description) {
-        Description = description;
+    public void setPackageImage(String packageImage) {
+        this.packageImage = packageImage;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

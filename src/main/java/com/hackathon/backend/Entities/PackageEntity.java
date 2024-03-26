@@ -14,14 +14,23 @@ import java.util.List;
 public class PackageEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private String packageName;
 
+    private String title;
+
+    private String packageImage;
+    private String imageOne;
+    private String imageTwo;
+    private String imageThree;
+
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "country")
     private CountryEntity country;
+
+    @Column(length = 2000)
     private String description;
     private Integer price;
 
@@ -40,7 +49,6 @@ public class PackageEntity {
     @JoinTable(name = "package_todos", joinColumns = @JoinColumn(name = "package_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "todos_id", referencedColumnName = "id"))
     private List<TodoListEntity> todos = new ArrayList<>();
-
 
 
     public int getId() {
@@ -106,5 +114,45 @@ public class PackageEntity {
 
     public void setTodos(List<TodoListEntity> todos) {
         this.todos = todos;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getPackageImage() {
+        return packageImage;
+    }
+
+    public void setPackageImage(String packageImage) {
+        this.packageImage = packageImage;
+    }
+
+    public String getImageOne() {
+        return imageOne;
+    }
+
+    public void setImageOne(String imageOne) {
+        this.imageOne = imageOne;
+    }
+
+    public String getImageTwo() {
+        return imageTwo;
+    }
+
+    public void setImageTwo(String imageTwo) {
+        this.imageTwo = imageTwo;
+    }
+
+    public String getImageThree() {
+        return imageThree;
+    }
+
+    public void setImageThree(String imageThree) {
+        this.imageThree = imageThree;
     }
 }

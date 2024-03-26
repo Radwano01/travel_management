@@ -9,8 +9,12 @@ import java.util.List;
 public class PackageDto {
 
     private int id;
-
+    private String title;
     private String packageName;
+    private String packageImage;
+    private String imageOne;
+    private String imageTwo;
+    private String imageThree;
     private String country;
     private String description;
     private List<BenefitEntity> benefit;
@@ -79,5 +83,45 @@ public class PackageDto {
 
     public void setRoadmap(List<RoadmapEntity> roadmap) {
         this.roadmap = roadmap;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getPackageImage() {
+        return packageImage;
+    }
+
+    public void setPackageImage(String packageImage) {
+        this.packageImage = packageImage;
+    }
+
+    public String getImageOne() {
+        return imageOne;
+    }
+
+    public void setImageOne(String imageOne) {
+        this.imageOne = imageOne;
+    }
+
+    public String getImageTwo() {
+        return imageTwo;
+    }
+
+    public void setImageTwo(String imageTwo) {
+        this.imageTwo = imageTwo;
+    }
+
+    public String getImageThree() {
+        return imageThree;
+    }
+
+    public void setImageThree(String imageThree) {
+        this.imageThree = imageThree;
     }
 }
