@@ -162,34 +162,6 @@ public class PackageService {
         }
     }
 
-    public ResponseEntity<?> getAllPackagesFromCountry(int countryID) {
-        try {
-            // Assuming packageRepository has a method to find packages by country ID
-            List<PackageEntity> packageEntity = packageRepository.findByCountryId(countryID);
-            List<PackageDto> dto = new ArrayList<>();
-
-            if (packageEntity.isEmpty()) {
-                return new ResponseEntity<>("Country Has No Packages", HttpStatus.NOT_FOUND);
-            }
-
-            for (PackageEntity pack : packageEntity) {
-                PackageDto packageDto1 = new PackageDto();
-                packageDto1.setId(pack.getId());
-                packageDto1.setPackageName(pack.getPackageName());
-                packageDto1.setCountry(pack.getCountry().getCountry());
-                packageDto1.setDescription(pack.getDescription());
-                packageDto1.setPrice(pack.getPrice());
-                packageDto1.setBenefit(pack.getBenefits());
-                packageDto1.setTodo(pack.getTodos());
-                packageDto1.setRoadmap(pack.getRoadmaps());
-                dto.add(packageDto1);
-            }
-            return new ResponseEntity<>(dto, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
     public ResponseEntity<?> getAllBenefit(){
         try{
             List<BenefitEntity> benefitEntities = benefitRepository.findAll();
