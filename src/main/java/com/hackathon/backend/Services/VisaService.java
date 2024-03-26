@@ -4,13 +4,9 @@ package com.hackathon.backend.Services;
 import com.hackathon.backend.Dto.PlaneDto.VisaDto;
 import com.hackathon.backend.Dto.payment.PaymentDto;
 import com.hackathon.backend.Entities.PlaneEntity;
-import com.hackathon.backend.Entities.UserEntity;
-import com.hackathon.backend.RelationShips.RoomEntity;
 import com.hackathon.backend.RelationShips.VisaEntity;
 import com.hackathon.backend.Repositories.PlaneRepository;
-import com.hackathon.backend.Repositories.UserRepository;
 import com.hackathon.backend.Repositories.VisaRepository;
-import com.hackathon.backend.Security.JWTGenerator;
 import com.hackathon.backend.Utilities.UserFromToken;
 import com.stripe.Stripe;
 import com.stripe.model.PaymentIntent;
@@ -152,9 +148,7 @@ public class VisaService {
                                 .setConfirm(true)
                                 .setConfirmationMethod(PaymentIntentCreateParams.ConfirmationMethod.MANUAL)
                                 .setErrorOnRequiresAction(true);
-
                         PaymentIntent paymentIntent = PaymentIntent.create(paramsBuilder.build());
-
                         if (paymentIntent.getStatus().equals("succeeded")) {
                             visa.setUserId(userId);
                             visa.setStatus("full");

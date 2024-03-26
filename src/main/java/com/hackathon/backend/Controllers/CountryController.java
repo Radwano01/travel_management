@@ -63,7 +63,7 @@ public class CountryController {
     }
 
     @DeleteMapping(path = "${COUNTRY_DELETE_DETAILS_PATH}")
-    public ResponseEntity<?> deleteCountryDetails(@PathVariable("countryDetailsID") int countryCountryID){
-        return countryService.deleteCountryDetails(countryCountryID);
+    public ResponseEntity<?> deleteCountryDetails(@PathVariable("countryID") int countryID,@PathVariable("countryDetailsID") int countryCountryID){
+        return countryService.deleteCountryDetails(countryID,countryCountryID);
     }
 }

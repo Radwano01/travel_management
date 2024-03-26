@@ -1,9 +1,6 @@
 package com.hackathon.backend.Services;
 
-import com.hackathon.backend.Dto.PackageDto.BenefitDto;
-import com.hackathon.backend.Dto.PackageDto.PackageDto;
-import com.hackathon.backend.Dto.PackageDto.PackageRoadmapDto;
-import com.hackathon.backend.Dto.PackageDto.PackageTodosDto;
+import com.hackathon.backend.Dto.PackageDto.*;
 import com.hackathon.backend.Dto.payment.PaymentDto;
 import com.hackathon.backend.Entities.*;
 import com.hackathon.backend.RelationShips.BenefitEntity;
@@ -165,33 +162,34 @@ public class PackageService {
         }
     }
 
-    public ResponseEntity<?> getAllPackagesFromCountry(PackageDto packageDto){
-        try{
-            List<PackageEntity> packageEntity = packageRepository.findAll();
+    public ResponseEntity<?> getAllPackagesFromCountry(int countryID) {
+        try {
+            // Assuming packageRepository has a method to find packages by country ID
+            List<PackageEntity> packageEntity = packageRepository.findByCountryId(countryID);
             List<PackageDto> dto = new ArrayList<>();
 
-            for(PackageEntity pack:packageEntity){
-                String validPackage = pack.getCountry().getCountry();
-                if(validPackage.contains(packageDto.getCountry())){
-                    PackageDto packageDto1 = new PackageDto();
-                    packageDto1.setId(pack.getId());
-                    packageDto1.setPackageName(pack.getPackageName());
-                    packageDto1.setCountry(validPackage);
-                    packageDto1.setDescription(pack.getDescription());
-                    packageDto1.setPrice(pack.getPrice());
-                    packageDto1.setBenefit(pack.getBenefits());
-                    packageDto1.setTodo(pack.getTodos());
-                    packageDto1.setRoadmap(pack.getRoadmaps());
-                    dto.add(packageDto1);
-                }else{
-                    return new ResponseEntity<>("Country Has No Packages", HttpStatus.NOT_FOUND);
-                }
+            if (packageEntity.isEmpty()) {
+                return new ResponseEntity<>("Country Has No Packages", HttpStatus.NOT_FOUND);
             }
-            return  new ResponseEntity<>(dto, HttpStatus.OK);
-        }catch (Exception e){
+
+            for (PackageEntity pack : packageEntity) {
+                PackageDto packageDto1 = new PackageDto();
+                packageDto1.setId(pack.getId());
+                packageDto1.setPackageName(pack.getPackageName());
+                packageDto1.setCountry(pack.getCountry().getCountry());
+                packageDto1.setDescription(pack.getDescription());
+                packageDto1.setPrice(pack.getPrice());
+                packageDto1.setBenefit(pack.getBenefits());
+                packageDto1.setTodo(pack.getTodos());
+                packageDto1.setRoadmap(pack.getRoadmaps());
+                dto.add(packageDto1);
+            }
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     public ResponseEntity<?> getAllBenefit(){
         try{
             List<BenefitEntity> benefitEntities = benefitRepository.findAll();
@@ -339,6 +337,28 @@ public class PackageService {
 
             return null;
         }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> getAllPackagesID(int countryID) {
+        try {
+            List<PackageEntity> packageEntity = packageRepository.findAllByCountryId(countryID);
+            List<PackageForCategoryDto> dto = new ArrayList<>();
+
+            if (packageEntity.isEmpty()) {
+                return new ResponseEntity<>("Country Has No Packages", HttpStatus.NOT_FOUND);
+            }
+            for (PackageEntity pack : packageEntity) {
+                PackageForCategoryDto packageForCategoryDto = new PackageForCategoryDto();
+                packageForCategoryDto.setId(pack.getId());
+                packageForCategoryDto.setPackageName(pack.getPackageName());
+                packageForCategoryDto.setCountry(pack.getCountry().getCountry());
+                packageForCategoryDto.setDescription(pack.getDescription());
+                dto.add(packageForCategoryDto);
+            }
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

@@ -53,9 +53,9 @@ public class PackageController {
         return packageService.getSinglePackage(packageID);
     }
 
-    @GetMapping(path = "${PACKAGE_GET_PACKAGES_FROM_COUNTRY_PATH}")
-    public ResponseEntity<?> getAllPackagesFromCountry(@RequestBody PackageDto packageDto){
-        return packageService.getAllPackagesFromCountry(packageDto);
+    @GetMapping(path = "${PACKAGE_GET_PACKAGES_FROM_COUNTRY_ID_PATH}")
+    public ResponseEntity<?> getAllPackagesFromCountry(@PathVariable("countryID") int countryID){
+        return packageService.getAllPackagesFromCountry(countryID);
     }
 
     @GetMapping(path = "${PACKAGE_GET_BENEFITS_PATH}")
@@ -71,6 +71,11 @@ public class PackageController {
     @GetMapping(path = "${PACKAGE_GET_TODOS_PATH}")
     public ResponseEntity<?> getAllTodosFromCountry(){
         return packageService.getAllTodos();
+    }
+
+    @GetMapping(path = "${PACKAGE_GET_IDS_FROM_COUNTRY_ID_PATH}")
+    public ResponseEntity<?> getPackagesID(@PathVariable("countryID") int countryID){
+        return packageService.getAllPackagesID(countryID);
     }
 
     @DeleteMapping(path = "${PACKAGE_DELETE_PACKAGE_PATH}")

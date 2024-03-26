@@ -12,4 +12,7 @@ import java.util.Optional;
 public interface PackageRepository extends JpaRepository<PackageEntity, Integer> {
     boolean existsByPackageName(String packageName);
 
+    List<PackageEntity> findByCountryId(int countryID);
+
+    List<PackageEntity> findAllByCountryId(int countryID);
 }

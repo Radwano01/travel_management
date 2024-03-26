@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CountryService {
@@ -123,12 +124,17 @@ public class CountryService {
         }
     }
 
-    public ResponseEntity<?> deleteCountryDetails(int countryDetailsID){
+    public ResponseEntity<?> deleteCountryDetails(int countryID,int countryDetailsID){
         try{
-            countryDetailsRepository.deleteById(countryDetailsID);
-            boolean isDeleted = !countryDetailsRepository.existsById(countryDetailsID);
-            if (isDeleted) {
-                return new ResponseEntity<>("Country Details Deleted Successfully", HttpStatus.OK);
+            CountryEntity countryEntity = countryRepository.findById(countryID)
+                    .orElseThrow(()-> new EntityNotFoundException("Country Id is Not Found: "+countryID));
+            Optional<CountryDetailsEntity> countryDetail = countryEntity.getCountryDetails().stream()
+                    .filter((details)-> details.getId() == countryDetailsID).findFirst();
+            if (countryDetail.isPresent()) {
+                CountryDetailsEntity countryDetailsEntity = countryDetail.get();
+                countryEntity.getCountryDetails().remove(countryDetail.get());
+                countryDetailsRepository.delete(countryDetailsEntity);
+                return new ResponseEntity<>("Country details deleted Successfully", HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Country Details Not Found", HttpStatus.NOT_FOUND);
             }
