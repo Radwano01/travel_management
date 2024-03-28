@@ -11,12 +11,15 @@ public class CoinsEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private int Coins;
+    private int coins;
 
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "username")
-    private UserEntity username;
+    @JoinColumn(name = "userId", insertable = false, updatable = false)
+    private UserEntity userEntity;
+
+    @Column(name = "userId")
+    private int userId;
 
     public int getId() {
         return id;
@@ -27,18 +30,18 @@ public class CoinsEntity {
     }
 
     public int getCoins() {
-        return Coins;
+        return coins;
     }
 
     public void setCoins(int coins) {
-        Coins = coins;
+        this.coins = coins;
     }
 
-    public UserEntity getUsername() {
-        return username;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setUsername(UserEntity username) {
-        this.username = username;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 }

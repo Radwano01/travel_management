@@ -33,12 +33,17 @@ public class UserPackagesController {
     }
 
     @GetMapping(path = "${USER_PACKAGE_GET_SINGLE_USER_TODOS_PATH}")
-    public ResponseEntity<?> getSingleUserTodos(@PathVariable("userID") int userID){
-        return userPackagesService.getAvailableTodos(userID);
+    public ResponseEntity<?> getSingleUserTodos(@PathVariable("token") String token){
+        return userPackagesService.getAvailableTodos(token);
+    }
+
+    @GetMapping(path = "${USER_PACKAGE_GET_SINGLE_USER_COINS_PATH}")
+    public ResponseEntity<?> getSingleUserCoins(@PathVariable("token") String token){
+        return userPackagesService.getSingleUserCoins(token);
     }
 
     @PutMapping(path = "${USER_PACKAGE_EDIT_TODOS_STATUS_PATH}")
-    public ResponseEntity<?> editTodosStatus(@PathVariable("id") int id){
-        return userPackagesService.setTodosCompleted(id);
+    public ResponseEntity<?> editTodosStatus(@PathVariable("id") int id, @PathVariable("token") String token){
+        return userPackagesService.setTodosCompleted(id,token);
     }
 }
