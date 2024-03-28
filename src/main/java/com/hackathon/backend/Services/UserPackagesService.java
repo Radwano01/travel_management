@@ -1,6 +1,7 @@
 package com.hackathon.backend.Services;
 
 
+import com.hackathon.backend.Dto.PackageDto.PackageDto;
 import com.hackathon.backend.Dto.UserTodosDto.UserTodosDto;
 import com.hackathon.backend.Dto.payment.PaymentDto;
 import com.hackathon.backend.Entities.*;
@@ -143,7 +144,11 @@ public class UserPackagesService {
             int userId = userFromToken.getUserIdFromToken(token);
             UserPackagesEntity userPackages = userPackagesRepository.findByUserId(userId)
                     .orElseThrow(()-> new EntityNotFoundException("User has No Packages!"));
-            return new ResponseEntity<>(userPackages, HttpStatus.OK);
+            PackageDto dto = new PackageDto();
+            dto.setTitle(userPackages.getPackageEntity().getTitle());
+            dto.setPrice(userPackages.getPackageEntity().getPrice());
+            dto.setPackageImage(userPackages.getPackageEntity().getPackageImage());
+            return new ResponseEntity<>(dto, HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
