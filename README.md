@@ -655,3 +655,58 @@ This service manages user-related operations.
   - `200 OK` if the verification email is sent successfully
   - `500 INTERNAL SERVER ERROR` if an unexpected error occurs
 
+### User Package Service API
+
+
+
+#### Make Payment for User Package
+
+- **Method:** `POST`
+- **Path:** `/api/v1/user_packages/payment/{token}`
+- **Input:**
+  - JSON object with the following fields:
+    - `paymentIntent` (string): Payment intent for the transaction
+- **Response:**
+  - `200 OK` if the payment is successful
+  - `400 BAD REQUEST` if the user is not verified
+  - `404 NOT FOUND` if there are no empty rooms available
+  - `402 PAYMENT REQUIRED` if the payment fails
+  - `500 INTERNAL SERVER ERROR` if an unexpected error occurs
+
+#### Get Single User Packages
+
+- **Method:** `GET`
+- **Path:** `/api/v1/user_packages/{token}`
+- **Response:**
+  - JSON object containing details of the user's packages
+  - `200 OK` if packages are retrieved successfully
+  - `500 INTERNAL SERVER ERROR` if an unexpected error occurs
+
+#### Get Single User Todos
+
+- **Method:** `GET`
+- **Path:** `/api/v1/user_packages/todos/{token}`
+- **Response:**
+  - JSON object containing available todos for the user
+  - `200 OK` if todos are retrieved successfully
+  - `500 INTERNAL SERVER ERROR` if an unexpected error occurs
+
+#### Edit Todos Status
+
+- **Method:** `PUT`
+- **Path:** `/api/v1/user_packages/todo/{id}/{token}`
+- **Input:**
+  - `id` (integer): ID of the todo to mark as completed
+- **Response:**
+  - `200 OK` if the todo status is successfully updated
+  - `404 NOT FOUND` if the todo or todo ID is not found
+  - `500 INTERNAL SERVER ERROR` if an unexpected error occurs
+
+#### Get Single User Coins
+
+- **Method:** `GET`
+- **Path:** `/api/v1/user_packages/coins/{token}`
+- **Response:**
+  - JSON object containing the number of coins for the user
+  - `200 OK` if coins are retrieved successfully
+  - `500 INTERNAL SERVER ERROR` if an unexpected error occurs
