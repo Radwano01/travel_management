@@ -15,7 +15,9 @@ public class HotelEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private String country;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "country")
+    private CountryEntity country;
 
     private String hotelName;
 
@@ -41,11 +43,11 @@ public class HotelEntity {
         this.hotelName = hotelName;
     }
 
-    public String getCountry() {
+    public CountryEntity getCountry() {
         return country;
     }
 
-    public void setCountry(String country) {
+    public void setCountry(CountryEntity country) {
         this.country = country;
     }
 

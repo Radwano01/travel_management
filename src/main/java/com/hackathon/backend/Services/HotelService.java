@@ -2,9 +2,9 @@ package com.hackathon.backend.Services;
 
 
 import com.hackathon.backend.Dto.HotelDto.HotelDto;
-import com.hackathon.backend.Dto.PlaneDto.PlaneDto;
+import com.hackathon.backend.Entities.CountryEntity;
 import com.hackathon.backend.Entities.HotelEntity;
-import com.hackathon.backend.Entities.PlaneEntity;
+import com.hackathon.backend.Repositories.CountryRepository;
 import com.hackathon.backend.Repositories.HotelRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -20,19 +20,23 @@ import java.util.List;
 public class HotelService {
 
     private final HotelRepository hotelRepository;
+    private final CountryRepository countryRepository;
 
-    public HotelService(HotelRepository hotelRepository){
+    public HotelService(HotelRepository hotelRepository,
+                        CountryRepository countryRepository){
         this.hotelRepository = hotelRepository;
 
+        this.countryRepository = countryRepository;
     }
 
     public ResponseEntity<?> createHotel(HotelDto hotelDto) {
         try{
             boolean existsHotel = hotelRepository.existsByHotelName(hotelDto.getHotelName());
             if(!existsHotel){
+                CountryEntity country = getCountry(hotelDto.getCountry());
                 HotelEntity hotelEntity = new HotelEntity();
                 hotelEntity.setHotelName(hotelDto.getHotelName());
-                hotelEntity.setCountry(hotelDto.getCountry());
+                hotelEntity.setCountry(country);
                 hotelRepository.save(hotelEntity);
                 return new ResponseEntity<>("Hotel created Successfully", HttpStatus.OK);
             }else{
@@ -72,7 +76,7 @@ public class HotelService {
                     HotelDto hotelDto = new HotelDto();
                     hotelDto.setId(hotel.getId());
                     hotelDto.setHotelName(hotel.getHotelName());
-                    hotelDto.setCountry(hotel.getCountry());
+                    hotelDto.setCountry(hotel.getCountry().getCountry());
                     dto.add(hotelDto);
                 }
                 return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -89,11 +93,12 @@ public class HotelService {
         try{
             HotelEntity hotelEntity = hotelRepository.findById(hotelID)
                     .orElseThrow(()-> new EntityNotFoundException("Hotel Id is Not Found"));
+            CountryEntity country = getCountry(hotelDto.getCountry());
             if(hotelDto.getHotelName() != null){
             hotelEntity.setHotelName(hotelDto.getHotelName());
             }
             if(hotelDto.getCountry() != null){
-                hotelEntity.setCountry(hotelDto.getCountry());
+                hotelEntity.setCountry(country);
             }
             return new ResponseEntity<>("Hotel updated Successfully", HttpStatus.OK);
         }catch (Exception e){
@@ -110,4 +115,8 @@ public class HotelService {
         }
     }
 
+    private CountryEntity getCountry(String country){
+        return countryRepository.findByCountry(country)
+                .orElseThrow(()-> new EntityNotFoundException("Country is Not Found"));
+    }
 }

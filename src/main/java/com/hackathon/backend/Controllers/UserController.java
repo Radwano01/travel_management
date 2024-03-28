@@ -28,8 +28,8 @@ public class UserController {
 
     @PostMapping(path = "${USER_VERIFICATION_PATH}")
     public ResponseEntity<?> verifyUserDetails(@PathVariable("email") String email,
-                                               @RequestParam(required = true) String token){
-        return userService.VerifyUser(email);
+                                               @PathVariable("token") String token){
+        return userService.VerifyUser(email,token);
     }
 
     @PostMapping(path = "${USER_SEND_VERIFICATION_PATH}")

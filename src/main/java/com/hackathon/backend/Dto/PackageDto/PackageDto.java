@@ -1,5 +1,6 @@
 package com.hackathon.backend.Dto.PackageDto;
 
+import com.hackathon.backend.Entities.CountryEntity;
 import com.hackathon.backend.RelationShips.BenefitEntity;
 import com.hackathon.backend.RelationShips.RoadmapEntity;
 import com.hackathon.backend.RelationShips.TodoListEntity;
@@ -15,7 +16,7 @@ public class PackageDto {
     private String imageOne;
     private String imageTwo;
     private String imageThree;
-    private String country;
+    private CountryEntity country;
     private String description;
     private List<BenefitEntity> benefit;
     private List<TodoListEntity> todo;
@@ -38,11 +39,11 @@ public class PackageDto {
         this.packageName = packageName;
     }
 
-    public String getCountry() {
+    public CountryEntity getCountry() {
         return country;
     }
 
-    public void setCountry(String country) {
+    public void setCountry(CountryEntity country) {
         this.country = country;
     }
 

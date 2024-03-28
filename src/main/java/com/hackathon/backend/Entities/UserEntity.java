@@ -14,7 +14,10 @@ public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "username")
     private String username;
+
     private String email;
     private String password;
     private boolean verification_status;

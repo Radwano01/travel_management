@@ -1,4 +1,4 @@
-package com.hackathon.backend.RelationShips;
+package com.hackathon.backend.Entities;
 
 import com.hackathon.backend.Entities.CountryEntity;
 import com.hackathon.backend.Entities.PackageEntity;
@@ -50,5 +50,21 @@ public class UserPackagesEntity {
 
     public void setPackageID(int packageID) {
         this.packageId = packageID;
+    }
+
+    public PackageEntity getPackageEntity() {
+        return packageEntity;
+    }
+
+    public void setPackageEntity(PackageEntity packageEntity) {
+        this.packageEntity = packageEntity;
+    }
+
+    public UserEntity getUserEntity() {
+        return userEntity;
+    }
+
+    public void setUserEntity(UserEntity userEntity) {
+        this.userEntity = userEntity;
     }
 }

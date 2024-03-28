@@ -1,5 +1,6 @@
 package com.hackathon.backend.Repositories;
 
+import com.hackathon.backend.Entities.CountryEntity;
 import com.hackathon.backend.RelationShips.RoomEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

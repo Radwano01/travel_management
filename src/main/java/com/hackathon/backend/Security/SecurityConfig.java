@@ -21,7 +21,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
     private final CustomUserDetailsService customUserDetailsService;
     private final JWTAuthEntryPoint jwtAuthEntryPoint;
 
@@ -61,5 +60,4 @@ public class SecurityConfig {
     public JWTAuthenticationFilter jwtAuthenticationFilter() {
         return new JWTAuthenticationFilter();
     }
-
 }

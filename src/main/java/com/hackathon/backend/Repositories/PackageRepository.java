@@ -15,4 +15,6 @@ public interface PackageRepository extends JpaRepository<PackageEntity, Integer>
     List<PackageEntity> findByCountryId(int countryID);
 
     List<PackageEntity> findAllByCountryId(int countryID);
+
+    Optional<Integer> findPackageIdById(int paymentId);
 }

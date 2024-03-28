@@ -51,7 +51,7 @@ public class RoomService {
             HotelEntity hotelEntity = hotelRepository.findById(hotelID)
                     .orElseThrow(()-> new EntityNotFoundException("Hotel is Not Found"));
             RoomEntity roomEntity = new RoomEntity();
-            roomEntity.setHotelName(roomDto.getHotelName());
+            roomEntity.setHotelName(hotelEntity.getHotelName());
             roomEntity.setFloor(roomDto.getFloor());
             roomEntity.setDoorNumber(roomDto.getDoorNumber());
             roomEntity.setRoomsNumber(roomDto.getRoomsNumber());
@@ -61,8 +61,8 @@ public class RoomService {
             roomEntity.setStatus(roomDto.getStatus());
             roomEntity.setUserId(1);
 
-            roomRepository.save(roomEntity);
             hotelEntity.getRooms().add(roomEntity);
+            roomRepository.save(roomEntity);
             return new ResponseEntity<>("Rooms created Successfully", HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

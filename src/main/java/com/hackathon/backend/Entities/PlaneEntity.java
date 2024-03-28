@@ -17,7 +17,6 @@ public class PlaneEntity {
 
     private String planeName;
     private int sitsCount;
-
     private String airportLaunch;
     private String airportLand;
     private String timeLaunch;

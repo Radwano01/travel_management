@@ -140,7 +140,7 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<?> VerifyUser(String email) {
+    public ResponseEntity<?> VerifyUser(String email,String token) {
         try{
             UserEntity userEntity = userRepository.findUserByEmail(email)
                     .orElseThrow(()-> new EntityNotFoundException("Email not Found! "+email));

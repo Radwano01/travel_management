@@ -1,7 +1,6 @@
 package com.hackathon.backend.Services;
 
 import com.hackathon.backend.Dto.PackageDto.*;
-import com.hackathon.backend.Dto.payment.PaymentDto;
 import com.hackathon.backend.Entities.*;
 import com.hackathon.backend.RelationShips.BenefitEntity;
 import com.hackathon.backend.RelationShips.RoadmapEntity;
@@ -26,19 +25,22 @@ public class PackageService {
     private final RoadmapRepository roadmapRepository;
     private final TodoListRepository todoListRepository;
     private final UserFromToken userFromToken;
+    private final UserPackagesRepository userPackagesRepository;
 
     public PackageService(PackageRepository packageRepository,
                           CountryRepository countryRepository,
                           BenefitRepository benefitRepository,
                           RoadmapRepository roadmapRepository,
                           TodoListRepository todoListRepository,
-                          UserFromToken userFromToken) {
+                          UserFromToken userFromToken,
+                          UserPackagesRepository userPackagesRepository) {
         this.packageRepository = packageRepository;
         this.countryRepository = countryRepository;
         this.benefitRepository = benefitRepository;
         this.roadmapRepository = roadmapRepository;
         this.todoListRepository = todoListRepository;
         this.userFromToken = userFromToken;
+        this.userPackagesRepository = userPackagesRepository;
     }
 
     public ResponseEntity<?> createPackage(int countryID,PackageDto packageDto) {
@@ -140,7 +142,7 @@ public class PackageService {
             packageDto.setImageOne(packageEntity.getImageOne());
             packageDto.setImageTwo(packageEntity.getImageTwo());
             packageDto.setImageThree(packageEntity.getImageThree());
-            packageDto.setCountry(packageEntity.getCountry().getCountry());
+            packageDto.setCountry(packageEntity.getCountry());
             packageDto.setDescription(packageEntity.getDescription());
             packageDto.setPrice(packageEntity.getPrice());
             packageDto.setBenefit(packageEntity.getBenefits());
@@ -207,9 +209,7 @@ public class PackageService {
         try{
             PackageEntity packageEntity = getPackageById(packageID);
 
-            CountryEntity countryEntity = countryRepository.findByCountry(packageDto.getCountry())
-
-                    .orElseThrow(()-> new EntityNotFoundException("Country is Not Found"));
+            CountryEntity countryEntity = getCountry(packageDto.getCountry().getCountry());
             if(packageDto.getPackageName() != null){
                 packageEntity.setPackageName(packageDto.getPackageName());
             }
@@ -349,26 +349,13 @@ public class PackageService {
         }
     }
 
-    public ResponseEntity<?> payment(PaymentDto paymentDto) {
-        try{
-            String token = paymentDto.getAccessToken();
-            int userId = userFromToken.getUserIdFromToken(token);
-            boolean userVerification = userFromToken.getUserVerificationFromToken(token);
-            PackageEntity packageEntity = packageRepository.findById(paymentDto.getPaymentId())
-                    .orElseThrow(()-> new EntityNotFoundException("Package Id is Not Found: "+paymentDto.getPaymentId()));
-            if(userVerification){
-
-            }
-
-            return null;
-        }catch (Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-
     private PackageEntity getPackageById(int packageID){
         return packageRepository.findById(packageID)
                 .orElseThrow(() -> new EntityNotFoundException("Package Not Found"));
+    }
+
+    private CountryEntity getCountry(String country){
+        return countryRepository.findByCountry(country)
+                .orElseThrow(()-> new EntityNotFoundException("Country is Not Found"));
     }
 }

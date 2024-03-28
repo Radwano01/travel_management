@@ -1,5 +1,7 @@
 package com.hackathon.backend.Dto.HotelDto;
 
+import com.hackathon.backend.Entities.CountryEntity;
+
 public class HotelDto {
 
     private int id;

@@ -109,12 +109,8 @@ public class PackageController {
     }
 
     @PutMapping(path = "${PACKAGE_EDIT_TODO_PATH}")
-    public ResponseEntity<?> editTodo(@PathVariable("todoID") int todoID,@RequestBody PackageTodosDto todosDto){
+    public ResponseEntity<?> editTodo(@PathVariable("todoID") int todoID, @RequestBody PackageTodosDto todosDto){
         return packageService.editTodos(todoID, todosDto);
     }
 
-    @PostMapping(path = "${PACKAGE_PAYMENT_PATH}")
-    public ResponseEntity<?> payment(PaymentDto paymentDto){
-        return packageService.payment(paymentDto);
-    }
 }
