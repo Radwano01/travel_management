@@ -27,7 +27,8 @@ public class PlaneSeatsEntity {
     private PlaneEntity plane;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private UserEntity user;
+    @JoinColumn(name = "user_id")
+    private UserEntity user = null;
 
 
 
@@ -35,6 +36,5 @@ public class PlaneSeatsEntity {
         this.seatClass = seatClass;
         this.seatNumber = seatNumber;
         this.plane = plane;
-        this.user = null;
     }
 }
