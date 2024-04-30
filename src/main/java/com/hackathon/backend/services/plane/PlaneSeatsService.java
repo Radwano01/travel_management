@@ -77,7 +77,6 @@ public class PlaneSeatsService {
         }catch (Exception e){
             return serverErrorException(e);
         }
-
     }
 
     @Transactional
