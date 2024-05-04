@@ -50,4 +50,8 @@ public class UserUtils {
         return userRepository.findUserByEmail(email)
                 .orElseThrow(()-> new EntityNotFoundException("Email not found"));
     }
+
+    public void deleteAll() {
+        userRepository.deleteAll();
+    }
 }

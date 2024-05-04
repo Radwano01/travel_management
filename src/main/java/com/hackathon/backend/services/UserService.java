@@ -57,11 +57,13 @@ public class UserService {
 
     public ResponseEntity<?> registerUser(@NonNull RegisterUserDto registerUserDto) {
         try {
-            boolean checkExistsEmail = userUtils.existsByEmail(registerUserDto.getEmail());
+            boolean checkExistsEmail = userUtils
+                    .existsByEmail(registerUserDto.getEmail());
             if (checkExistsEmail) {
-                return new ResponseEntity<>("Email exists", HttpStatus.CONFLICT);
+                return alreadyValidException("Email exists");
             }
-            boolean existsUsername = userUtils.existsUsernameByUsername(registerUserDto.getUsername());
+            boolean existsUsername = userUtils
+                    .existsUsernameByUsername(registerUserDto.getUsername());
             if (existsUsername) {
                 return alreadyValidException("Username already valid");
             }

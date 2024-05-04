@@ -19,6 +19,8 @@ public class PlaceDetailsEntity {
     private String imageOne;
     private String imageTwo;
     private String imageThree;
+
+    @Column(length = 2000)
     private String description;
 
     @OneToOne(fetch = FetchType.EAGER)

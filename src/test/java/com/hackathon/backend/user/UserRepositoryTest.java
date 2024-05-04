@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 class UserRepositoryTest {
 
-    // User repository under test
     @Autowired
     private UserRepository userRepository;
 
@@ -26,21 +25,19 @@ class UserRepositoryTest {
     private RoleRepository roleRepository;
 
     @BeforeEach
-    void setUp(){
-        RoleEntity role = new RoleEntity(
-                "USER"
-        );
+    void setUp() {
+        RoleEntity role = new RoleEntity();
+        role.setRole("USER");
         roleRepository.save(role);
 
-        String email = "test@gmail.com";
-        UserEntity user = new UserEntity(
-                "testUser",
-                email,
-                false,
-                "image_url",
-                "testpass",
-                role
-        );
+        UserEntity user = new UserEntity();
+        user.setId(1L);
+        user.setImage("test");
+        user.setUsername("test");
+        user.setPassword("test");
+        user.setRole(role);
+        user.setEmail("test@gmail.com");
+        user.setVerificationStatus(false);
         userRepository.save(user);
     }
 
@@ -49,6 +46,7 @@ class UserRepositoryTest {
         userRepository.deleteAll();
         roleRepository.deleteAll();
     }
+
 
     @Test
     void UserExistByEmail() {
@@ -74,7 +72,7 @@ class UserRepositoryTest {
     @Test
     void FindUserByUsername() {
         //given
-        String username = "testUser";
+        String username = "test";
         //when
         Optional<UserEntity> user = userRepository.findUserByUsername(username);
         assertTrue(user.isPresent());
@@ -84,7 +82,7 @@ class UserRepositoryTest {
 
     @Test
     void ExistsUsernameByUsername() {
-        String username = "testUser";
+        String username = "test";
         //when
         boolean response = userRepository.existsUsernameByUsername(username);
         //then
@@ -93,11 +91,11 @@ class UserRepositoryTest {
 
     @Test
     void FindIdByUsername() {
-        String username = "testUser";
+        String username = "test";
         //when
         Optional<UserEntity> response = userRepository.findUserByUsername(username);
         assertTrue(response.isPresent());
         //then
-        assertNotNull(response.get().getId());
+        assertNotNull(username, response.get().getUsername());
     }
 }

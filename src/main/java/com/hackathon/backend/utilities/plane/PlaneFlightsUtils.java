@@ -38,4 +38,8 @@ public class PlaneFlightsUtils {
     public void deleteById(long flightId) {
         planeFlightsRepository.deleteById(flightId);
     }
+
+    public void deleteAll() {
+        planeFlightsRepository.deleteAll();
+    }
 }

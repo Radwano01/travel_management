@@ -22,4 +22,8 @@ public class RoomUtils {
     public void delete(RoomEntity roomEntity) {
         roomRepository.delete(roomEntity);
     }
+
+    public void deleteAll() {
+        roomRepository.deleteAll();
+    }
 }

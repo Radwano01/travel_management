@@ -35,4 +35,8 @@ public class PlaneUtils {
     public void deleteById(long planeId) {
         planeRepository.deleteById(planeId);
     }
+
+    public void deleteAll() {
+        planeRepository.deleteAll();
+    }
 }

@@ -4,6 +4,8 @@ import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.package_.packageFeatures.BenefitEntity;
 import com.hackathon.backend.repositories.package_.PackageRepository;
 import com.hackathon.backend.repositories.package_.packageFeatures.BenefitRepository;
+import com.hackathon.backend.utilities.package_.PackageUtils;
+import com.hackathon.backend.utilities.package_.features.BenefitUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,23 +21,21 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @Service
 public class PackageBenefitsRelationsService {
 
-    private final PackageRepository packageRepository;
-    private final BenefitRepository benefitRepository;
+    private final PackageUtils packageUtils;
+    private final BenefitUtils benefitUtils;
 
     @Autowired
-    public PackageBenefitsRelationsService(PackageRepository packageRepository,
-                                           BenefitRepository benefitRepository) {
-        this.packageRepository = packageRepository;
-        this.benefitRepository = benefitRepository;
+    public PackageBenefitsRelationsService(PackageUtils packageUtils,
+                                           BenefitUtils benefitUtils) {
+        this.packageUtils = packageUtils;
+        this.benefitUtils = benefitUtils;
     }
 
     @Transactional
     public ResponseEntity<?> addPackageBenefit(int packageId, int benefitId) {
         try{
-            PackageEntity packageEntity = packageRepository.findById(packageId)
-                    .orElseThrow(()-> new EntityNotFoundException("Package id not found"));
-            BenefitEntity benefitEntity = benefitRepository.findById(benefitId)
-                    .orElseThrow(()-> new EntityNotFoundException("benefit id not found"));
+            PackageEntity packageEntity = packageUtils.findById(packageId);
+                    BenefitEntity benefitEntity = benefitUtils.findById(benefitId);
             Optional<BenefitEntity> benefitEntityOptional = packageEntity.getPackageDetails()
                     .getBenefits().stream()
                     .filter((benefit)-> benefit.getId() == benefitId)
@@ -55,16 +55,16 @@ public class PackageBenefitsRelationsService {
     @Transactional
     public ResponseEntity<?> removePackageBenefit(int packageId, int benefitId) {
         try{
-            Optional<PackageEntity> packageEntity = packageRepository.findById(packageId);
-            Optional<BenefitEntity> benefitEntity = benefitRepository.findById(benefitId);
-            if(packageEntity.isPresent() && benefitEntity.isPresent()) {
-                Optional<BenefitEntity> benefitEntityOptional = packageEntity.get().getPackageDetails().getBenefits().stream()
+            PackageEntity packageEntity = packageUtils.findById(packageId);
+            BenefitEntity benefitEntity = benefitUtils.findById(benefitId);
+            if(packageEntity != null && benefitEntity != null) {
+                Optional<BenefitEntity> benefitEntityOptional = packageEntity.getPackageDetails().getBenefits().stream()
                         .filter((benefit) -> benefit.getId() == benefitId)
                         .findFirst();
                 if(benefitEntityOptional.isPresent()) {
-                    packageEntity.get().getPackageDetails().getBenefits().remove(benefitEntityOptional.get());
-                    packageRepository.save(packageEntity.get());
-                    benefitRepository.save(benefitEntity.get());
+                    packageEntity.getPackageDetails().getBenefits().remove(benefitEntityOptional.get());
+                    packageUtils.save(packageEntity);
+                    benefitUtils.save(benefitEntity);
                     return ResponseEntity.ok("Benefit removed from this package");
                 }else{
                     return notFoundException("Benefit not found in this package");

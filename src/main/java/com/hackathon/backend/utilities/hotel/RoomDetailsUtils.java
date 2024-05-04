@@ -40,4 +40,8 @@ public class RoomDetailsUtils {
     public List<RoomDetailsEntity> findAll() {
         return roomDetailsRepository.findAll();
     }
+
+    public void deleteAll() {
+        roomDetailsRepository.deleteAll();
+    }
 }

@@ -30,13 +30,12 @@ class HotelFeaturesRepositoryTest {
     }
 
     @Test
-    void findByHotelFeatures() {
+    void existsHotelFeatureByHotelFeatures() {
         // given
         String hotelFeature = "test feature";
         // when
         boolean existsHotelFeatures = hotelFeaturesRepository.existsHotelFeatureByHotelFeatures(hotelFeature);
         // then
         assertTrue(existsHotelFeatures);
-
     }
 }

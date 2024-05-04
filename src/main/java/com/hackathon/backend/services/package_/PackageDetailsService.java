@@ -6,6 +6,8 @@ import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.repositories.package_.PackageDetailsRepository;
 import com.hackathon.backend.repositories.package_.PackageRepository;
+import com.hackathon.backend.utilities.package_.PackageDetailsUtils;
+import com.hackathon.backend.utilities.package_.PackageUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,20 +20,19 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @Service
 public class PackageDetailsService {
 
-    private final PackageDetailsRepository packageDetailsRepository;
-    private final PackageRepository packageRepository;
+    private final PackageDetailsUtils packageDetailsUtils;
+    private final PackageUtils packageUtils;
 
     @Autowired
-    public PackageDetailsService(PackageDetailsRepository packageDetailsRepository,
-                                 PackageRepository packageRepository) {
-        this.packageDetailsRepository = packageDetailsRepository;
-        this.packageRepository = packageRepository;
+    public PackageDetailsService(PackageDetailsUtils packageDetailsUtils,
+                                 PackageUtils packageUtils) {
+        this.packageDetailsUtils = packageDetailsUtils;
+        this.packageUtils = packageUtils;
     }
 
     public ResponseEntity<?> getSinglePackageDetails(int packageId) {
         try{
-            PackageEntity packageEntity = packageRepository.findById(packageId)
-                    .orElseThrow(()-> new EntityNotFoundException("Package id not found"));
+            PackageEntity packageEntity = packageUtils.findById(packageId);
             PackageDetailsEntity packageDetails = packageEntity.getPackageDetails();
             PackageDetailsDto packageDetailsDto = new PackageDetailsDto(
                     packageDetails.getId(),
@@ -62,10 +63,9 @@ public class PackageDetailsService {
     public ResponseEntity<?> editPackageDetails(int packageDetailsId,
                                                 PackageDetailsDto packageDetailsDto) {
         try{
-            PackageDetailsEntity packageDetails = packageDetailsRepository.findById(packageDetailsId)
-                    .orElseThrow(()-> new EntityNotFoundException("Package id not found"));
+            PackageDetailsEntity packageDetails = packageDetailsUtils.findById(packageDetailsId);
             editHelper(packageDetails, packageDetailsDto);
-            packageDetailsRepository.save(packageDetails);
+            packageDetailsUtils.save(packageDetails);
             return ResponseEntity.ok("Package details edited successfully");
         }catch (EntityNotFoundException e){
             return notFoundException(e);

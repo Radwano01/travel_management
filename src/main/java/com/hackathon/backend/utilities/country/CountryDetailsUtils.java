@@ -35,4 +35,8 @@ public class CountryDetailsUtils {
         return countryDetailsRepository.findById(countryDetailsId)
                 .orElseThrow(() -> new EntityNotFoundException("Country details id not found"));
     }
+
+    public void deleteAll() {
+        countryDetailsRepository.deleteAll();
+    }
 }

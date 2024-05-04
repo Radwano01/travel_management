@@ -9,7 +9,4 @@ import java.util.Optional;
 
 @Repository
 public interface PlaceRepository extends JpaRepository<PlaceEntity,Integer> {
-    Optional<PlaceEntity> findByPlace(String newPlace);
-
-    List<PlaceEntity> findAllPlacesByCountryId(int countryId);
 }

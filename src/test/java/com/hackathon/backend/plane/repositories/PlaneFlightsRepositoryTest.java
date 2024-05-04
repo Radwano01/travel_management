@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @DataJpaTest
 class PlaneFlightsRepositoryTest {
@@ -21,30 +23,6 @@ class PlaneFlightsRepositoryTest {
     private CountryRepository countryRepository;
     @Autowired
     private PlaneFlightsRepository planeFlightsRepository;
-
-    @BeforeEach
-    void setUp() {
-        PlaneFlightsEntity planeFlights = new PlaneFlightsEntity();
-        CountryEntity countryOne = new CountryEntity();
-        countryOne.setId(1);
-        countryOne.setCountry("United Kingdom");
-
-        CountryEntity countryTwo = new CountryEntity();
-        countryTwo.setId(2);
-        countryTwo.setCountry("United Status");
-
-        countryRepository.saveAll(List.of(countryOne,countryTwo));
-
-        planeFlights.setId(1L);
-        planeFlights.setDepartureCountry(countryOne);
-        planeFlights.setDestinationCountry(countryTwo);
-        planeFlightsRepository.save(planeFlights);
-    }
-
-    @AfterEach
-    void tearDown() {
-        planeFlightsRepository.deleteAll();
-    }
 
     @Test
     void findAllByDepartureCountryIdAndDestinationCountryId() {

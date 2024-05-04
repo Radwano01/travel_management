@@ -36,4 +36,8 @@ public class PlaneSeatsUtils {
         return planeSeatsRepository.findById(seatId)
                 .orElseThrow(()-> new EntityNotFoundException("plane seat id Not Found"));
     }
+
+    public void deleteAll() {
+        planeSeatsRepository.deleteAll();
+    }
 }

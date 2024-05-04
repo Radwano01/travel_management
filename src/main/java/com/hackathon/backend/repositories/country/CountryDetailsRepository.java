@@ -10,6 +10,4 @@ import java.util.Optional;
 @Repository
 public interface CountryDetailsRepository extends JpaRepository<CountryDetailsEntity, Integer> {
     Optional<CountryDetailsEntity> findByCountryId(int countryId);
-
-    void deleteByCountryId(int countryId);
 }

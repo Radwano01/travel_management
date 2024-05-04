@@ -9,6 +9,4 @@ import java.util.Optional;
 @Repository
 public interface PackageDetailsRepository extends JpaRepository<PackageDetailsEntity, Integer> {
     void deleteByPackageOfferId(int packageId);
-
-    Optional<PackageDetailsEntity> findByPackageOfferId(int packageId);
 }

@@ -41,4 +41,8 @@ public class CountryUtils {
     public void delete(CountryEntity countryEntity) {
         countryRepository.delete(countryEntity);
     }
+
+    public void deleteAll() {
+        countryRepository.deleteAll();
+    }
 }

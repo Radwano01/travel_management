@@ -1,8 +1,10 @@
 package com.hackathon.backend.hotel.repositories;
 
+import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
+import com.hackathon.backend.repositories.hotel.HotelRepository;
 import com.hackathon.backend.repositories.hotel.RoomDetailsRepository;
 import com.hackathon.backend.repositories.hotel.hotelFeatures.HotelFeaturesRepository;
 import com.hackathon.backend.repositories.hotel.hotelFeatures.RoomFeaturesRepository;
@@ -13,11 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class RoomDetailsRepositoryTest {
+
+    @Autowired
+    private HotelRepository hotelRepository;
 
     @Autowired
     private RoomDetailsRepository roomDetailsRepository;
@@ -73,5 +79,44 @@ class RoomDetailsRepositoryTest {
         //then
         assertNotNull(allRoomFeatures);
 
+    }
+
+    @Test
+    void testDeleteByHotelId() {
+
+        //given
+        long hotelId = 1L;
+        roomDetailsRepository.deleteByHotelId(hotelId);
+
+        //when
+        Optional<RoomDetailsEntity> roomDetails = roomDetailsRepository.findByHotelId(hotelId);
+
+        //then
+        assertTrue(roomDetails.isEmpty());
+    }
+
+    @Test
+    void testFindByHotelId() {
+
+        //given
+        HotelEntity hotel = new HotelEntity();
+        hotel.setId(1L);
+        hotelRepository.save(hotel);
+        RoomDetailsEntity roomDetails = new RoomDetailsEntity(
+                "test",
+                "test",
+                "test",
+                "test",
+                "test",
+                0,
+                hotel
+        );
+        roomDetailsRepository.save(roomDetails);
+
+        //when
+        Optional<RoomDetailsEntity> roomDetailsOptional = roomDetailsRepository.findByHotelId(1L);
+
+        //then
+        assertTrue(roomDetailsOptional.isPresent());
     }
 }

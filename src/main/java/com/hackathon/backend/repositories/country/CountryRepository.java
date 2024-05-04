@@ -12,8 +12,6 @@ import java.util.List;
 @Repository
 public interface CountryRepository extends JpaRepository<CountryEntity,Integer> {
     boolean existsByCountry(String country);
-    CountryEntity findByCountry(String newCountryDto);
-
     @Query("SELECT new com.hackathon.backend.dto.countryDto.CountryDto(c.id, c.country, c.mainImage) FROM CountryEntity c")
     List<CountryDto> findAllCountries();
 }

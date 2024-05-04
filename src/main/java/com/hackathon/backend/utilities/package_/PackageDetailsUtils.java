@@ -35,4 +35,9 @@ public class PackageDetailsUtils {
     public List<PackageDetailsEntity> findAll() {
         return packageDetailsRepository.findAll();
     }
+
+    public PackageDetailsEntity findById(int packageDetailsId) {
+        return packageDetailsRepository.findById(packageDetailsId)
+                .orElseThrow(()-> new EntityNotFoundException("Package id not found"));
+    }
 }

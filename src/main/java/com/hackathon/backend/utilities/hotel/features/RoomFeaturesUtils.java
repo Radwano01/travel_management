@@ -39,4 +39,8 @@ public class RoomFeaturesUtils {
     public void deleteById(int featureId) {
         roomFeaturesRepository.deleteById(featureId);
     }
+
+    public void deleteAll() {
+        roomFeaturesRepository.deleteAll();
+    }
 }

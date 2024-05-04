@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -64,13 +65,19 @@ public class PackageEvaluationService {
             PackageEntity packageEntity = packageUtils.findById(packageId);
             List<PackageEvaluationEntity> packageEvaluations = packageEntity.getPackageEvaluations();
             List<PackageEvaluationDto> packageEvaluationDtos = packageEvaluations.stream()
-                    .map((evaluation) -> new PackageEvaluationDto(
-                            evaluation.getId(),
-                            evaluation.getComment(),
-                            evaluation.getRate(),
-                            evaluation.getUser().getUsername(),
-                            evaluation.getUser().getImage()
-                    )).collect(Collectors.toList());
+                    .map((evaluation) -> {
+                        if (evaluation.getUser() != null) {
+                            return new PackageEvaluationDto(
+                                    evaluation.getId(),
+                                    evaluation.getComment(),
+                                    evaluation.getRate(),
+                                    evaluation.getUser().getUsername(),
+                                    evaluation.getUser().getImage()
+                            );
+                        } else {
+                            return null;
+                        }
+                    }).collect(Collectors.toList());
             return ResponseEntity.ok(packageEvaluationDtos);
         } catch (EntityNotFoundException e) {
             return notFoundException(e);
@@ -101,21 +108,29 @@ public class PackageEvaluationService {
     }
 
     @Transactional
-    public ResponseEntity<?> removeComment(int packageId,
-                                           long userId,
-                                           long commentId) {
+    public ResponseEntity<?> removeComment(int packageId, long userId, long commentId) {
         try {
             PackageEntity packageEntity = packageUtils.findById(packageId);
             UserEntity user = userUtils.findById(userId);
             PackageEvaluationEntity packageEvaluation = packageEvaluationUtils.findById(commentId);
-            if(packageEntity != null && user != null && packageEvaluation != null){
+
+            if (packageEntity != null && user != null && packageEvaluation != null) {
+                if (packageEntity.getPackageEvaluations() == null) {
+                    packageEntity.setPackageEvaluations(new ArrayList<>());
+                }
+
                 packageEntity.getPackageEvaluations().remove(packageEvaluation);
+
+                if (user.getPackageEvaluations() == null) {
+                    user.setPackageEvaluations(new ArrayList<>());
+                }
                 user.getPackageEvaluations().remove(packageEvaluation);
+
                 packageUtils.save(packageEntity);
                 userUtils.save(user);
                 packageEvaluationUtils.delete(packageEvaluation);
                 return ResponseEntity.ok("Comment deleted successfully");
-            }else{
+            } else {
                 return ResponseEntity.ok("Comment not found");
             }
         } catch (EntityNotFoundException e) {

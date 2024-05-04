@@ -26,4 +26,8 @@ public class PlaceUtils {
     public void delete(PlaceEntity place) {
         placeRepository.delete(place);
     }
+
+    public void deleteAll() {
+        placeRepository.deleteAll();
+    }
 }

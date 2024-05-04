@@ -29,7 +29,7 @@ class RoomFeaturesRepositoryTest {
     }
 
     @Test
-    void findByRoomFeatures() {
+    void existsRoomFeatureByRoomFeatures() {
         //given
         String roomFeature = "test feature";
         //when

@@ -4,6 +4,8 @@ import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.package_.packageFeatures.RoadmapEntity;
 import com.hackathon.backend.repositories.package_.PackageRepository;
 import com.hackathon.backend.repositories.package_.packageFeatures.RoadmapRepository;
+import com.hackathon.backend.utilities.package_.PackageUtils;
+import com.hackathon.backend.utilities.package_.features.RoadmapUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,23 +21,21 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @Service
 public class PackageRoadmapsRelationsService {
 
-    private final PackageRepository packageRepository;
-    private final RoadmapRepository roadmapRepository;
+    private final PackageUtils packageUtils;
+    private final RoadmapUtils roadmapUtils;
 
     @Autowired
-    public PackageRoadmapsRelationsService(PackageRepository packageRepository,
-                                           RoadmapRepository roadmapRepository) {
-        this.packageRepository = packageRepository;
-        this.roadmapRepository = roadmapRepository;
+    public PackageRoadmapsRelationsService(PackageUtils packageUtils,
+                                           RoadmapUtils roadmapUtils) {
+        this.packageUtils = packageUtils;
+        this.roadmapUtils = roadmapUtils;
     }
 
     @Transactional
     public ResponseEntity<?> addPackageRoadmap(int packageId, int roadmapId) {
         try{
-            PackageEntity packageEntity = packageRepository.findById(packageId)
-                    .orElseThrow(()-> new EntityNotFoundException("Package id not found"));
-            RoadmapEntity roadmapEntity = roadmapRepository.findById(roadmapId)
-                    .orElseThrow(()-> new EntityNotFoundException("roadmap id not found"));
+            PackageEntity packageEntity = packageUtils.findById(packageId);
+            RoadmapEntity roadmapEntity = roadmapUtils.findById(roadmapId);
             Optional<RoadmapEntity> roadmapEntityOptional = packageEntity.getPackageDetails()
                     .getRoadmaps().stream()
                     .filter((roadmap)-> roadmap.getId() == roadmapId)
@@ -55,16 +55,16 @@ public class PackageRoadmapsRelationsService {
     @Transactional
     public ResponseEntity<?> removePackageRoadmap(int packageId, int roadmapId) {
         try{
-            Optional<PackageEntity> packageEntity = packageRepository.findById(packageId);
-            Optional<RoadmapEntity> roadmapEntity = roadmapRepository.findById(roadmapId);
-            if(packageEntity.isPresent() && roadmapEntity.isPresent()) {
-                Optional<RoadmapEntity> roadmapEntityOptional = packageEntity.get().getPackageDetails().getRoadmaps().stream()
+            PackageEntity packageEntity = packageUtils.findById(packageId);
+            RoadmapEntity roadmapEntity = roadmapUtils.findById(roadmapId);
+            if(packageEntity != null && roadmapEntity != null) {
+                Optional<RoadmapEntity> roadmapEntityOptional = packageEntity.getPackageDetails().getRoadmaps().stream()
                         .filter((roadmap) -> roadmap.getId() == roadmapId)
                         .findFirst();
                 if(roadmapEntityOptional.isPresent()) {
-                    packageEntity.get().getPackageDetails().getRoadmaps().remove(roadmapEntityOptional.get());
-                    packageRepository.save(packageEntity.get());
-                    roadmapRepository.save(roadmapEntity.get());
+                    packageEntity.getPackageDetails().getRoadmaps().remove(roadmapEntityOptional.get());
+                    packageUtils.save(packageEntity);
+                    roadmapUtils.save(roadmapEntity);
                     return ResponseEntity.ok("Roadmap removed from this package");
                 }else{
                     return notFoundException("Roadmap not found in this package");

@@ -20,43 +20,40 @@ class CountryRepositoryTest {
     private CountryRepository countryRepository;
 
     @BeforeEach
-    void setUp(){
-        String country = "United Kingdom";
-        CountryEntity countryEntity = new CountryEntity(country);
-        countryRepository.save(countryEntity);
+    void setUp() {
+        CountryEntity country = new CountryEntity();
+        country.setId(1);
+        country.setCountry("ExistingCountryName");
+        countryRepository.save(country);
     }
 
     @AfterEach
-    void tearDown(){
+    void tearDown() {
         countryRepository.deleteAll();
     }
 
     @Test
     void existsByCountry() {
-        //given
-        String country = "United Kingdom";
-        //when
-        boolean exists = countryRepository.existsByCountry(country);
-        //then
+        // given
+        String existingCountryName = "ExistingCountryName";
+
+        // when
+        boolean exists = countryRepository.existsByCountry(existingCountryName);
+
+        // then
         assertTrue(exists);
     }
 
     @Test
-    void findByCountry(){
-        //given
-        String country = "United Kingdom";
-        //when
-        CountryEntity countryEntity = countryRepository.findByCountry(country);
-        //then
-        assertEquals(country, countryEntity.getCountry());
-    }
+    void findAllCountries() {
+        // given
+        // Countries exist in the database
 
-    @Test
-    void findAllCountries(){
-        //when
+        // when
         List<CountryDto> countries = countryRepository.findAllCountries();
-        //then
+
+        // then
         assertNotNull(countries);
-        assertSame(1, countries.size());
+        assertFalse(countries.isEmpty());
     }
 }

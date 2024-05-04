@@ -25,7 +25,10 @@ public class RoomDetailsEntity {
     private String imageTwo;
     private String imageThree;
     private String imageFour;
+
+    @Column(length = 1000)
     private String description;
+
     private int price;
 
     @OneToOne(fetch = FetchType.LAZY)

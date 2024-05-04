@@ -84,13 +84,13 @@ public class PlaneFlightsService {
         }
     }
 
-    public ResponseEntity<?> editFlight(long flightId, long planeId,
+    public ResponseEntity<?> editFlight(long flightId,
                                         int departureCountryId,
                                         int destinationCountryId,
                                         FlightDto flightDto) {
         try{
             PlaneFlightsEntity planeFlights = planeFlightsUtils.findById(flightId);
-            editHelper(planeFlights, flightDto, planeId, departureCountryId, destinationCountryId);
+            editHelper(planeFlights, flightDto, departureCountryId, destinationCountryId);
             planeFlightsUtils.save(planeFlights);
             return ResponseEntity.ok("Flight edit successfully");
         }catch (EntityNotFoundException e){
@@ -117,7 +117,7 @@ public class PlaneFlightsService {
     }
 
     private void editHelper(PlaneFlightsEntity planeFlights,
-                            FlightDto flightDto, long planeId,
+                            FlightDto flightDto,
                             int departureCountryId,
                             int destinationCountryId) {
         if(flightDto.getPrice() >= 0){
@@ -128,10 +128,6 @@ public class PlaneFlightsService {
         }
         if(flightDto.getArrivalTime() != null){
             planeFlights.setArrivalTime(flightDto.getArrivalTime());
-        }
-        if(planeFlights.getPlane().getId() != planeId){
-            PlaneEntity plane = planeUtils.findPlaneById(planeId);
-            planeFlights.setPlane(plane);
         }
         if(planeFlights.getDepartureCountry().getId() != departureCountryId){
             CountryEntity departureCountry = countryUtils.findCountryById(departureCountryId);

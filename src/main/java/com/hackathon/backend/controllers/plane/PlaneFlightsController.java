@@ -33,12 +33,11 @@ public class PlaneFlightsController {
 
     @PutMapping(path = "${EDIT_FLIGHT_PATH}")
     public ResponseEntity<?> editFlight(@PathVariable("flightId") long flightId,
-                                        @PathVariable("planeId") long planeId,
-                                       @PathVariable("departureCountryId") int departureCountryId,
-                                       @PathVariable("destinationCountryId") int destinationCountryId,
-                                       @RequestBody FlightDto flightDto){
+                                        @PathVariable("departureCountryId") int departureCountryId,
+                                        @PathVariable("destinationCountryId") int destinationCountryId,
+                                        @RequestBody FlightDto flightDto){
         return planeFlightsService.editFlight(
-                flightId,planeId,
+                flightId,
                 departureCountryId,
                 destinationCountryId,
                 flightDto
