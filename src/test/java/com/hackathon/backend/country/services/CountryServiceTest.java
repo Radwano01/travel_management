@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,15 +53,9 @@ class CountryServiceTest {
         //given
         CountryDetailsDto countryDetailsDto = new CountryDetailsDto();
         countryDetailsDto.setCountry("United Kingdom");
-        countryDetailsDto.setCountryMainImage("main_image_url");
-        countryDetailsDto.setImageOne("image_one_url");
-        countryDetailsDto.setImageTwo("image_two_url");
-        countryDetailsDto.setImageThree("image_three_url");
-        countryDetailsDto.setDescription("about country description");
 
         CountryWithDetailsDto countryWithDetailsDto = new CountryWithDetailsDto();
         countryWithDetailsDto.setCountry("United Kingdom");
-        countryWithDetailsDto.setMainImage("image_url");
         countryWithDetailsDto.setCountryDetails(countryDetailsDto);
         //when
         ResponseEntity<?> response = countryService.createCountry(countryWithDetailsDto);
@@ -73,65 +68,49 @@ class CountryServiceTest {
         //given
         CountryDetailsDto countryDetailsDto = new CountryDetailsDto();
         countryDetailsDto.setCountry("United Kingdom");
-        countryDetailsDto.setCountryMainImage("main_image_url");
-        countryDetailsDto.setImageOne("image_one_url");
-        countryDetailsDto.setImageTwo("image_two_url");
-        countryDetailsDto.setImageThree("image_three_url");
-        countryDetailsDto.setDescription("about country description");
+
 
         CountryWithDetailsDto countryWithDetailsDto = new CountryWithDetailsDto();
         countryWithDetailsDto.setCountry("United Kingdom");
-        countryWithDetailsDto.setMainImage("image_url");
         countryWithDetailsDto.setCountryDetails(countryDetailsDto);
 
-        when(countryUtils.existsByCountry("United Kingdom")).thenReturn(false)
-                .thenReturn(true);
+        when(countryUtils.existsByCountry("United Kingdom")).thenReturn(true);
         //when
         ResponseEntity<?> response = countryService.createCountry(countryWithDetailsDto);
-        ResponseEntity<?> secondResponse = countryService.createCountry(countryWithDetailsDto);
 
         //then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(HttpStatus.CONFLICT, secondResponse.getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
     }
 
     @Test
     void getCountries() {
         //given
-        List<CountryDto> countryEntities = new ArrayList<>();
-        CountryDto countryDto = new CountryDto();
-        countryDto.setId(1);
-        countryDto.setCountry("uk");
-        countryDto.setMainImage("image_url");
-        countryEntities.add(countryDto);
+        List<CountryDto> countryEntities = Collections.singletonList(new CountryDto());
         when(countryUtils.findAllCountries()).thenReturn(countryEntities);
+
         //when
         ResponseEntity<?> response = countryService.getCountries();
+
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        List<CountryDto> mappedCountries = (List<CountryDto>) response.getBody();
-        assertSame(countryDto, mappedCountries.get(0));
+        assertEquals(countryEntities, response.getBody());
     }
 
     @Test
     void editCountry() {
         //given
+        int countryId = 1;
+
         CountryDetailsDto countryDetailsDto = new CountryDetailsDto();
         countryDetailsDto.setCountry("United Kingdom");
-        countryDetailsDto.setCountryMainImage("main_image_url");
-        countryDetailsDto.setImageOne("image_one_url");
-        countryDetailsDto.setImageTwo("image_two_url");
-        countryDetailsDto.setImageThree("image_three_url");
-        countryDetailsDto.setDescription("about country description");
 
         CountryWithDetailsDto countryWithDetailsDto = new CountryWithDetailsDto();
         countryWithDetailsDto.setCountry("United Kingdom");
-        countryWithDetailsDto.setMainImage("image_url");
         countryWithDetailsDto.setCountryDetails(countryDetailsDto);
 
         countryService.createCountry(countryWithDetailsDto);
-        int countryId = 1;
+
         when(countryUtils.findCountryById(countryId)).thenReturn(new CountryEntity());
         //new Data
         CountryDto newCountryDto = new CountryDto();
@@ -153,13 +132,12 @@ class CountryServiceTest {
         CountryDetailsEntity countryDetails = new CountryDetailsEntity();
         countryDetails.setId(1);
         countryDetails.setCountry(country);
-        countryUtils.save(country);
-        countryDetailsUtils.save(countryDetails);
-
         when(countryUtils.findCountryById(1)).thenReturn(country);
         when(countryDetailsUtils.findByCountryId(1)).thenReturn(countryDetails);
+
         //when
         ResponseEntity<?> response = countryService.deleteCountry(1);
+
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
