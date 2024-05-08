@@ -40,10 +40,6 @@ class CountryDetailsServiceTest {
         CountryEntity country = new CountryEntity();
         country.setCountry("United Kingdom");
 
-        PlaceEntity place = new PlaceEntity();
-        place.setPlace("London");
-        country.getPlaces().add(place);
-
         CountryDetailsEntity countryDetails = new CountryDetailsEntity();
         countryDetails.setId(countryId);
         countryDetails.setImageOne("image_one");

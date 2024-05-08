@@ -1,7 +1,8 @@
 package com.hackathon.backend.services.country;
 
-import com.hackathon.backend.dto.countryDto.PlaceDto.PlaceDetailsDto;
-import com.hackathon.backend.dto.countryDto.PlaceDto.PlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.EssentialPlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.PlaceDetailsDto;
+import com.hackathon.backend.dto.countryDto.placeDto.PlaceDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+
+import java.util.List;
 
 import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
 import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
@@ -59,6 +62,17 @@ public class PlaceService {
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         } catch (Exception e){
+            return serverErrorException(e);
+        }
+    }
+
+    public ResponseEntity<?> getPlacesByCountry(int countryId){
+        try{
+            List<EssentialPlaceDto> places = placeUtils.findPlacesByCountryId(countryId);
+            return ResponseEntity.ok(places);
+        }catch(EntityNotFoundException e){
+            return notFoundException(e);
+        }catch(Exception e){
             return serverErrorException(e);
         }
     }

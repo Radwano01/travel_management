@@ -17,36 +17,32 @@ public class HotelDto {
     private long id;
     private String hotelName;
     private String mainImage;
-    private String title;
     private String description;
     private int hotelRoomsCount;
     private String address;
     private float rate;
-
     private RoomDetailsDto roomDetails;
     private List<HotelFeaturesEntity> hotelFeatures;
     private List<RoomFeaturesEntity> roomFeatures;
 
     public HotelDto(long id, String hotelName,
-                    String mainImage, String title,
-                    String description, String address, float rate) {
+                    String mainImage, String description,
+                    String address, float rate) {
         this.id = id;
         this.hotelName = hotelName;
         this.mainImage = mainImage;
-        this.title = title;
         this.description = description;
         this.address = address;
         this.rate = rate;
     }
 
     public HotelDto(long id, String hotelName,
-                    String mainImage, String title,
-                    String description, int hotelRoomsCount,
+                    String mainImage, String description,
+                    int hotelRoomsCount,
                     String address, float rate) {
         this.id = id;
         this.hotelName = hotelName;
         this.mainImage = mainImage;
-        this.title = title;
         this.description = description;
         this.hotelRoomsCount = hotelRoomsCount;
         this.address = address;

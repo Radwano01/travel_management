@@ -1,4 +1,4 @@
-package com.hackathon.backend.dto.countryDto.PlaceDto;
+package com.hackathon.backend.dto.countryDto.placeDto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

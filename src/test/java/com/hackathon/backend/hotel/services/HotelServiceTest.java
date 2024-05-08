@@ -81,7 +81,6 @@ class HotelServiceTest {
         hotelDto.setId(1);
         hotelDto.setHotelName("test");
         hotelDto.setMainImage("test");
-        hotelDto.setTitle("test");
         hotelDto.setDescription("test");
         hotelDto.setHotelRoomsCount(100);
         hotelDto.setAddress("test");
@@ -104,7 +103,6 @@ class HotelServiceTest {
                 1,
                 "Grand Hotel",
                 "grand_hotel.jpg",
-                "Luxury at Its Best",
                 "Experience unparalleled luxury and comfort at the Grand Hotel.",
                 100,
                 "123 Main Street, City",
@@ -122,7 +120,6 @@ class HotelServiceTest {
         assertEquals(hotel.getId(), queryHotelDto.getId());
         assertEquals(hotel.getHotelName(), queryHotelDto.getHotelName());
         assertEquals(hotel.getMainImage(), queryHotelDto.getMainImage());
-        assertEquals(hotel.getTitle(), queryHotelDto.getTitle());
         assertEquals(hotel.getDescription(), queryHotelDto.getDescription());
         assertEquals(hotel.getAddress(), queryHotelDto.getAddress());
         assertEquals(hotel.getRate(), queryHotelDto.getRate());
@@ -145,7 +142,6 @@ class HotelServiceTest {
         hotelDto.setId(1);
         hotelDto.setHotelName("Grand Hotel");
         hotelDto.setMainImage("grand_hotel.jpg");
-        hotelDto.setTitle("Luxury at Its Best");
         hotelDto.setDescription("Experience unparalleled luxury and comfort at the Grand Hotel.");
         hotelDto.setHotelRoomsCount(100);
         hotelDto.setAddress("123 Main Street, City");
@@ -183,7 +179,6 @@ class HotelServiceTest {
         hotel.setId(1);
         hotel.setHotelName("test");
         hotel.setMainImage("test");
-        hotel.setTitle("test");
         hotel.setDescription("test");
         hotel.setHotelRoomsCount(100);
         hotel.setAddress("test");

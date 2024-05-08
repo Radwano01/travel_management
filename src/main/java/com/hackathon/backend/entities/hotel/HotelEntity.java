@@ -25,8 +25,10 @@ public class HotelEntity {
     private String hotelName;
     private String mainImage;
     private String address;
-    private String title;
+
+    @Column(length = 100)
     private String description;
+
     private int hotelRoomsCount;
     private float rate = 0f;
 
@@ -49,12 +51,11 @@ public class HotelEntity {
     private List<HotelEvaluationEntity> evaluations = new ArrayList<>();;
 
     public HotelEntity(String hotelName, String mainImage,
-                       String title, String description,
-                       int hotelRoomsCount, String address,
-                       CountryEntity country, PlaceEntity foundPlace) {
+                       String description, int hotelRoomsCount,
+                       String address, CountryEntity country,
+                       PlaceEntity foundPlace) {
         this.hotelName = hotelName;
         this.mainImage = mainImage;
-        this.title = title;
         this.description = description;
         this.hotelRoomsCount = hotelRoomsCount;
         this.address = address;

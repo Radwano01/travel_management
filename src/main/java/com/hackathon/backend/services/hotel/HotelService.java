@@ -55,7 +55,6 @@ public class HotelService {
             HotelEntity hotelEntity = new HotelEntity(
                     hotelDto.getHotelName(),
                     hotelDto.getMainImage(),
-                    hotelDto.getTitle(),
                     hotelDto.getDescription(),
                     hotelDto.getHotelRoomsCount(),
                     hotelDto.getAddress(),
@@ -145,9 +144,6 @@ public class HotelService {
         }
         if (hotelDto.getMainImage() != null) {
             hotel.setMainImage(hotelDto.getMainImage());
-        }
-        if (hotelDto.getTitle() != null) {
-            hotel.setTitle(hotelDto.getTitle());
         }
         if (hotelDto.getDescription() != null) {
             hotel.setDescription(hotelDto.getDescription());

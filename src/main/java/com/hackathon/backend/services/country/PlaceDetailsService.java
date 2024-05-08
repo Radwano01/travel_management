@@ -1,6 +1,6 @@
 package com.hackathon.backend.services.country;
 
-import com.hackathon.backend.dto.countryDto.PlaceDto.PlaceDetailsDto;
+import com.hackathon.backend.dto.countryDto.placeDto.PlaceDetailsDto;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.utilities.country.PlaceDetailsUtils;

@@ -1,7 +1,6 @@
 package com.hackathon.backend.services.country;
 
 import com.hackathon.backend.dto.countryDto.CountryDetailsDto;
-import com.hackathon.backend.dto.countryDto.PlaceDto.EssentialPlaceDto;
 import com.hackathon.backend.entities.country.CountryDetailsEntity;
 import com.hackathon.backend.utilities.country.CountryDetailsUtils;
 import jakarta.persistence.EntityNotFoundException;
@@ -9,8 +8,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
 import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
@@ -28,12 +25,6 @@ public class CountryDetailsService {
     public ResponseEntity<?> getSingleCountryDetails(int countryId) {
         try {
             CountryDetailsEntity countryDetails = countryDetailsUtils.findByCountryId(countryId);
-            List<EssentialPlaceDto> placeEntityList = countryDetails.getCountry().getPlaces()
-                    .stream().map((place)-> new EssentialPlaceDto(
-                            place.getId(),
-                            place.getPlace(),
-                            place.getMainImage()
-                    )).toList();
 
             CountryDetailsDto countryDetailsDto = new CountryDetailsDto(
                     countryDetails.getId(),
@@ -42,8 +33,7 @@ public class CountryDetailsService {
                     countryDetails.getImageThree(),
                     countryDetails.getDescription(),
                     countryDetails.getCountry().getCountry(),
-                    countryDetails.getCountry().getMainImage(),
-                    placeEntityList
+                    countryDetails.getCountry().getMainImage()
             );
             return ResponseEntity.ok(countryDetailsDto);
         } catch (EntityNotFoundException e) {

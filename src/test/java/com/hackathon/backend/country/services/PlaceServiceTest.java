@@ -1,7 +1,7 @@
 package com.hackathon.backend.country.services;
 
-import com.hackathon.backend.dto.countryDto.PlaceDto.PlaceDetailsDto;
-import com.hackathon.backend.dto.countryDto.PlaceDto.PlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.PlaceDetailsDto;
+import com.hackathon.backend.dto.countryDto.placeDto.PlaceDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.services.country.PlaceService;
@@ -66,6 +66,19 @@ class PlaceServiceTest {
         ResponseEntity<?> response = placeService.createPlace(countryId,place);
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void getPlace(){
+        //given
+        int countryId = 1;
+
+        //when
+        ResponseEntity<?> response = placeService.getPlacesByCountry(countryId);
+
+        //then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response);
     }
 
     @Test

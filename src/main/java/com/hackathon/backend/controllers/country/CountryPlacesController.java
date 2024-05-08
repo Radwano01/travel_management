@@ -1,6 +1,6 @@
 package com.hackathon.backend.controllers.country;
 
-import com.hackathon.backend.dto.countryDto.PlaceDto.PlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.PlaceDto;
 import com.hackathon.backend.services.country.PlaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +20,11 @@ public class CountryPlacesController {
     public ResponseEntity<?> createPlace(@PathVariable("countryId") int countryId,
                                          @RequestBody PlaceDto placeDto){
         return placeService.createPlace(countryId,placeDto);
+    }
+
+    @GetMapping(path = "${GET_PLACES_PATH}")
+    public ResponseEntity<?> getPlaces(@PathVariable("countryId") int countryId){
+        return placeService.getPlacesByCountry(countryId);
     }
 
     @PutMapping(path = "${EDIT_PLACE_PATH}")

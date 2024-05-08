@@ -1,7 +1,7 @@
 package com.hackathon.backend.controllers.country;
 
 
-import com.hackathon.backend.dto.countryDto.PlaceDto.PlaceDetailsDto;
+import com.hackathon.backend.dto.countryDto.placeDto.PlaceDetailsDto;
 import com.hackathon.backend.services.country.PlaceDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
