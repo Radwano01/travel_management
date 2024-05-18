@@ -5,6 +5,7 @@ import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.repositories.plane.PlaneRepository;
 import com.hackathon.backend.repositories.plane.PlaneSeatsRepository;
 import com.hackathon.backend.services.plane.PlaneService;
+import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
 import com.hackathon.backend.utilities.plane.PlaneSeatsUtils;
 import com.hackathon.backend.utilities.plane.PlaneUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -29,13 +30,18 @@ class PlaneServiceTest {
     @Mock
     private PlaneUtils planeUtils;
 
+    @Mock
+    private PlaneFlightsUtils planeFlightsUtils;
+
     private PlaneService planeService;
 
     @BeforeEach
     void setUp() {
         planeService = new PlaneService(
                 planeSeatsUtils,
-                planeUtils);
+                planeUtils,
+                planeFlightsUtils
+        );
     }
 
     @AfterEach

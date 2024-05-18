@@ -39,4 +39,8 @@ public class BenefitUtils {
     public void deleteById(int benefitId) {
         benefitRepository.deleteById(benefitId);
     }
+
+    public void delete(BenefitEntity benefit) {
+        benefitRepository.delete(benefit);
+    }
 }

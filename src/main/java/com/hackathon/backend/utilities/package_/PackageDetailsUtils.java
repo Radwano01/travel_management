@@ -40,4 +40,8 @@ public class PackageDetailsUtils {
         return packageDetailsRepository.findById(packageDetailsId)
                 .orElseThrow(()-> new EntityNotFoundException("Package id not found"));
     }
+
+    public void delete(PackageDetailsEntity packageDetails) {
+        packageDetailsRepository.delete(packageDetails);
+    }
 }

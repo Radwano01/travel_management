@@ -22,12 +22,12 @@ public class CountryController {
 
     @GetMapping(path = "${GET_COUNTRIES_PATH}")
     public ResponseEntity<?> getCountries(){
-        return countryService.getCountries();
+        return countryService.getCountry();
     }
 
     @PutMapping(path = "${EDIT_COUNTRY_PATH}")
     public ResponseEntity<?> editCountry(@PathVariable("countryId") int countryId,
-                                         @RequestBody CountryDto countryDto){
+                                         @RequestBody CountryWithDetailsDto countryDto){
         return countryService.editCountry(countryId,countryDto);
     }
 

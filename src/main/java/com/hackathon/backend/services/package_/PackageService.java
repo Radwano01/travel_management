@@ -6,9 +6,15 @@ import com.hackathon.backend.dto.packageDto.PackageDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
+import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
+import com.hackathon.backend.entities.package_.packageFeatures.BenefitEntity;
+import com.hackathon.backend.entities.package_.packageFeatures.RoadmapEntity;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.package_.PackageDetailsUtils;
+import com.hackathon.backend.utilities.package_.PackageEvaluationUtils;
 import com.hackathon.backend.utilities.package_.PackageUtils;
+import com.hackathon.backend.utilities.package_.features.BenefitUtils;
+import com.hackathon.backend.utilities.package_.features.RoadmapUtils;
 import io.micrometer.common.lang.NonNull;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -27,14 +33,21 @@ public class PackageService {
     private final PackageUtils packageUtils;
     private final PackageDetailsUtils packageDetailsUtils;
     private final CountryUtils countryUtils;
+    private final RoadmapUtils roadmapUtils;
+    private final BenefitUtils benefitUtils;
+    private final PackageEvaluationUtils packageEvaluationUtils;
 
     @Autowired
     public PackageService(PackageUtils packageUtils,
                           PackageDetailsUtils packageDetailsUtils,
-                          CountryUtils countryUtils){
+                          CountryUtils countryUtils, RoadmapUtils roadmapUtils, BenefitUtils benefitUtils,
+                          PackageEvaluationUtils packageEvaluationUtils){
         this.packageUtils = packageUtils;
         this.packageDetailsUtils = packageDetailsUtils;
         this.countryUtils = countryUtils;
+        this.roadmapUtils = roadmapUtils;
+        this.benefitUtils = benefitUtils;
+        this.packageEvaluationUtils = packageEvaluationUtils;
     }
 
     public ResponseEntity<?> createPackage(int countryId,
@@ -48,7 +61,10 @@ public class PackageService {
                     packageDto.getMainImage(),
                     country
             );
+
             packageUtils.save(packageEntity);
+            country.getPackages().add(packageEntity);
+            countryUtils.save(country);
 
             PackageDetailsDto packageDetailsDto = packageDto.getPackageDetails();
             PackageDetailsEntity packageDetails = new PackageDetailsEntity(
@@ -58,7 +74,10 @@ public class PackageService {
                     packageDetailsDto.getDescription(),
                     packageEntity
             );
+
             packageDetailsUtils.save(packageDetails);
+            packageEntity.setPackageDetails(packageDetails);
+            packageUtils.save(packageEntity);
             return ResponseEntity.ok("Package and package Details created successfully");
         }catch(EntityNotFoundException e){
             return notFoundException(e);
@@ -98,14 +117,29 @@ public class PackageService {
     public ResponseEntity<?> deletePackage(int packageId){
         try{
             PackageEntity packageEntity = packageUtils.findById(packageId);
-            PackageDetailsEntity packageDetails = packageDetailsUtils.findByPackageOfferId(packageId);
-            if(packageEntity != null && packageDetails != null) {
-                packageDetailsUtils.deleteByPackageOfferId(packageId);
-                packageUtils.deleteById(packageId);
-                return ResponseEntity.ok("Package deleted successfully");
-            }else{
-                return ResponseEntity.ok("Package not found");
+            PackageDetailsEntity packageDetails = packageEntity.getPackageDetails();
+
+            for(PackageEvaluationEntity evaluation:packageEntity.getPackageEvaluations()){
+                packageEvaluationUtils.delete(evaluation);
             }
+
+            List<RoadmapEntity> roadmapEntity = packageEntity.getPackageDetails().getRoadmaps();
+
+            for(RoadmapEntity roadmap:roadmapEntity){
+                packageDetails.getRoadmaps().remove(roadmap);
+                roadmapUtils.save(roadmap);
+            }
+
+            List<BenefitEntity> benefitEntity = packageEntity.getPackageDetails().getBenefits();
+
+            for(BenefitEntity benefit:benefitEntity){
+                packageDetails.getBenefits().remove(benefit);
+                benefitUtils.save(benefit);
+            }
+
+            packageDetailsUtils.delete(packageDetails);
+            packageUtils.delete(packageEntity);
+            return ResponseEntity.ok("Package deleted successfully");
         }catch(EntityNotFoundException e){
             return notFoundException(e);
         }catch(Exception e){

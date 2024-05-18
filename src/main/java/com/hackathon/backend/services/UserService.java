@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -157,10 +156,13 @@ public class UserService {
             if(user.isVerificationStatus()){
                 return badRequestException("This account has verified already");
             }
-
             String verificationLink = verifyLink+user.getEmail()+"/"+token;
-            sendMail(user.getEmail(), verificationLink);
-            javaMailSender.send(sendMail(user.getEmail(), verificationLink));
+
+            userUtils.sendMessageToEmail(user.getEmail(), verificationLink);
+            javaMailSender.send(
+                    userUtils.sendMessageToEmail(user.getEmail(), verificationLink)
+            );
+
             return ResponseEntity.ok("Verification email sent");
         }catch (EntityNotFoundException e){
             return notFoundException(e);
@@ -182,13 +184,5 @@ public class UserService {
         if(editUserDto.getImage() != null){
             user.setImage(editUserDto.getImage());
         }
-    }
-
-    private SimpleMailMessage sendMail(String email, String verificationLink){
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(email);
-        mailMessage.setSubject("Email Verification From Hackathon Project");
-        mailMessage.setText("Please Click to the link to verify your account: "+verificationLink);
-        return mailMessage;
     }
 }

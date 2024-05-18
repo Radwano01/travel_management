@@ -5,6 +5,7 @@ import com.hackathon.backend.dto.planeDto.PlaneDto;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
 import com.hackathon.backend.repositories.plane.PlaneSeatsRepository;
+import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
 import com.hackathon.backend.utilities.plane.PlaneSeatsUtils;
 import com.hackathon.backend.utilities.plane.PlaneUtils;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,12 +26,15 @@ public class PlaneService{
 
     private final PlaneSeatsUtils planeSeatsUtils;
     private final PlaneUtils planeUtils;
+    private final PlaneFlightsUtils planeFlightsUtils;
 
     @Autowired
     public PlaneService(PlaneSeatsUtils planeSeatsUtils,
-                        PlaneUtils planeUtils){
+                        PlaneUtils planeUtils,
+                        PlaneFlightsUtils planeFlightsUtils){
         this.planeSeatsUtils = planeSeatsUtils;
         this.planeUtils = planeUtils;
+        this.planeFlightsUtils = planeFlightsUtils;
     }
 
     public ResponseEntity<?> createPlane(@NonNull PlaneDto planeDto) {
@@ -65,14 +69,14 @@ public class PlaneService{
     public ResponseEntity<?> deletePlane(long planeId) {
         try{
             PlaneEntity plane = planeUtils.findById(planeId);
-            List<PlaneSeatsEntity> planeSeats = planeSeatsUtils.findAllSeatsByPlaneId(planeId);
-            if(plane != null || planeSeats != null){
-                planeUtils.deleteById(planeId);
-                planeSeatsUtils.deleteById(planeId);
-                return ResponseEntity.ok("Plane deleted successfully");
-            }else{
-                return ResponseEntity.ok("plane not found");
+
+            for(PlaneSeatsEntity planeSeats:plane.getPlaneSeats()){
+                planeSeatsUtils.delete(planeSeats);
             }
+
+            planeFlightsUtils.delete(plane.getFlight());
+            planeUtils.delete(plane);
+            return ResponseEntity.ok("Plane deleted successfully");
         }catch (Exception e){
             return serverErrorException(e);
         }

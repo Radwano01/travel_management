@@ -52,6 +52,8 @@ public class PackageEvaluationService {
 
             );
             packageEntity.getPackageEvaluations().add(packageEvaluation);
+            packageUtils.save(packageEntity);
+            userUtils.save(user);
             return ResponseEntity.ok("Comment added successfully");
         } catch (EntityNotFoundException e) {
             return notFoundException(e);

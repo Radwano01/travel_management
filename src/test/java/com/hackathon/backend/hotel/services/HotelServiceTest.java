@@ -10,9 +10,12 @@ import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.services.hotel.HotelService;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.country.PlaceUtils;
+import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
 import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
 import com.hackathon.backend.utilities.hotel.RoomUtils;
+import com.hackathon.backend.utilities.hotel.features.HotelFeaturesUtils;
+import com.hackathon.backend.utilities.hotel.features.RoomFeaturesUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,9 +35,6 @@ import static org.mockito.Mockito.when;
 class HotelServiceTest {
 
     @Mock
-    private PlaceUtils placeUtils;
-
-    @Mock
     private CountryUtils countryUtils;
 
     @Mock
@@ -46,14 +46,26 @@ class HotelServiceTest {
     @Mock
     private HotelUtils hotelUtils;
 
+    @Mock
+    private HotelEvaluationUtils hotelEvaluationUtils;
+
+    @Mock
+    private HotelFeaturesUtils hotelFeaturesUtils;
+
+    @Mock
+    private RoomFeaturesUtils roomFeaturesUtils;
+
     private HotelService hotelService;
 
     @BeforeEach
     void setUp() {
-        hotelService = new HotelService(placeUtils,
+        hotelService = new HotelService(
                 countryUtils,
                 roomUtils,
                 hotelUtils,
+                hotelFeaturesUtils,
+                roomFeaturesUtils,
+                hotelEvaluationUtils,
                 roomDetailsUtils);
     }
 
@@ -67,7 +79,6 @@ class HotelServiceTest {
     void createHotel() {
         //given
         int countryId = 1;
-        int placeId = 1;
 
         RoomDetailsDto roomDetailsDto = new RoomDetailsDto();
         roomDetailsDto.setImageOne("test");
@@ -88,9 +99,8 @@ class HotelServiceTest {
         hotelDto.setRoomDetails(roomDetailsDto);
 
         when(countryUtils.findCountryById(countryId)).thenReturn(new CountryEntity());
-        when(placeUtils.findById(placeId)).thenReturn(new PlaceEntity());
         //when
-        ResponseEntity<?> response = hotelService.createHotel(countryId, placeId, hotelDto);
+        ResponseEntity<?> response = hotelService.createHotel(countryId, hotelDto);
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -131,12 +141,10 @@ class HotelServiceTest {
         //given
         long hotelId = 1;
         int countryId = 1;
-        int placeId = 1;
 
         CountryEntity country = new CountryEntity();
         country.setId(countryId);
         PlaceEntity place = new PlaceEntity();
-        place.setId(placeId);
 
         HotelDto hotelDto = new HotelDto();
         hotelDto.setId(1);
@@ -150,11 +158,10 @@ class HotelServiceTest {
 
         HotelEntity hotel = new HotelEntity();
         hotel.setCountry(country);
-        hotel.setPlace(place);
 
         when(hotelUtils.findHotelById(hotelId)).thenReturn(hotel);
         //when
-        ResponseEntity<?> response = hotelService.editHotel(hotelId, countryId, placeId, hotelDto);
+        ResponseEntity<?> response = hotelService.editHotel(hotelId, countryId, hotelDto);
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }

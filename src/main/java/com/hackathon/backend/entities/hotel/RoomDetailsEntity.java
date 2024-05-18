@@ -59,4 +59,15 @@ public class RoomDetailsEntity {
         this.price = price;
         this.hotel = hotel;
     }
+
+    public RoomDetailsEntity(String imageOne, String imageTwo,
+                             String imageThree, String imageFour,
+                             String description, int price) {
+        this.imageOne = imageOne;
+        this.imageTwo = imageTwo;
+        this.imageThree = imageThree;
+        this.imageFour = imageFour;
+        this.description = description;
+        this.price = price;
+    }
 }

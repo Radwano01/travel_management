@@ -7,7 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class VisaPaymentDto {
-    private Long paymentId;
+public class PlaneSeatPaymentDto {
     private String paymentIntent;
 }

@@ -5,13 +5,19 @@ import com.hackathon.backend.dto.hotelDto.RoomDetailsDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
+import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
 import com.hackathon.backend.entities.hotel.RoomEntity;
+import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
+import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import com.hackathon.backend.utilities.country.CountryUtils;
+import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
 import com.hackathon.backend.utilities.country.PlaceUtils;
 import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
 import com.hackathon.backend.utilities.hotel.RoomUtils;
+import com.hackathon.backend.utilities.hotel.features.HotelFeaturesUtils;
+import com.hackathon.backend.utilities.hotel.features.RoomFeaturesUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,40 +33,44 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @Service
 public class HotelService {
 
-    private final PlaceUtils placeUtils;
     private final CountryUtils countryUtils;
     private final RoomUtils roomUtils;
     private final HotelUtils hotelUtils;
+    private final HotelFeaturesUtils hotelFeaturesUtils;
+    private final RoomFeaturesUtils roomFeaturesUtils;
+    private final HotelEvaluationUtils hotelEvaluationUtils;
     private final RoomDetailsUtils roomDetailsUtils;
 
     @Autowired
-    public HotelService(PlaceUtils placeUtils,
-                        CountryUtils countryUtils,
+    public HotelService(CountryUtils countryUtils,
                         RoomUtils roomUtils,
                         HotelUtils hotelUtils,
+                        HotelFeaturesUtils hotelFeaturesUtils,
+                        RoomFeaturesUtils roomFeaturesUtils,
+                        HotelEvaluationUtils hotelEvaluationUtils,
                         RoomDetailsUtils roomDetailsUtils){
-        this.placeUtils = placeUtils;
         this.countryUtils = countryUtils;
         this.roomUtils = roomUtils;
         this.hotelUtils = hotelUtils;
+        this.hotelFeaturesUtils = hotelFeaturesUtils;
+        this.roomFeaturesUtils = roomFeaturesUtils;
+        this.hotelEvaluationUtils = hotelEvaluationUtils;
         this.roomDetailsUtils = roomDetailsUtils;
     }
 
     public ResponseEntity<?> createHotel(int countryId,
-                                         int placeId,
                                          @NonNull HotelDto hotelDto) {
         try {
             CountryEntity country = countryUtils.findCountryById(countryId);
-            PlaceEntity place = placeUtils.findById(placeId);
             HotelEntity hotelEntity = new HotelEntity(
                     hotelDto.getHotelName(),
                     hotelDto.getMainImage(),
                     hotelDto.getDescription(),
                     hotelDto.getHotelRoomsCount(),
                     hotelDto.getAddress(),
-                    country,
-                    place
+                    country
             );
+
             hotelUtils.save(hotelEntity);
 
             RoomDetailsDto roomDetailsDto = hotelDto.getRoomDetails();
@@ -73,6 +83,9 @@ public class HotelService {
                     roomDetailsDto.getPrice(),
                     hotelEntity
             );
+
+            hotelEntity.setRoomDetails(roomDetails);
+            hotelUtils.save(hotelEntity);
             roomDetailsUtils.save(roomDetails);
             return ResponseEntity.ok("Hotel created successfully: " + hotelDto.getHotelName());
         } catch (EntityNotFoundException e) {
@@ -93,17 +106,12 @@ public class HotelService {
     }
 
     @Transactional
-    public ResponseEntity<?> editHotel(long hotelId, int countryId,
-                                       int placeId, HotelDto hotelDto){
+    public ResponseEntity<?> editHotel(long hotelId, int countryId, HotelDto hotelDto){
         try{
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
             if(countryId != hotel.getCountry().getId()){
                 CountryEntity country = countryUtils.findCountryById(countryId);
                 hotel.setCountry(country);
-            }
-            if(placeId != hotel.getPlace().getId()){
-                PlaceEntity place = hotelUtils.findPlaceByIdInCountry(countryId,placeId);
-                hotel.setPlace(place);
             }
             editHelper(hotel, hotelDto);
             hotelUtils.save(hotel);
@@ -119,17 +127,37 @@ public class HotelService {
     public ResponseEntity<?> deleteHotel(long hotelId) {
         try {
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
-            RoomDetailsEntity roomDetails = roomDetailsUtils.findByHotelId(hotelId);
-            if(hotel != null && roomDetails != null){
-                for(RoomEntity room: hotel.getRooms()){
-                    roomUtils.delete(room);
-                }
-                hotelUtils.delete(hotel);
-                roomDetailsUtils.deleteByHotelId(hotelId);
-                return ResponseEntity.ok("Hotel deleted Successfully");
-            }else{
-                return notFoundException("Hotel not found");
+            RoomDetailsEntity roomDetails = hotel.getRoomDetails();
+            CountryEntity country = hotel.getCountry();
+
+            for(RoomEntity room: hotel.getRooms()){
+                roomUtils.delete(room);
             }
+
+            country.getHotels().remove(hotel);
+            countryUtils.save(country);
+
+            for(HotelEvaluationEntity evaluation:hotel.getEvaluations()){
+                hotelEvaluationUtils.delete(evaluation);
+            }
+
+            List<HotelFeaturesEntity> hotelFeatures = roomDetails.getHotelFeatures();
+
+            for(HotelFeaturesEntity hotelFeature:hotelFeatures){
+                roomDetails.getHotelFeatures().remove(hotelFeature);
+                hotelFeaturesUtils.save(hotelFeature);
+            }
+
+            List<RoomFeaturesEntity> roomFeatures = roomDetails.getRoomFeatures();
+
+            for(RoomFeaturesEntity roomFeature:roomFeatures){
+                roomDetails.getRoomFeatures().remove(roomFeature);
+                roomFeaturesUtils.save(roomFeature);
+            }
+
+            roomDetailsUtils.delete(roomDetails);
+            hotelUtils.delete(hotel);
+            return ResponseEntity.ok("Hotel deleted Successfully");
         }catch (EntityNotFoundException e) {
             return notFoundException(e);
         }catch (Exception e){

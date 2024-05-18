@@ -42,4 +42,8 @@ public class PlaneFlightsUtils {
     public void deleteAll() {
         planeFlightsRepository.deleteAll();
     }
+
+    public void delete(PlaneFlightsEntity flight) {
+        planeFlightsRepository.delete(flight);
+    }
 }

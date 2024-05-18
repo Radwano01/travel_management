@@ -99,15 +99,11 @@ public class PlaneSeatsService {
                                         long seatId) {
         try{
             PlaneEntity plane = planeUtils.findPlaneById(planeId);
-            boolean planeSeats = plane.getPlaneSeats().removeIf((seats)-> seats.getId() == seatId);
-            if(planeSeats){
-                planeSeatsUtils.deleteById(seatId);
-                planeUtils.save(plane);
-                return ResponseEntity.ok("Plane seat deleted successfully");
-            }else{
-                return notFoundException("Seat not found");
-            }
+            plane.getPlaneSeats().removeIf((seats)-> seats.getId() == seatId);
 
+            planeSeatsUtils.deleteById(seatId);
+            planeUtils.save(plane);
+            return ResponseEntity.ok("Plane seat deleted successfully");
         }catch(EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){

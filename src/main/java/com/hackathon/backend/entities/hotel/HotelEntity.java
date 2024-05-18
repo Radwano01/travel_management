@@ -32,14 +32,10 @@ public class HotelEntity {
     private int hotelRoomsCount;
     private float rate = 0f;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id")
     private CountryEntity country;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="place_id")
-    private PlaceEntity place;
 
     @OneToOne(mappedBy = "hotel", fetch = FetchType.EAGER)
     private RoomDetailsEntity roomDetails;
@@ -52,14 +48,13 @@ public class HotelEntity {
 
     public HotelEntity(String hotelName, String mainImage,
                        String description, int hotelRoomsCount,
-                       String address, CountryEntity country,
-                       PlaceEntity foundPlace) {
+                       String address, CountryEntity country) {
         this.hotelName = hotelName;
         this.mainImage = mainImage;
         this.description = description;
         this.hotelRoomsCount = hotelRoomsCount;
         this.address = address;
         this.country = country;
-        this.place = foundPlace;
+
     }
 }

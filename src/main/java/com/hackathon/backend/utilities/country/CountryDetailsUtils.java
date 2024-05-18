@@ -22,11 +22,6 @@ public class CountryDetailsUtils {
         countryDetailsRepository.save(countryDetails);
     }
 
-    public CountryDetailsEntity findByCountryId(int countryId) {
-        return countryDetailsRepository.findByCountryId(countryId)
-                .orElseThrow(()-> new EntityNotFoundException("Country id not found"));
-    }
-
     public void delete(CountryDetailsEntity countryDetails) {
         countryDetailsRepository.delete(countryDetails);
     }

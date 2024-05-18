@@ -4,10 +4,17 @@ import com.hackathon.backend.dto.countryDto.CountryDto;
 import com.hackathon.backend.dto.countryDto.CountryWithDetailsDto;
 import com.hackathon.backend.entities.country.CountryDetailsEntity;
 import com.hackathon.backend.entities.country.CountryEntity;
+import com.hackathon.backend.entities.country.PlaceEntity;
+import com.hackathon.backend.entities.hotel.HotelEntity;
+import com.hackathon.backend.entities.package_.PackageEntity;
+import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
 import com.hackathon.backend.utilities.country.CountryDetailsUtils;
 import com.hackathon.backend.utilities.country.CountryUtils;
+import com.hackathon.backend.utilities.country.PlaceUtils;
+import com.hackathon.backend.utilities.hotel.HotelUtils;
+import com.hackathon.backend.utilities.package_.PackageUtils;
+import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
@@ -19,15 +26,27 @@ import java.util.List;
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
-public class CountryService {
+public class CountryService{
 
     private final CountryUtils countryUtils;
     private final CountryDetailsUtils countryDetailsUtils;
+    private final PlaceUtils placeUtils;
+    private final HotelUtils hotelUtils;
+    private final PackageUtils packageUtils;
+    private final PlaneFlightsUtils planeFlightsUtils;
+
     @Autowired
     public CountryService(CountryUtils countryUtils,
-                          CountryDetailsUtils countryDetailsUtils) {
+                          CountryDetailsUtils countryDetailsUtils,
+                          PlaceUtils placeUtils, HotelUtils hotelUtils,
+                          PackageUtils packageUtils,
+                          PlaneFlightsUtils planeFlightsUtils) {
         this.countryUtils = countryUtils;
         this.countryDetailsUtils = countryDetailsUtils;
+        this.placeUtils = placeUtils;
+        this.hotelUtils = hotelUtils;
+        this.packageUtils = packageUtils;
+        this.planeFlightsUtils = planeFlightsUtils;
     }
 
     public ResponseEntity<?> createCountry(@NonNull CountryWithDetailsDto countryWithDetailsDto) {
@@ -57,9 +76,8 @@ public class CountryService {
         }
     }
 
-    public ResponseEntity<?> getCountries() {
+    public ResponseEntity<?> getCountry() {
         try {
-
             List<CountryDto> countries = countryUtils.findAllCountries();
             return ResponseEntity.ok(countries);
         }catch (EmptyResultDataAccessException e) {
@@ -69,9 +87,8 @@ public class CountryService {
         }
     }
 
-    @Transactional
     public ResponseEntity<?> editCountry(int countryId,
-                                         CountryDto countryDto) {
+                                        CountryWithDetailsDto countryDto) {
         try {
             CountryEntity country = countryUtils.findCountryById(countryId);
             editHelper(country,countryDto);
@@ -84,25 +101,40 @@ public class CountryService {
         }
     }
 
-    @Transactional
     public ResponseEntity<?> deleteCountry(int countryId) {
         try {
             CountryEntity countryEntity = countryUtils.findCountryById(countryId);
-            CountryDetailsEntity countryDetails = countryDetailsUtils.findByCountryId(countryId);
-            if(countryEntity != null && countryDetails != null){
-                countryDetailsUtils.delete(countryDetails);
-                countryUtils.delete(countryEntity);
-                return ResponseEntity.ok("Country and country details deleted successfully");
-            }else{
-                return notFoundException("Country or country details not found");
+
+            for(PlaceEntity place:countryEntity.getPlaces()){
+                placeUtils.delete(place);
             }
+
+            for(HotelEntity hotel:countryEntity.getHotels()){
+                hotelUtils.delete(hotel);
+            }
+
+            for(PackageEntity packageEntity:countryEntity.getPackages()){
+                packageUtils.delete(packageEntity);
+            }
+
+            for(PlaneFlightsEntity departure:countryEntity.getDepartingFlights()){
+                planeFlightsUtils.delete(departure);
+            }
+
+            for(PlaneFlightsEntity arrival:countryEntity.getArrivingFlights()){
+                planeFlightsUtils.delete(arrival);
+            }
+
+            countryDetailsUtils.delete(countryEntity.getCountryDetails());
+            countryUtils.delete(countryEntity);
+            return ResponseEntity.ok("Country and country details deleted successfully");
         } catch (Exception e) {
             return serverErrorException(e);
         }
     }
 
     private void editHelper(CountryEntity country,
-                            CountryDto countryDto) {
+                            CountryWithDetailsDto countryDto) {
         if (countryDto.getCountry() != null) {
             country.setCountry(countryDto.getCountry());
         }

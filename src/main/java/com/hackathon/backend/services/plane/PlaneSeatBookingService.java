@@ -1,12 +1,12 @@
-package com.hackathon.backend.services.hotel;
+package com.hackathon.backend.services.plane;
 
-import com.hackathon.backend.dto.payment.RoomPaymentDto;
-import com.hackathon.backend.entities.hotel.RoomBookingEntity;
-import com.hackathon.backend.entities.hotel.RoomEntity;
+import com.hackathon.backend.dto.payment.PlaneSeatPaymentDto;
+import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
+import com.hackathon.backend.entities.plane.PlaneSeatsBookingEntity;
 import com.hackathon.backend.entities.user.UserEntity;
-import com.hackathon.backend.repositories.hotel.RoomBookingRepository;
+import com.hackathon.backend.repositories.plane.PlaneSeatsBookingRepository;
+import com.hackathon.backend.repositories.plane.PlaneSeatsRepository;
 import com.hackathon.backend.utilities.UserUtils;
-import com.hackathon.backend.utilities.hotel.RoomUtils;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
@@ -17,61 +17,57 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static com.hackathon.backend.utilities.ErrorUtils.*;
-
+import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
+import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 
 @Service
-public class RoomBookingService {
+public class PlaneSeatBookingService {
 
-    private final RoomBookingRepository roomBookingRepository;
-    private final RoomUtils roomUtils;
     private final UserUtils userUtils;
+    private final PlaneSeatsRepository planeSeatsRepository;
+    private final PlaneSeatsBookingRepository planeSeatsBookingRepository;
 
     @Value("${STRIPE_SECRET_KEY}")
     private String stripeSecretKey;
 
     @Autowired
-    public RoomBookingService(RoomBookingRepository roomBookingRepository,
-                              RoomUtils roomUtils,
-                              UserUtils userUtils) {
-        this.roomBookingRepository = roomBookingRepository;
-        this.roomUtils = roomUtils;
+    public PlaneSeatBookingService(UserUtils userUtils,
+                              PlaneSeatsRepository planeSeatsRepository,
+                              PlaneSeatsBookingRepository planeSeatsBookingRepository) {
         this.userUtils = userUtils;
+        this.planeSeatsRepository = planeSeatsRepository;
+        this.planeSeatsBookingRepository = planeSeatsBookingRepository;
     }
-
 
     @Transactional
     public ResponseEntity<?> payment(long id,
                                      long planeId,
-                                     RoomPaymentDto roomPaymentDto){
+                                     PlaneSeatPaymentDto planeSeatPaymentDto){
         try{
             UserEntity user = userUtils.findById(id);
             boolean userVerification = user.isVerificationStatus();
             if(!userVerification) {
-                return badRequestException("User is Not Verified yet!");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is Not Verified yet!");
             }
-            RoomEntity room = roomUtils.findById(planeId);
-            if (!room.isStatus()) {
-                return badRequestException("Room Not Valid!");
+            PlaneSeatsEntity seat = planeSeatsRepository.findById(planeId)
+                    .orElseThrow(() -> new EntityNotFoundException("Visa id is not found"));
+            if (!seat.isStatus()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Visa Not Valid!");
             }
             try {
-                PaymentIntent paymentIntent = createPayment(roomPaymentDto);
+                PaymentIntent paymentIntent = createPayment(planeSeatPaymentDto);
                 if (paymentIntent.getStatus().equals("succeeded")) {
-                    room.setStatus(false);
-                    RoomBookingEntity roomBookingEntity = new RoomBookingEntity(
+                    seat.setStatus(false);
+                    PlaneSeatsBookingEntity planeSeatsBookingEntity = new PlaneSeatsBookingEntity(
                             user,
-                            room,
-                            roomPaymentDto.getStartTime(),
-                            roomPaymentDto.getEndTime()
+                            seat
                     );
-                    roomBookingRepository.save(roomBookingEntity);
-                    return ResponseEntity.ok("Room booked successfully");
+                    planeSeatsBookingRepository.save(planeSeatsBookingEntity);
+
+
+                    return ResponseEntity.ok("Visa booked successfully");
                 } else {
                     return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
                             .body("Payment failed. Please check your payment details and try again.");
@@ -86,24 +82,16 @@ public class RoomBookingService {
         }
     }
 
-
-    private PaymentIntent createPayment(RoomPaymentDto roomPaymentDto) throws StripeException {
+    private PaymentIntent createPayment(PlaneSeatPaymentDto planeSeatPaymentDto) throws StripeException {
         Stripe.apiKey = stripeSecretKey;
         PaymentIntentCreateParams.Builder paramsBuilder = new PaymentIntentCreateParams.Builder()
                 .setCurrency("USD")
                 .setAmount(1000L)
                 .addPaymentMethodType("card")
-                .setPaymentMethod(roomPaymentDto.getPaymentIntent())
+                .setPaymentMethod(planeSeatPaymentDto.getPaymentIntent())
                 .setConfirm(true)
                 .setConfirmationMethod(PaymentIntentCreateParams.ConfirmationMethod.MANUAL)
                 .setErrorOnRequiresAction(true);
         return PaymentIntent.create(paramsBuilder.build());
-    }
-
-    @Scheduled(fixedRate = 60000)
-    public void removeExpiredBookings(){
-        LocalDateTime nowTime = LocalDateTime.now();
-        List<RoomBookingEntity> expiredBookings = roomBookingRepository.findAllByEndTime(nowTime);
-        roomBookingRepository.deleteAll(expiredBookings);
     }
 }

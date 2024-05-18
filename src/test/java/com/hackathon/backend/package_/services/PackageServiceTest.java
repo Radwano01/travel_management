@@ -9,7 +9,10 @@ import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.services.package_.PackageService;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.package_.PackageDetailsUtils;
+import com.hackathon.backend.utilities.package_.PackageEvaluationUtils;
 import com.hackathon.backend.utilities.package_.PackageUtils;
+import com.hackathon.backend.utilities.package_.features.BenefitUtils;
+import com.hackathon.backend.utilities.package_.features.RoadmapUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +40,15 @@ class PackageServiceTest {
     @Mock
     private CountryUtils countryUtils;
 
+    @Mock
+    private RoadmapUtils roadmapUtils;
+
+    @Mock
+    private BenefitUtils benefitUtils;
+
+    @Mock
+    private PackageEvaluationUtils packageEvaluationUtils;
+
     private PackageService packageService;
 
     @BeforeEach
@@ -44,7 +56,10 @@ class PackageServiceTest {
         packageService = new PackageService(
                 packageUtils,
                 packageDetailsUtils,
-                countryUtils
+                countryUtils,
+                roadmapUtils,
+                benefitUtils,
+                packageEvaluationUtils
         );
     }
 

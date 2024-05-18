@@ -8,6 +8,10 @@ import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.services.country.CountryService;
 import com.hackathon.backend.utilities.country.CountryDetailsUtils;
 import com.hackathon.backend.utilities.country.CountryUtils;
+import com.hackathon.backend.utilities.country.PlaceUtils;
+import com.hackathon.backend.utilities.hotel.HotelUtils;
+import com.hackathon.backend.utilities.package_.PackageUtils;
+import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,12 +38,30 @@ class CountryServiceTest {
     @Mock
     private CountryDetailsUtils countryDetailsUtils;
 
+    @Mock
+    private PlaceUtils placeUtils;
+
+    @Mock
+    private HotelUtils hotelUtils;
+
+    @Mock
+    private PackageUtils packageUtils;
+
+    @Mock
+    private PlaneFlightsUtils planeFlightsUtils;
+
     private CountryService countryService;
 
     @BeforeEach
     void setUp() {
-        countryService = new CountryService(countryUtils,
-                countryDetailsUtils);
+        countryService = new CountryService(
+                countryUtils,
+                countryDetailsUtils,
+                placeUtils,
+                hotelUtils,
+                packageUtils,
+                planeFlightsUtils
+        );
     }
 
     @AfterEach
@@ -89,7 +111,7 @@ class CountryServiceTest {
         when(countryUtils.findAllCountries()).thenReturn(countryEntities);
 
         //when
-        ResponseEntity<?> response = countryService.getCountries();
+        ResponseEntity<?> response = countryService.getCountry();
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -113,7 +135,7 @@ class CountryServiceTest {
 
         when(countryUtils.findCountryById(countryId)).thenReturn(new CountryEntity());
         //new Data
-        CountryDto newCountryDto = new CountryDto();
+        CountryWithDetailsDto newCountryDto = new CountryWithDetailsDto();
         newCountryDto.setCountry("United Kingdom");
         newCountryDto.setMainImage("url_image");
         //when
@@ -133,7 +155,6 @@ class CountryServiceTest {
         countryDetails.setId(1);
         countryDetails.setCountry(country);
         when(countryUtils.findCountryById(1)).thenReturn(country);
-        when(countryDetailsUtils.findByCountryId(1)).thenReturn(countryDetails);
 
         //when
         ResponseEntity<?> response = countryService.deleteCountry(1);

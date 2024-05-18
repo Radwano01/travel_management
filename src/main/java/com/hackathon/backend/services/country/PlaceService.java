@@ -23,7 +23,7 @@ import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
 import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 
 @Service
-public class PlaceService {
+public class PlaceService{
 
     private final CountryUtils countryUtils;
     private final PlaceUtils placeUtils;
@@ -47,7 +47,10 @@ public class PlaceService {
                     placeDto.getMainImage(),
                     country
             );
+
             placeUtils.save(place);
+            country.getPlaces().add(place);
+            countryUtils.save(country);
 
             PlaceDetailsDto placeDetailsDto = placeDto.getPlaceDetails();
             PlaceDetailsEntity placeDetails = new PlaceDetailsEntity(
@@ -58,6 +61,8 @@ public class PlaceService {
                     place
             );
             placeDetailsUtils.save(placeDetails);
+            place.setPlaceDetails(placeDetails);
+            placeUtils.save(place);
             return ResponseEntity.ok("Place created successfully");
         }catch (EntityNotFoundException e){
             return notFoundException(e);
@@ -97,12 +102,18 @@ public class PlaceService {
     public ResponseEntity<?> deletePlace(int placeId) {
         try{
             PlaceEntity place = placeUtils.findById(placeId);
-            if(place != null){
-                placeUtils.delete(place);
-                return ResponseEntity.ok("Place deleted successfully");
-            }else{
-                return notFoundException("Place not found");
-            }
+            PlaceDetailsEntity placeDetails = place.getPlaceDetails();
+
+            CountryEntity country = place.getCountry();
+
+            country.getPlaces().remove(place);
+
+            countryUtils.save(country);
+
+            placeDetailsUtils.delete(placeDetails);
+
+            placeUtils.delete(place);
+            return ResponseEntity.ok("Place deleted successfully");
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){

@@ -35,4 +35,8 @@ public class PackageUtils {
     public void deleteById(int packageId) {
         packageRepository.deleteById(packageId);
     }
+
+    public void delete(PackageEntity packageEntity) {
+        packageRepository.delete(packageEntity);
+    }
 }

@@ -30,4 +30,8 @@ public class PlaceDetailsUtils {
     public void deleteAll() {
         placeDetailsRepository.deleteAll();
     }
+
+    public void delete(PlaceDetailsEntity placeDetails) {
+        placeDetailsRepository.delete(placeDetails);
+    }
 }

@@ -40,4 +40,8 @@ public class PlaneSeatsUtils {
     public void deleteAll() {
         planeSeatsRepository.deleteAll();
     }
+
+    public void delete(PlaneSeatsEntity planeSeats) {
+        planeSeatsRepository.delete(planeSeats);
+    }
 }

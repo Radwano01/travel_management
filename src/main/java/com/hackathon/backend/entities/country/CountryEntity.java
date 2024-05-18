@@ -1,6 +1,7 @@
 package com.hackathon.backend.entities.country;
 
 import com.hackathon.backend.entities.hotel.HotelEntity;
+import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -27,6 +28,9 @@ public class CountryEntity {
 
     @OneToMany(mappedBy = "country",fetch = FetchType.LAZY)
     private List<HotelEntity> hotels = new ArrayList<>();
+
+    @OneToMany(mappedBy = "country", fetch = FetchType.LAZY)
+    private List<PackageEntity> packages = new ArrayList<>();
 
     @OneToOne(mappedBy ="country", fetch = FetchType.LAZY)
     private CountryDetailsEntity countryDetails;

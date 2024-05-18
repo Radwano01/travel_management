@@ -5,9 +5,12 @@ import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+
+import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 
 
 @Component
@@ -34,7 +37,7 @@ public class UserUtils {
     }
 
     public boolean existsUsernameByUsername(String username) {
-        return existsUsernameByUsername(username);
+        return userRepository.existsUsernameByUsername(username);
     }
 
     public UserEntity findUserByUsername(String usernameFromJWT) {
@@ -53,5 +56,13 @@ public class UserUtils {
 
     public void deleteAll() {
         userRepository.deleteAll();
+    }
+
+    public SimpleMailMessage sendMessageToEmail(String email, String message){
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(email);
+        mailMessage.setSubject("Email Verification From Hackathon Project");
+        mailMessage.setText("Please Click to the link to verify your account: "+message);
+        return mailMessage;
     }
 }

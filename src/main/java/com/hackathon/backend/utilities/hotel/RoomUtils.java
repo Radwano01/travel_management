@@ -2,6 +2,7 @@ package com.hackathon.backend.utilities.hotel;
 
 import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.repositories.hotel.RoomRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,5 +26,10 @@ public class RoomUtils {
 
     public void deleteAll() {
         roomRepository.deleteAll();
+    }
+
+    public RoomEntity findById(Long paymentId) {
+        return roomRepository.findById(paymentId)
+                .orElseThrow(()-> new EntityNotFoundException("Room id not found"));
     }
 }

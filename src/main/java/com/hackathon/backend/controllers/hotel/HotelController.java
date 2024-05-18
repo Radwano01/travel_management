@@ -18,9 +18,8 @@ public class HotelController {
 
     @PostMapping(path = "${CREATE_HOTEL_PATH}")
     public ResponseEntity<?> createHotel(@PathVariable("countryId") int countryId,
-                                         @PathVariable("placeId") int placeId,
                                          @RequestBody HotelDto hotelDto){
-        return hotelService.createHotel(countryId, placeId, hotelDto);
+        return hotelService.createHotel(countryId, hotelDto);
     }
 
     @GetMapping(path = "${GET_HOTELS_PATH}")
@@ -31,9 +30,8 @@ public class HotelController {
     @PutMapping(path = "${EDIT_HOTEL_PATH}")
     public ResponseEntity<?> editHotel(@PathVariable("hotelId") long hotelId,
                                        @PathVariable("countryId") int countryId,
-                                       @PathVariable("placeId") int placeId,
                                        @RequestBody HotelDto hotelDto){
-        return hotelService.editHotel(hotelId, countryId, placeId, hotelDto);
+        return hotelService.editHotel(hotelId, countryId, hotelDto);
     }
 
     @DeleteMapping(path = "${DELETE_HOTEL_PATH}")
