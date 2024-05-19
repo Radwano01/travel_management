@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
 import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
@@ -73,8 +74,9 @@ public class PlaceService{
 
     public ResponseEntity<?> getPlacesByCountry(int countryId){
         try{
-            List<EssentialPlaceDto> places = placeUtils.findPlacesByCountryId(countryId);
-            return ResponseEntity.ok(places);
+            CountryEntity country = countryUtils.findCountryById(countryId);
+            List<PlaceEntity> placeEntities =  country.getPlaces();
+            return ResponseEntity.ok(placeEntities);
         }catch(EntityNotFoundException e){
             return notFoundException(e);
         }catch(Exception e){
@@ -87,10 +89,17 @@ public class PlaceService{
                                        int placeId,
                                        PlaceDto placeDto) {
         try{
-            PlaceEntity place = placeUtils.findById(placeId);
-            editHelper(place, placeDto, countryId);
-            placeUtils.save(place);
-            return ResponseEntity.ok("Place updated successfully");
+            CountryEntity country = countryUtils.findCountryById(countryId);
+            Optional<PlaceEntity> place = country.getPlaces().stream()
+                    .filter((data)-> data.getId() == placeId).findFirst();
+            if(place.isPresent()) {
+                editHelper(place.get(), placeDto, countryId);
+                placeUtils.save(place.get());
+                countryUtils.save(country);
+                return ResponseEntity.ok("Place updated successfully");
+            }else{
+                return notFoundException("Place not found in country data");
+            }
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){
@@ -99,21 +108,21 @@ public class PlaceService{
     }
 
     @Transactional
-    public ResponseEntity<?> deletePlace(int placeId) {
+    public ResponseEntity<?> deletePlace(int countryId,
+                                         int placeId) {
         try{
-            PlaceEntity place = placeUtils.findById(placeId);
-            PlaceDetailsEntity placeDetails = place.getPlaceDetails();
+            CountryEntity country = countryUtils.findCountryById(countryId);
+            Optional<PlaceEntity> place = country.getPlaces().stream()
+                    .filter((data)-> data.getId() == placeId).findFirst();
 
-            CountryEntity country = place.getCountry();
-
-            country.getPlaces().remove(place);
-
-            countryUtils.save(country);
-
-            placeDetailsUtils.delete(placeDetails);
-
-            placeUtils.delete(place);
-            return ResponseEntity.ok("Place deleted successfully");
+            if(place.isPresent()) {
+                placeDetailsUtils.delete(place.get().getPlaceDetails());
+                placeUtils.delete(place.get());
+                countryUtils.save(country);
+                return ResponseEntity.ok("Place deleted successfully");
+            }else{
+                return notFoundException("Place not found in country data");
+            }
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){
@@ -134,6 +143,7 @@ public class PlaceService{
             CountryEntity country = countryUtils
                     .findCountryById(countryId);
             place.setCountry(country);
+            countryUtils.save(country);
         }
     }
 }

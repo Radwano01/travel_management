@@ -47,12 +47,13 @@ public class PlaceDetailsService {
     }
 
     @Transactional
-    public ResponseEntity<?> editPlaceDetails(int placeDetailsId,
+    public ResponseEntity<?> editPlaceDetails(int placeId,
                                               PlaceDetailsDto placeDetailsDto) {
         try{
-            PlaceDetailsEntity placeDetails = placeDetailsUtils.findById(placeDetailsId);
-            editHelper(placeDetails,placeDetailsDto);
-            placeDetailsUtils.save(placeDetails);
+            PlaceEntity place = placeUtils.findById(placeId);
+            editHelper(place.getPlaceDetails(),placeDetailsDto);
+            placeDetailsUtils.save(place.getPlaceDetails());
+            placeUtils.save(place);
             return ResponseEntity.ok("Place details edited successfully");
         }catch (EntityNotFoundException e){
             return notFoundException(e);

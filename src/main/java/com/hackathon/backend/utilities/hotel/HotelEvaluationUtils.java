@@ -34,8 +34,4 @@ public class HotelEvaluationUtils {
     public void delete(HotelEvaluationEntity hotelEvaluation) {
         hotelEvaluationRepository.delete(hotelEvaluation);
     }
-
-    public void deleteAll() {
-        hotelEvaluationRepository.deleteAll();
-    }
 }

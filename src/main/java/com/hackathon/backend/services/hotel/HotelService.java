@@ -106,15 +106,16 @@ public class HotelService {
     }
 
     @Transactional
-    public ResponseEntity<?> editHotel(long hotelId, int countryId, HotelDto hotelDto){
+    public ResponseEntity<?> editHotel(long hotelId,
+                                       int countryId,
+                                       HotelDto hotelDto){
         try{
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
-            if(countryId != hotel.getCountry().getId()){
-                CountryEntity country = countryUtils.findCountryById(countryId);
-                hotel.setCountry(country);
-            }
+            CountryEntity country = countryUtils.findCountryById(countryId);
+            hotel.setCountry(country);
             editHelper(hotel, hotelDto);
             hotelUtils.save(hotel);
+            countryUtils.save(country);
             return ResponseEntity.ok("Hotel updated Successfully: "+hotel.getHotelName());
         }catch (EntityNotFoundException e) {
             return notFoundException(e);

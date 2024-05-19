@@ -35,7 +35,8 @@ public class CountryPlacesController {
     }
 
     @DeleteMapping(path = "${DELETE_PLACE_PATH}")
-    public ResponseEntity<?> deletePlace(@PathVariable("placeId") int placeId){
-        return placeService.deletePlace(placeId);
+    public ResponseEntity<?> deletePlace(@PathVariable("countryId") int countryId,
+                                         @PathVariable("placeId") int placeId){
+        return placeService.deletePlace(countryId,placeId);
     }
 }

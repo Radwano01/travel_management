@@ -25,8 +25,8 @@ public class CountryDetailsController {
     }
 
     @PutMapping(path = "${EDIT_COUNTRY_DETAILS_PATH}")
-    public ResponseEntity<?> editCountryDetails(@PathVariable("countryDetailsId") int countryDetailsId,
+    public ResponseEntity<?> editCountryDetails(@PathVariable("countryId") int countryId,
                                                 @RequestBody CountryDetailsDto countryDetailsDto){
-        return countryDetailsService.editCountryDetails(countryDetailsId,countryDetailsDto);
+        return countryDetailsService.editCountryDetails(countryId,countryDetailsDto);
     }
 }

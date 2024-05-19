@@ -41,10 +41,6 @@ public class RoomDetailsUtils {
         return roomDetailsRepository.findAll();
     }
 
-    public void deleteAll() {
-        roomDetailsRepository.deleteAll();
-    }
-
     public void delete(RoomDetailsEntity roomDetails) {
         roomDetailsRepository.delete(roomDetails);
     }

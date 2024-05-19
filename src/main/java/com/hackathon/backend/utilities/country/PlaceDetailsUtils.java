@@ -27,10 +27,6 @@ public class PlaceDetailsUtils {
                 .orElseThrow(()-> new EntityNotFoundException("Place details id not found"));
     }
 
-    public void deleteAll() {
-        placeDetailsRepository.deleteAll();
-    }
-
     public void delete(PlaceDetailsEntity placeDetails) {
         placeDetailsRepository.delete(placeDetails);
     }

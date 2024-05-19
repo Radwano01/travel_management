@@ -36,10 +36,6 @@ public class PlaneUtils {
         planeRepository.deleteById(planeId);
     }
 
-    public void deleteAll() {
-        planeRepository.deleteAll();
-    }
-
     public void delete(PlaneEntity plane) {
         planeRepository.delete(plane);
     }

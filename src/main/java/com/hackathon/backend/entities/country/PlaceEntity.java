@@ -30,9 +30,6 @@ public class PlaceEntity {
     @OneToOne(mappedBy = "place", fetch = FetchType.LAZY)
     private PlaceDetailsEntity placeDetails;
 
-    @OneToMany(mappedBy = "place", fetch = FetchType.LAZY)
-    private List<HotelEntity> hotel = new ArrayList<>();
-
     public PlaceEntity(String place,
                        String mainImage,
                        CountryEntity country) {

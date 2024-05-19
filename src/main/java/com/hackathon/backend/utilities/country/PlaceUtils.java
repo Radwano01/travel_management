@@ -30,10 +30,6 @@ public class PlaceUtils {
         placeRepository.delete(place);
     }
 
-    public void deleteAll() {
-        placeRepository.deleteAll();
-    }
-
     public List<EssentialPlaceDto> findPlacesByCountryId(int countryId) {
         return placeRepository.findPlacesByCountryId(countryId);
     }

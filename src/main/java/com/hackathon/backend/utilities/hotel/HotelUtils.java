@@ -51,8 +51,4 @@ public class HotelUtils {
     public void delete(HotelEntity hotel) {
         hotelRepository.delete(hotel);
     }
-
-    public void deleteAll() {
-        hotelRepository.deleteAll();
-    }
 }

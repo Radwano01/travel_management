@@ -23,8 +23,8 @@ public class RoomDetailsController {
     }
 
     @PutMapping(path = "${EDIT_ROOM_DETAILS_PATH}")
-    public ResponseEntity<?> editRoomDetails(@PathVariable("roomDetailsId") long roomDetailsId,
+    public ResponseEntity<?> editRoomDetails(@PathVariable("hotelId") long hotelId,
                                              @RequestBody RoomDetailsDto roomDetailsDto){
-        return roomDetailsService.editRoomDetails(roomDetailsId,roomDetailsDto);
+        return roomDetailsService.editRoomDetails(hotelId,roomDetailsDto);
     }
 }

@@ -58,12 +58,12 @@ public class RoomDetailsService {
     }
 
     @Transactional
-    public ResponseEntity<?> editRoomDetails(long roomDetailsId,
+    public ResponseEntity<?> editRoomDetails(long hotelId,
                                              RoomDetailsDto roomDetailsDto) {
         try{
-            RoomDetailsEntity roomDetails = roomDetailsUtils.findById(roomDetailsId);
-            editHelper(roomDetails,roomDetailsDto);
-            roomDetailsUtils.save(roomDetails);
+            HotelEntity hotel = hotelUtils.findHotelById(hotelId);
+            editHelper(hotel.getRoomDetails(),roomDetailsDto);
+            roomDetailsUtils.save(hotel.getRoomDetails());
             return ResponseEntity.ok("Hotel rooms details edited successfully");
         }catch (EntityNotFoundException e){
             return notFoundException(e);

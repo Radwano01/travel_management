@@ -24,10 +24,6 @@ public class RoomUtils {
         roomRepository.delete(roomEntity);
     }
 
-    public void deleteAll() {
-        roomRepository.deleteAll();
-    }
-
     public RoomEntity findById(Long paymentId) {
         return roomRepository.findById(paymentId)
                 .orElseThrow(()-> new EntityNotFoundException("Room id not found"));

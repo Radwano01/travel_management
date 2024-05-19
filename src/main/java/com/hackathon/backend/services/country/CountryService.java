@@ -70,6 +70,7 @@ public class CountryService{
             );
             countryDetailsUtils.save(countryDetails);
             country.setCountryDetails(countryDetails);
+            countryUtils.save(country);
             return ResponseEntity.ok("Country created Successfully: "+countryName);
         } catch (Exception e) {
             return serverErrorException(e);

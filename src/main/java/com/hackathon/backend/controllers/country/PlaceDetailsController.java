@@ -23,8 +23,8 @@ public class PlaceDetailsController {
     }
 
     @PutMapping(path = "${EDIT_PLACE_DETAILS_PATH}")
-    public ResponseEntity<?> editPlaceDetails(@PathVariable("placeDetailsId") int placeDetailsId,
+    public ResponseEntity<?> editPlaceDetails(@PathVariable("placeId") int placeId,
                                               @RequestBody PlaceDetailsDto placeDetailsDto) {
-        return placeDetailsService.editPlaceDetails(placeDetailsId, placeDetailsDto);
+        return placeDetailsService.editPlaceDetails(placeId, placeDetailsDto);
     }
 }
