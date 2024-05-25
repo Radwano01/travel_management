@@ -39,4 +39,8 @@ public class RoomFeaturesUtils {
     public void deleteById(int featureId) {
         roomFeaturesRepository.deleteById(featureId);
     }
+
+    public void delete(RoomFeaturesEntity roomFeatures) {
+        roomFeaturesRepository.delete(roomFeatures);
+    }
 }

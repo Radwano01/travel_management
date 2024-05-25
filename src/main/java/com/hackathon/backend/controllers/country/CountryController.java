@@ -27,7 +27,7 @@ public class CountryController {
 
     @PutMapping(path = "${EDIT_COUNTRY_PATH}")
     public ResponseEntity<?> editCountry(@PathVariable("countryId") int countryId,
-                                         @RequestBody CountryWithDetailsDto countryDto){
+                                         @RequestBody CountryDto countryDto){
         return countryService.editCountry(countryId,countryDto);
     }
 

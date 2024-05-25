@@ -71,30 +71,17 @@ public class BenefitService{
     @Transactional
     public ResponseEntity<?> deleteBenefit(int benefitId) {
         try {
-            BenefitEntity benefit = benefitUtils.findById(benefitId);
-            if (benefit != null) {
-                List<PackageDetailsEntity> packageDetailsEntities = packageDetailsUtils.findAll();
-                for (PackageDetailsEntity packageDetails : packageDetailsEntities) {
-                    if (packageDetails.getBenefits() != null) {
-                        List<BenefitEntity> benefitEntities = packageDetails.getBenefits();
-                        boolean removeIf = benefitEntities.removeIf((b) -> b.getId() == benefitId);
-                        if (removeIf) {
-                            packageDetailsUtils.save(packageDetails);
-                        }
-                    } else {
-                        return notFoundException("This package has no benefits");
-                    }
-                }
-                benefitUtils.deleteById(benefitId);
-                return ResponseEntity.ok("Benefit deleted successfully");
-            } else {
-                return notFoundException("Benefit not found");
+            BenefitEntity benefitEntity = benefitUtils.findById(benefitId);
+            for (PackageDetailsEntity packageDetails : benefitEntity.getPackageDetails()) {
+                packageDetails.getBenefits().remove(benefitEntity);
+                packageDetailsUtils.save(packageDetails);
             }
+            benefitUtils.delete(benefitEntity);
+            return ResponseEntity.ok("Benefit deleted successfully");
         } catch (EntityNotFoundException e) {
             return notFoundException(e);
         } catch (Exception e) {
             return serverErrorException(e);
         }
     }
-
 }

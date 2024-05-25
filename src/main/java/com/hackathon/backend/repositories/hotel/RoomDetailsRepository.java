@@ -9,11 +9,4 @@ import java.util.Optional;
 
 @Repository
 public interface RoomDetailsRepository extends JpaRepository<RoomDetailsEntity, Long> {
-    List<RoomDetailsEntity> findByHotelFeaturesId(int featureId);
-
-    List<RoomDetailsEntity> findByRoomFeaturesId(int featureId);
-
-    void deleteByHotelId(long hotelId);
-
-    Optional<RoomDetailsEntity> findByHotelId(long hotelId);
 }

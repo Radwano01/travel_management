@@ -44,6 +44,8 @@ public class PackageRoadmapsRelationsService {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("This roadmap is already valid for this package");
             }
             packageEntity.getPackageDetails().getRoadmaps().add(roadmapEntity);
+            roadmapUtils.save(roadmapEntity);
+            packageUtils.save(packageEntity);
             return ResponseEntity.ok("Roadmap added successfully");
         }catch (EntityNotFoundException e){
             return notFoundException(e);
@@ -57,20 +59,16 @@ public class PackageRoadmapsRelationsService {
         try{
             PackageEntity packageEntity = packageUtils.findById(packageId);
             RoadmapEntity roadmapEntity = roadmapUtils.findById(roadmapId);
-            if(packageEntity != null && roadmapEntity != null) {
-                Optional<RoadmapEntity> roadmapEntityOptional = packageEntity.getPackageDetails().getRoadmaps().stream()
-                        .filter((roadmap) -> roadmap.getId() == roadmapId)
-                        .findFirst();
-                if(roadmapEntityOptional.isPresent()) {
-                    packageEntity.getPackageDetails().getRoadmaps().remove(roadmapEntityOptional.get());
-                    packageUtils.save(packageEntity);
-                    roadmapUtils.save(roadmapEntity);
-                    return ResponseEntity.ok("Roadmap removed from this package");
-                }else{
-                    return notFoundException("Roadmap not found in this package");
-                }
+            Optional<RoadmapEntity> roadmapEntityOptional = packageEntity.getPackageDetails().getRoadmaps().stream()
+                    .filter((roadmap) -> roadmap.getId() == roadmapId)
+                    .findFirst();
+            if(roadmapEntityOptional.isPresent()) {
+                packageEntity.getPackageDetails().getRoadmaps().remove(roadmapEntityOptional.get());
+                packageUtils.save(packageEntity);
+                roadmapUtils.save(roadmapEntity);
+                return ResponseEntity.ok("Roadmap removed from this package");
             }else{
-                return notFoundException("Package or roadmap not found");
+                return notFoundException("Roadmap not found in this package");
             }
         }catch (EntityNotFoundException e){
             return notFoundException(e);

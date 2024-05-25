@@ -44,6 +44,8 @@ public class PackageBenefitsRelationsService {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("This benefit is already valid for this package");
             }
             packageEntity.getPackageDetails().getBenefits().add(benefitEntity);
+            packageUtils.save(packageEntity);
+            benefitUtils.save(benefitEntity);
             return ResponseEntity.ok("Benefit added successfully");
         }catch (EntityNotFoundException e){
             return notFoundException(e);
@@ -57,20 +59,16 @@ public class PackageBenefitsRelationsService {
         try{
             PackageEntity packageEntity = packageUtils.findById(packageId);
             BenefitEntity benefitEntity = benefitUtils.findById(benefitId);
-            if(packageEntity != null && benefitEntity != null) {
-                Optional<BenefitEntity> benefitEntityOptional = packageEntity.getPackageDetails().getBenefits().stream()
-                        .filter((benefit) -> benefit.getId() == benefitId)
-                        .findFirst();
-                if(benefitEntityOptional.isPresent()) {
-                    packageEntity.getPackageDetails().getBenefits().remove(benefitEntityOptional.get());
-                    packageUtils.save(packageEntity);
-                    benefitUtils.save(benefitEntity);
-                    return ResponseEntity.ok("Benefit removed from this package");
-                }else{
-                    return notFoundException("Benefit not found in this package");
-                }
+            Optional<BenefitEntity> benefitEntityOptional = packageEntity.getPackageDetails().getBenefits().stream()
+                    .filter((benefit) -> benefit.getId() == benefitId)
+                    .findFirst();
+            if(benefitEntityOptional.isPresent()) {
+                packageEntity.getPackageDetails().getBenefits().remove(benefitEntityOptional.get());
+                packageUtils.save(packageEntity);
+                benefitUtils.save(benefitEntity);
+                return ResponseEntity.ok("Benefit removed from this package");
             }else{
-                return notFoundException("Package or benefit not found");
+                return notFoundException("Benefit not found in this package");
             }
         }catch (EntityNotFoundException e){
             return notFoundException(e);

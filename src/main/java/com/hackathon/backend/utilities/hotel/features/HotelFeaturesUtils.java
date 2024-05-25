@@ -39,4 +39,8 @@ public class HotelFeaturesUtils {
     public void deleteById(int featureId) {
         hotelFeaturesRepository.deleteById(featureId);
     }
+
+    public void delete(HotelFeaturesEntity hotelFeatures) {
+        hotelFeaturesRepository.delete(hotelFeatures);
+    }
 }

@@ -49,7 +49,6 @@ public class PlaneSeatsService {
             plane.getPlaneSeats().add(planeSeats);
             planeUtils.save(plane);
             return ResponseEntity.ok("Plane seat created successfully");
-
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         } catch (Exception e){

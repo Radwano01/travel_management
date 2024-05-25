@@ -23,15 +23,6 @@ public class RoomDetailsUtils {
         roomDetailsRepository.save(roomDetails);
     }
 
-    public RoomDetailsEntity findByHotelId(long hotelId) {
-        return roomDetailsRepository.findByHotelId(hotelId)
-                .orElseThrow(()-> new EntityNotFoundException("Hotel id not found"));
-    }
-
-    public void deleteByHotelId(long hotelId) {
-        roomDetailsRepository.deleteByHotelId(hotelId);
-    }
-
     public RoomDetailsEntity findById(long roomDetailsId) {
         return roomDetailsRepository.findById(roomDetailsId)
                 .orElseThrow(()-> new EntityNotFoundException("Room details id not found"));

@@ -23,15 +23,6 @@ public class PackageDetailsUtils {
         packageDetailsRepository.save(packageDetails);
     }
 
-    public PackageDetailsEntity findByPackageOfferId(int packageId) {
-        return packageDetailsRepository.findById(packageId)
-                .orElseThrow(()-> new EntityNotFoundException("Package id not found"));
-    }
-
-    public void deleteByPackageOfferId(int packageId) {
-        packageDetailsRepository.deleteByPackageOfferId(packageId);
-    }
-
     public List<PackageDetailsEntity> findAll() {
         return packageDetailsRepository.findAll();
     }

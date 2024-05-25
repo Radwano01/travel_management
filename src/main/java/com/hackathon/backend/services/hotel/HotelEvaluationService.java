@@ -104,7 +104,7 @@ public class HotelEvaluationService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteComment(long hotelId,
+    public ResponseEntity<?> removeComment(long hotelId,
                                            long userId,
                                            long commentId) {
         try {

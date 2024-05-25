@@ -1,4 +1,4 @@
-package com.hackathon.backend.services.hotel.featuresSerivces;
+package com.hackathon.backend.services.hotel.hotelFeatures;
 
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
@@ -78,24 +78,13 @@ public class HotelFeaturesService {
     public ResponseEntity<?> deleteHotelFeature(int featureId) {
         try {
             HotelFeaturesEntity hotelFeatures = hotelFeaturesUtils.findById(featureId);
-            if (hotelFeatures != null) {
-                List<RoomDetailsEntity> roomDetailsEntities = roomDetailsUtils.findAll();
-                for (RoomDetailsEntity roomDetails : roomDetailsEntities) {
-                    if (roomDetails.getHotelFeatures() != null) {
-                        List<HotelFeaturesEntity> hotelFeaturesEntities = roomDetails.getHotelFeatures();
-                        boolean removeIf = hotelFeaturesEntities.removeIf((hf) -> hf.getId() == featureId);
-                        if (removeIf) {
-                            roomDetailsUtils.save(roomDetails);
-                        }
-                    } else {
-                        return notFoundException("This package has no hotel features");
-                    }
-                }
-                hotelFeaturesUtils.deleteById(featureId);
-                return ResponseEntity.ok("Hotel feature deleted successfully");
-            } else {
-                return notFoundException("Hotel feature not found");
+            for (RoomDetailsEntity roomDetails : hotelFeatures.getRoomDetails()) {
+                roomDetails.getHotelFeatures().remove(hotelFeatures);
+                roomDetailsUtils.save(roomDetails);
             }
+            hotelFeaturesUtils.delete(hotelFeatures);
+            return ResponseEntity.ok("Hotel feature deleted successfully");
+
         } catch (EntityNotFoundException e) {
             return notFoundException(e);
         } catch (Exception e) {

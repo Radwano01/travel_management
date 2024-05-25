@@ -4,18 +4,15 @@ import com.hackathon.backend.dto.planeDto.FlightDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
-import com.hackathon.backend.repositories.plane.PlaneFlightsRepository;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
 import com.hackathon.backend.utilities.plane.PlaneUtils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 

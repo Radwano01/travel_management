@@ -39,6 +39,6 @@ public class HotelEvaluationController {
     public ResponseEntity<?> deleteComment(@PathVariable("hotelId") long hotelId,
                                          @PathVariable("userId") long userId,
                                          @PathVariable("commentId") long commentId){
-        return hotelEvaluationService.deleteComment(hotelId,userId,commentId);
+        return hotelEvaluationService.removeComment(hotelId,userId,commentId);
     }
 }

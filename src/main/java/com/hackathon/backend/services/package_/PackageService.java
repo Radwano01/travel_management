@@ -38,10 +38,9 @@ public class PackageService {
     private final PackageEvaluationUtils packageEvaluationUtils;
 
     @Autowired
-    public PackageService(PackageUtils packageUtils,
-                          PackageDetailsUtils packageDetailsUtils,
-                          CountryUtils countryUtils, RoadmapUtils roadmapUtils, BenefitUtils benefitUtils,
-                          PackageEvaluationUtils packageEvaluationUtils){
+    public PackageService(PackageUtils packageUtils, PackageDetailsUtils packageDetailsUtils,
+                          CountryUtils countryUtils, RoadmapUtils roadmapUtils,
+                          BenefitUtils benefitUtils, PackageEvaluationUtils packageEvaluationUtils){
         this.packageUtils = packageUtils;
         this.packageDetailsUtils = packageDetailsUtils;
         this.countryUtils = countryUtils;
@@ -123,16 +122,12 @@ public class PackageService {
                 packageEvaluationUtils.delete(evaluation);
             }
 
-            List<RoadmapEntity> roadmapEntity = packageEntity.getPackageDetails().getRoadmaps();
-
-            for(RoadmapEntity roadmap:roadmapEntity){
+            for(RoadmapEntity roadmap:packageEntity.getPackageDetails().getRoadmaps()){
                 packageDetails.getRoadmaps().remove(roadmap);
                 roadmapUtils.save(roadmap);
             }
 
-            List<BenefitEntity> benefitEntity = packageEntity.getPackageDetails().getBenefits();
-
-            for(BenefitEntity benefit:benefitEntity){
+            for(BenefitEntity benefit:packageEntity.getPackageDetails().getBenefits()){
                 packageDetails.getBenefits().remove(benefit);
                 benefitUtils.save(benefit);
             }
@@ -153,13 +148,13 @@ public class PackageService {
             packageEntity.setPackageName(packageDto.getPackageName());
         }
         if(packageDto.getMainImage() != null){
-            packageEntity.setMainImage(packageEntity.getMainImage());
+            packageEntity.setMainImage(packageDto.getMainImage());
         }
         if(packageDto.getPrice() > 0){
-            packageEntity.setPrice(packageEntity.getPrice());
+            packageEntity.setPrice(packageDto.getPrice());
         }
         if(packageDto.getRate() > 0){
-            packageEntity.setRate(packageEntity.getRate());
+            packageEntity.setRate(packageDto.getRate());
         }
     }
 }

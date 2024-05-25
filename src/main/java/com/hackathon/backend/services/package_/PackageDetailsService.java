@@ -77,16 +77,16 @@ public class PackageDetailsService {
     private void editHelper(PackageDetailsEntity packageDetails,
                             PackageDetailsDto packageDetailsDto) {
         if(packageDetailsDto.getImageOne() != null){
-            packageDetails.setImageOne(packageDetails.getImageOne());
+            packageDetails.setImageOne(packageDetailsDto.getImageOne());
         }
         if(packageDetailsDto.getImageTwo() != null){
-            packageDetails.setImageTwo(packageDetails.getImageTwo());
+            packageDetails.setImageTwo(packageDetailsDto.getImageTwo());
         }
         if(packageDetailsDto.getImageThree() != null){
-            packageDetails.setImageThree(packageDetails.getImageThree());
+            packageDetails.setImageThree(packageDetailsDto.getImageThree());
         }
         if(packageDetailsDto.getDescription() != null){
-            packageDetails.setDescription(packageDetails.getDescription());
+            packageDetails.setDescription(packageDetailsDto.getDescription());
         }
     }
 }

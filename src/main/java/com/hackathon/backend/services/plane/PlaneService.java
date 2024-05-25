@@ -87,7 +87,7 @@ public class PlaneService{
         if(planeDto.getPlaneCompanyName() != null){
             plane.setPlaneCompanyName(planeDto.getPlaneCompanyName());
         }
-        if(plane.getNumSeats() >= planeDto.getNumSeats()){
+        if(planeDto.getNumSeats() > 0){
             plane.setNumSeats(planeDto.getNumSeats());
         }
     }

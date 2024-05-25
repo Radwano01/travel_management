@@ -1,6 +1,6 @@
 package com.hackathon.backend.controllers.hotel.hotelFeatures;
 
-import com.hackathon.backend.services.hotel.featuresSerivces.RoomFeaturesService;
+import com.hackathon.backend.services.hotel.hotelFeatures.RoomFeaturesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

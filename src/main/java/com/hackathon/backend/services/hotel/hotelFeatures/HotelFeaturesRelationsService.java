@@ -1,4 +1,4 @@
-package com.hackathon.backend.services.hotel.featuresSerivces;
+package com.hackathon.backend.services.hotel.hotelFeatures;
 
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;

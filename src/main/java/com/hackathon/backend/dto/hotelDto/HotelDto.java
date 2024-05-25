@@ -37,19 +37,6 @@ public class HotelDto {
     }
 
     public HotelDto(long id, String hotelName,
-                    String mainImage, String description,
-                    int hotelRoomsCount,
-                    String address, float rate) {
-        this.id = id;
-        this.hotelName = hotelName;
-        this.mainImage = mainImage;
-        this.description = description;
-        this.hotelRoomsCount = hotelRoomsCount;
-        this.address = address;
-        this.rate = rate;
-    }
-
-    public HotelDto(long id, String hotelName,
                     String address, float rate,
                     RoomDetailsDto roomDetailsDto,
                     List<HotelFeaturesEntity> hotelFeatures,

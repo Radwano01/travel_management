@@ -23,8 +23,4 @@ public class RoleEntity {
 
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     private List<UserEntity> users = new ArrayList<>();
-
-    public RoleEntity(String role) {
-        this.role = role;
-    }
 }

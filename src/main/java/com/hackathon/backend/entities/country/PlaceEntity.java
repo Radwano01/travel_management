@@ -38,10 +38,6 @@ public class PlaceEntity {
         this.country = country;
     }
 
-    public PlaceEntity(String place) {
-        this.place = place;
-    }
-
     public PlaceEntity(int id, String place,
                        String mainImage) {
         this.id = id;

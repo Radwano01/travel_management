@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -33,7 +34,7 @@ public class PackageEntity{
     private PackageDetailsEntity packageDetails;
 
     @OneToMany(mappedBy = "packageEntity", fetch = FetchType.LAZY)
-    private List<PackageEvaluationEntity> packageEvaluations;
+    private List<PackageEvaluationEntity> packageEvaluations = new ArrayList<>();
 
 
     public PackageEntity(String packageName,

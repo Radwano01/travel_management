@@ -74,24 +74,12 @@ public class RoadmapService{
     public ResponseEntity<?> deleteRoadmap(int roadmapId){
         try{
             RoadmapEntity roadmapEntity = roadmapUtils.findById(roadmapId);
-            if(roadmapEntity != null) {
-                List<PackageDetailsEntity> packageDetailsEntities = packageDetailsUtils.findAll();
-                for(PackageDetailsEntity packageDetails:packageDetailsEntities){
-                    if(packageDetails.getRoadmaps() != null) {
-                        List<RoadmapEntity> roadmapEntities = packageDetails.getRoadmaps();
-                        boolean removeIf = roadmapEntities.removeIf((roadmap) -> roadmap.getId() == roadmapId);
-                        if (removeIf) {
-                            packageDetailsUtils.save(packageDetails);
-                        }
-                    }else{
-                        return notFoundException("This package has not roadmaps");
-                    }
+                for(PackageDetailsEntity packageDetails:roadmapEntity.getPackageDetails()){
+                    packageDetails.getRoadmaps().remove(roadmapEntity);
+                    packageDetailsUtils.save(packageDetails);
                 }
-                roadmapUtils.delete(roadmapEntity);
-                return ResponseEntity.ok("Roadmap deleted successfully");
-            }else{
-                return notFoundException("Roadmap not found");
-            }
+            roadmapUtils.delete(roadmapEntity);
+            return ResponseEntity.ok("Roadmap deleted successfully");
         }catch(EntityNotFoundException e){
             return notFoundException(e);
         }catch(Exception e){

@@ -51,7 +51,7 @@ public class CountryService{
 
     public ResponseEntity<?> createCountry(@NonNull CountryWithDetailsDto countryWithDetailsDto) {
         try {
-            String countryName = countryWithDetailsDto.getCountry().trim();
+            String countryName = countryWithDetailsDto.getCountry().trim().toLowerCase();
             boolean existsCountry = countryUtils.existsByCountry(countryName);
             if (existsCountry) {
                 return alreadyValidException("Country already exist: "+countryName);
@@ -89,7 +89,7 @@ public class CountryService{
     }
 
     public ResponseEntity<?> editCountry(int countryId,
-                                        CountryWithDetailsDto countryDto) {
+                                        CountryDto countryDto) {
         try {
             CountryEntity country = countryUtils.findCountryById(countryId);
             editHelper(country,countryDto);
@@ -135,7 +135,7 @@ public class CountryService{
     }
 
     private void editHelper(CountryEntity country,
-                            CountryWithDetailsDto countryDto) {
+                            CountryDto countryDto) {
         if (countryDto.getCountry() != null) {
             country.setCountry(countryDto.getCountry());
         }

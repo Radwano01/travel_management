@@ -6,6 +6,7 @@ import com.hackathon.backend.repositories.country.PlaceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -28,9 +29,5 @@ public class PlaceUtils {
 
     public void delete(PlaceEntity place) {
         placeRepository.delete(place);
-    }
-
-    public List<EssentialPlaceDto> findPlacesByCountryId(int countryId) {
-        return placeRepository.findPlacesByCountryId(countryId);
     }
 }
