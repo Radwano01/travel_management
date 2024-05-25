@@ -47,11 +47,11 @@ public class RoomBookingService {
 
 
     @Transactional
-    public ResponseEntity<?> payment(long id,
+    public ResponseEntity<?> payment(long userId,
                                      long planeId,
                                      RoomPaymentDto roomPaymentDto){
         try{
-            UserEntity user = userUtils.findById(id);
+            UserEntity user = userUtils.findById(userId);
             boolean userVerification = user.isVerificationStatus();
             if(!userVerification) {
                 return badRequestException("User is Not Verified yet!");

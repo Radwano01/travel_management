@@ -1,12 +1,15 @@
-package com.hackathon.backend.services.plane;
+package com.hackathon.backend.services.package_;
 
+import com.hackathon.backend.dto.packageDto.PackagePaymentDto;
 import com.hackathon.backend.dto.payment.PlaneSeatPaymentDto;
-import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
+import com.hackathon.backend.entities.package_.PackageBookingEntity;
+import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.plane.PlaneSeatsBookingEntity;
+import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
 import com.hackathon.backend.entities.user.UserEntity;
-import com.hackathon.backend.repositories.plane.PlaneSeatsBookingRepository;
-import com.hackathon.backend.repositories.plane.PlaneSeatsRepository;
+import com.hackathon.backend.repositories.package_.PackageBookingRepository;
 import com.hackathon.backend.utilities.UserUtils;
+import com.hackathon.backend.utilities.package_.PackageUtils;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
@@ -23,48 +26,45 @@ import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
 import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 
 @Service
-public class PlaneSeatBookingService {
+public class PackageBookingService {
 
     private final UserUtils userUtils;
-    private final PlaneSeatsRepository planeSeatsRepository;
-    private final PlaneSeatsBookingRepository planeSeatsBookingRepository;
+
+    private final PackageUtils packageUtils;
+
+    private final PackageBookingRepository packageBookingRepository;
+
+    @Autowired
+    public PackageBookingService(UserUtils userUtils, PackageUtils packageUtils,
+                                 PackageBookingRepository packageBookingRepository) {
+        this.userUtils = userUtils;
+        this.packageUtils = packageUtils;
+        this.packageBookingRepository = packageBookingRepository;
+    }
 
     @Value("${STRIPE_SECRET_KEY}")
     private String stripeSecretKey;
 
-    @Autowired
-    public PlaneSeatBookingService(UserUtils userUtils,
-                              PlaneSeatsRepository planeSeatsRepository,
-                              PlaneSeatsBookingRepository planeSeatsBookingRepository) {
-        this.userUtils = userUtils;
-        this.planeSeatsRepository = planeSeatsRepository;
-        this.planeSeatsBookingRepository = planeSeatsBookingRepository;
-    }
 
     @Transactional
     public ResponseEntity<?> payment(long userId,
-                                     long planeId,
-                                     PlaneSeatPaymentDto planeSeatPaymentDto){
+                                     int packageId,
+                                     PackagePaymentDto packagePaymentDto){
         try{
             UserEntity user = userUtils.findById(userId);
             boolean userVerification = user.isVerificationStatus();
             if(!userVerification) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is Not Verified yet!");
             }
-            PlaneSeatsEntity seat = planeSeatsRepository.findById(planeId)
-                    .orElseThrow(() -> new EntityNotFoundException("Visa id is not found"));
-            if (!seat.isStatus()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Visa Not Valid!");
-            }
+            PackageEntity packageEntity = packageUtils.findById(packageId);
             try {
-                PaymentIntent paymentIntent = createPayment(planeSeatPaymentDto);
+                PaymentIntent paymentIntent = createPayment(packagePaymentDto);
                 if (paymentIntent.getStatus().equals("succeeded")) {
-                    seat.setStatus(false);
-                    PlaneSeatsBookingEntity planeSeatsBookingEntity = new PlaneSeatsBookingEntity(
+                    PackageBookingEntity packageBookingEntity = new PackageBookingEntity(
                             user,
-                            seat
+                            packageEntity
                     );
-                    planeSeatsBookingRepository.save(planeSeatsBookingEntity);
+                    packageBookingRepository.save(packageBookingEntity);
                     return ResponseEntity.ok("Visa booked successfully");
                 } else {
                     return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
@@ -80,13 +80,13 @@ public class PlaneSeatBookingService {
         }
     }
 
-    private PaymentIntent createPayment(PlaneSeatPaymentDto planeSeatPaymentDto) throws StripeException {
+    private PaymentIntent createPayment(PackagePaymentDto packagePaymentDto) throws StripeException {
         Stripe.apiKey = stripeSecretKey;
         PaymentIntentCreateParams.Builder paramsBuilder = new PaymentIntentCreateParams.Builder()
                 .setCurrency("USD")
                 .setAmount(1000L)
                 .addPaymentMethodType("card")
-                .setPaymentMethod(planeSeatPaymentDto.getPaymentIntent())
+                .setPaymentMethod(packagePaymentDto.getPaymentIntent())
                 .setConfirm(true)
                 .setConfirmationMethod(PaymentIntentCreateParams.ConfirmationMethod.MANUAL)
                 .setErrorOnRequiresAction(true);
