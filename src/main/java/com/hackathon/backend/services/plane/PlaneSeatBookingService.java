@@ -1,6 +1,5 @@
 package com.hackathon.backend.services.plane;
 
-import com.hackathon.backend.dto.payment.PlaneSeatPaymentDto;
 import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
 import com.hackathon.backend.entities.plane.PlaneSeatsBookingEntity;
 import com.hackathon.backend.entities.user.UserEntity;
@@ -44,7 +43,7 @@ public class PlaneSeatBookingService {
     @Transactional
     public ResponseEntity<?> payment(long userId,
                                      long planeId,
-                                     PlaneSeatPaymentDto planeSeatPaymentDto){
+                                     String paymentIntentCode){
         try{
             UserEntity user = userUtils.findById(userId);
             boolean userVerification = user.isVerificationStatus();
@@ -57,7 +56,7 @@ public class PlaneSeatBookingService {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Visa Not Valid!");
             }
             try {
-                PaymentIntent paymentIntent = createPayment(planeSeatPaymentDto);
+                PaymentIntent paymentIntent = createPayment(paymentIntentCode);
                 if (paymentIntent.getStatus().equals("succeeded")) {
                     seat.setStatus(false);
                     PlaneSeatsBookingEntity planeSeatsBookingEntity = new PlaneSeatsBookingEntity(
@@ -80,13 +79,13 @@ public class PlaneSeatBookingService {
         }
     }
 
-    private PaymentIntent createPayment(PlaneSeatPaymentDto planeSeatPaymentDto) throws StripeException {
+    private PaymentIntent createPayment(String paymentIntentCode) throws StripeException {
         Stripe.apiKey = stripeSecretKey;
         PaymentIntentCreateParams.Builder paramsBuilder = new PaymentIntentCreateParams.Builder()
                 .setCurrency("USD")
                 .setAmount(1000L)
                 .addPaymentMethodType("card")
-                .setPaymentMethod(planeSeatPaymentDto.getPaymentIntent())
+                .setPaymentMethod(paymentIntentCode)
                 .setConfirm(true)
                 .setConfirmationMethod(PaymentIntentCreateParams.ConfirmationMethod.MANUAL)
                 .setErrorOnRequiresAction(true);

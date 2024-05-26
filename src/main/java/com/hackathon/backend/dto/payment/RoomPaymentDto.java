@@ -10,5 +10,4 @@ import java.time.LocalDateTime;
 public class RoomPaymentDto {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private String paymentIntent;
 }

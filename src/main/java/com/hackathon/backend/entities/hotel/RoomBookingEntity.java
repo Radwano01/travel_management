@@ -21,21 +21,21 @@ public class RoomBookingEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    private UserEntity users;
+    private UserEntity user;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "room_id", insertable = false, updatable = false)
-    private RoomEntity rooms;
+    @JoinColumn(name = "hotel_id", insertable = false, updatable = false)
+    private HotelEntity hotel;
 
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-    public RoomBookingEntity(UserEntity user, RoomEntity room,
+    public RoomBookingEntity(UserEntity user, HotelEntity hotel,
                              LocalDateTime startTime,
                              LocalDateTime endTime) {
-        this.users = user;
-        this.rooms = room;
+        this.user = user;
+        this.hotel = hotel;
         this.startTime = startTime;
         this.endTime = endTime;
     }

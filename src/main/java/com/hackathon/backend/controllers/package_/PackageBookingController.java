@@ -1,6 +1,5 @@
 package com.hackathon.backend.controllers.package_;
 
-import com.hackathon.backend.dto.packageDto.PackagePaymentDto;
 import com.hackathon.backend.services.package_.PackageBookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +16,10 @@ public class PackageBookingController {
         this.packageBookingService = packageBookingService;
     }
 
-    @PostMapping("{HOTEL_SEAT_PAYMENT}")
+    @PostMapping("{PACKAGE_PAYMENT_PATH}")
     public ResponseEntity<?> payment(@PathVariable("userId") long userId,
                                      @PathVariable("packageId") int packageId,
-                                     @RequestBody PackagePaymentDto packagePaymentDto){
-        return packageBookingService.payment(userId, packageId, packagePaymentDto);
+                                     @PathVariable("paymentIntent") String paymentIntent){
+        return packageBookingService.payment(userId, packageId, paymentIntent);
     }
 }

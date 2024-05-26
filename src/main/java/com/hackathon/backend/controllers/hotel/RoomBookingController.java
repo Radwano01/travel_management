@@ -17,10 +17,11 @@ public class RoomBookingController {
         this.roomBookingService = roomBookingService;
     }
 
-    @PostMapping("{HOTEL_SEAT_PAYMENT}")
+    @PostMapping("{HOTEL_ROOM_PAYMENT_PATH}")
     public ResponseEntity<?> payment(@PathVariable("userId") long userId,
-                                     @PathVariable("planeId") long planeId,
+                                     @PathVariable("hotelId") long hotelId,
+                                     @PathVariable("paymentIntent") String paymentIntent,
                                      @RequestBody RoomPaymentDto roomPaymentDto){
-        return roomBookingService.payment(userId, planeId, roomPaymentDto);
+        return roomBookingService.payment(userId, hotelId, paymentIntent, roomPaymentDto);
     }
 }

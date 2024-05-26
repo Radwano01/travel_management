@@ -1,11 +1,7 @@
 package com.hackathon.backend.services.package_;
 
-import com.hackathon.backend.dto.packageDto.PackagePaymentDto;
-import com.hackathon.backend.dto.payment.PlaneSeatPaymentDto;
 import com.hackathon.backend.entities.package_.PackageBookingEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
-import com.hackathon.backend.entities.plane.PlaneSeatsBookingEntity;
-import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
 import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.package_.PackageBookingRepository;
 import com.hackathon.backend.utilities.UserUtils;
@@ -49,7 +45,7 @@ public class PackageBookingService {
     @Transactional
     public ResponseEntity<?> payment(long userId,
                                      int packageId,
-                                     PackagePaymentDto packagePaymentDto){
+                                     String paymentIntentCode){
         try{
             UserEntity user = userUtils.findById(userId);
             boolean userVerification = user.isVerificationStatus();
@@ -58,7 +54,7 @@ public class PackageBookingService {
             }
             PackageEntity packageEntity = packageUtils.findById(packageId);
             try {
-                PaymentIntent paymentIntent = createPayment(packagePaymentDto);
+                PaymentIntent paymentIntent = createPayment(paymentIntentCode);
                 if (paymentIntent.getStatus().equals("succeeded")) {
                     PackageBookingEntity packageBookingEntity = new PackageBookingEntity(
                             user,
@@ -80,13 +76,13 @@ public class PackageBookingService {
         }
     }
 
-    private PaymentIntent createPayment(PackagePaymentDto packagePaymentDto) throws StripeException {
+    private PaymentIntent createPayment(String paymentIntentCode) throws StripeException {
         Stripe.apiKey = stripeSecretKey;
         PaymentIntentCreateParams.Builder paramsBuilder = new PaymentIntentCreateParams.Builder()
                 .setCurrency("USD")
                 .setAmount(1000L)
                 .addPaymentMethodType("card")
-                .setPaymentMethod(packagePaymentDto.getPaymentIntent())
+                .setPaymentMethod(paymentIntentCode)
                 .setConfirm(true)
                 .setConfirmationMethod(PaymentIntentCreateParams.ConfirmationMethod.MANUAL)
                 .setErrorOnRequiresAction(true);
