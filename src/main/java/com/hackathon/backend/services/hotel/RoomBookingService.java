@@ -8,7 +8,6 @@ import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.hotel.RoomBookingRepository;
 import com.hackathon.backend.utilities.UserUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
-import com.hackathon.backend.utilities.hotel.RoomUtils;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
@@ -47,7 +45,6 @@ public class RoomBookingService {
         this.hotelUtils = hotelUtils;
         this.userUtils = userUtils;
     }
-
 
     @Transactional
     public ResponseEntity<?> payment(long userId,

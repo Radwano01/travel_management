@@ -2,10 +2,12 @@ package com.hackathon.backend.country.services;
 
 import com.hackathon.backend.dto.countryDto.placeDto.PlaceDetailsDto;
 import com.hackathon.backend.dto.countryDto.placeDto.PlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.PostP;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.services.country.PlaceService;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.country.PlaceDetailsUtils;
 import com.hackathon.backend.utilities.country.PlaceUtils;
@@ -16,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.List;
 
@@ -35,38 +38,41 @@ class PlaceServiceTest {
     @Mock
     PlaceDetailsUtils placeDetailsUtils;
 
+    @Mock
+    S3Service s3Service;
+
     @InjectMocks
     PlaceService placeService;
 
     @Test
     void createPlace() {
-        //given
+        // given
         int countryId = 1;
+
+        PostP p = new PostP(
+                "testPlace",
+                new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageTwo", "imageTwo.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageThree", "imageThree.jpg", "image/jpeg", new byte[0]),
+                "testDesc"
+        );
+
         CountryEntity country = new CountryEntity();
         country.setId(countryId);
         country.setCountry("testCountry");
         country.setMainImage("testImage");
 
-        PlaceDetailsDto placeDetailsDto = new PlaceDetailsDto();
-        placeDetailsDto.setImageOne("testImageOne");
-        placeDetailsDto.setImageTwo("testImageTwo");
-        placeDetailsDto.setImageThree("testImage");
-        placeDetailsDto.setDescription("testDesc");
-
-        PlaceDto placeDto = new PlaceDto();
-        placeDto.setPlace("testPlace");
-        placeDto.setMainImage("testImage");
-        placeDto.setPlaceDetails(placeDetailsDto);
-
-        //behavior
+        // Mock the behavior
         when(countryUtils.findCountryById(countryId)).thenReturn(country);
 
-        //when
-        ResponseEntity<?> response = placeService.createPlace(countryId, placeDto);
+        // when
+        ResponseEntity<?> response = placeService.createPlace(countryId, p);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
+
 
     @Test
     void getPlacesByCountry() {

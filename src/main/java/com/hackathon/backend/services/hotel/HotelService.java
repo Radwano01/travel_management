@@ -1,5 +1,6 @@
 package com.hackathon.backend.services.hotel;
 
+import com.hackathon.backend.controllers.hotel.PostH;
 import com.hackathon.backend.dto.hotelDto.HotelDto;
 import com.hackathon.backend.dto.hotelDto.RoomDetailsDto;
 import com.hackathon.backend.entities.country.CountryEntity;
@@ -10,6 +11,7 @@ import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
 import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
@@ -41,6 +43,8 @@ public class HotelService {
     private final HotelEvaluationUtils hotelEvaluationUtils;
     private final RoomDetailsUtils roomDetailsUtils;
 
+    private final S3Service s3Service;
+
     @Autowired
     public HotelService(CountryUtils countryUtils,
                         RoomUtils roomUtils,
@@ -48,7 +52,8 @@ public class HotelService {
                         HotelFeaturesUtils hotelFeaturesUtils,
                         RoomFeaturesUtils roomFeaturesUtils,
                         HotelEvaluationUtils hotelEvaluationUtils,
-                        RoomDetailsUtils roomDetailsUtils){
+                        RoomDetailsUtils roomDetailsUtils,
+                        S3Service s3Service){
         this.countryUtils = countryUtils;
         this.roomUtils = roomUtils;
         this.hotelUtils = hotelUtils;
@@ -56,38 +61,46 @@ public class HotelService {
         this.roomFeaturesUtils = roomFeaturesUtils;
         this.hotelEvaluationUtils = hotelEvaluationUtils;
         this.roomDetailsUtils = roomDetailsUtils;
+        this.s3Service = s3Service;
     }
 
     public ResponseEntity<?> createHotel(int countryId,
-                                         @NonNull HotelDto hotelDto) {
+                                         @NonNull PostH postH) {
         try {
             CountryEntity country = countryUtils.findCountryById(countryId);
+
+            String hotelImageName = s3Service.uploadFile(postH.getMainImage());
+
             HotelEntity hotelEntity = new HotelEntity(
-                    hotelDto.getHotelName(),
-                    hotelDto.getMainImage(),
-                    hotelDto.getDescription(),
-                    hotelDto.getHotelRoomsCount(),
-                    hotelDto.getAddress(),
+                    postH.getHotelName(),
+                    hotelImageName,
+                    postH.getDescription(),
+                    postH.getHotelRoomsCount(),
+                    postH.getAddress(),
                     country
             );
 
             hotelUtils.save(hotelEntity);
 
-            RoomDetailsDto roomDetailsDto = hotelDto.getRoomDetails();
+            String roomDetailsImageNameOne = s3Service.uploadFile(postH.getImageOne());
+            String roomDetailsImageNameTwo = s3Service.uploadFile(postH.getImageTwo());
+            String roomDetailsImageNameThree = s3Service.uploadFile(postH.getImageThree());
+            String roomDetailsImageNameFour = s3Service.uploadFile(postH.getImageFour());
+
             RoomDetailsEntity roomDetails = new RoomDetailsEntity(
-                    roomDetailsDto.getImageOne(),
-                    roomDetailsDto.getImageTwo(),
-                    roomDetailsDto.getImageThree(),
-                    roomDetailsDto.getImageFour(),
-                    roomDetailsDto.getDescription(),
-                    roomDetailsDto.getPrice(),
+                    roomDetailsImageNameOne,
+                    roomDetailsImageNameTwo,
+                    roomDetailsImageNameThree,
+                    roomDetailsImageNameFour,
+                    postH.getDescription(),
+                    postH.getPrice(),
                     hotelEntity
             );
 
             hotelEntity.setRoomDetails(roomDetails);
             hotelUtils.save(hotelEntity);
             roomDetailsUtils.save(roomDetails);
-            return ResponseEntity.ok("Hotel created successfully: " + hotelDto.getHotelName());
+            return ResponseEntity.ok("Hotel created successfully: " + postH.getHotelName());
         } catch (EntityNotFoundException e) {
             return notFoundException(e);
         } catch (Exception e) {

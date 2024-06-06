@@ -1,13 +1,13 @@
 package com.hackathon.backend.services.country;
 
-import com.hackathon.backend.dto.countryDto.CountryDto;
-import com.hackathon.backend.dto.countryDto.CountryWithDetailsDto;
+import com.hackathon.backend.dto.countryDto.*;
 import com.hackathon.backend.entities.country.CountryDetailsEntity;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryDetailsUtils;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.country.PlaceUtils;
@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.List;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
@@ -34,38 +35,49 @@ public class CountryService{
     private final HotelUtils hotelUtils;
     private final PackageUtils packageUtils;
     private final PlaneFlightsUtils planeFlightsUtils;
+    private final S3Service s3Service;
 
     @Autowired
     public CountryService(CountryUtils countryUtils,
                           CountryDetailsUtils countryDetailsUtils,
                           PlaceUtils placeUtils, HotelUtils hotelUtils,
                           PackageUtils packageUtils,
-                          PlaneFlightsUtils planeFlightsUtils) {
+                          PlaneFlightsUtils planeFlightsUtils,
+                          S3Service s3Service) {
         this.countryUtils = countryUtils;
         this.countryDetailsUtils = countryDetailsUtils;
         this.placeUtils = placeUtils;
         this.hotelUtils = hotelUtils;
         this.packageUtils = packageUtils;
         this.planeFlightsUtils = planeFlightsUtils;
+        this.s3Service = s3Service;
     }
 
-    public ResponseEntity<?> createCountry(@NonNull CountryWithDetailsDto countryWithDetailsDto) {
+    public ResponseEntity<?> createCountry(@NonNull PostC postC) {
         try {
-            String countryName = countryWithDetailsDto.getCountry().trim().toLowerCase();
+            String countryName = postC.getCountry().trim().toLowerCase();
             boolean existsCountry = countryUtils.existsByCountry(countryName);
             if (existsCountry) {
                 return alreadyValidException("Country already exist: "+countryName);
             }
+
+            String countryImageName = s3Service.uploadFile(postC.getMainImage());
+
             CountryEntity country = new CountryEntity(
-                    countryWithDetailsDto.getCountry(),
-                    countryWithDetailsDto.getMainImage()
+                    postC.getCountry(),
+                    countryImageName
             );
             countryUtils.save(country);
+
+            String countryDetailsImageNameOne = s3Service.uploadFile(postC.getImageOne());
+            String countryDetailsImageNameTwo = s3Service.uploadFile(postC.getImageTwo());
+            String countryDetailsImageNameThree = s3Service.uploadFile(postC.getImageThree());
+
             CountryDetailsEntity countryDetails = new CountryDetailsEntity(
-                    countryWithDetailsDto.getCountryDetails().getImageOne(),
-                    countryWithDetailsDto.getCountryDetails().getImageTwo(),
-                    countryWithDetailsDto.getCountryDetails().getImageThree(),
-                    countryWithDetailsDto.getCountryDetails().getDescription(),
+                    countryDetailsImageNameOne,
+                    countryDetailsImageNameTwo,
+                    countryDetailsImageNameThree,
+                    postC.getDescription(),
                     country
             );
             countryDetailsUtils.save(countryDetails);

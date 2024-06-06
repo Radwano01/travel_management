@@ -172,12 +172,6 @@ public class UserService {
     }
 
     private void editHelper(UserEntity user, EditUserDto editUserDto) {
-        if(editUserDto.getEmail() != null){
-            user.setEmail(editUserDto.getEmail());
-        }
-        if (editUserDto.getUsername() != null) {
-            user.setUsername(editUserDto.getUsername());
-        }
         if (editUserDto.getPassword() != null) {
             user.setPassword(passwordEncoder.encode(editUserDto.getPassword()));
         }

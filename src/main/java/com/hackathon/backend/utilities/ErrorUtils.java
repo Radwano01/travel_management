@@ -13,6 +13,10 @@ public class ErrorUtils {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 
+    public static ResponseEntity<?> serverErrorException(String message){
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message);
+    }
+
     public static ResponseEntity<?> notFoundException(EntityNotFoundException e){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }

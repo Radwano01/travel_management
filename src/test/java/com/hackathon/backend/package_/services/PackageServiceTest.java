@@ -1,15 +1,14 @@
 package com.hackathon.backend.package_.services;
 
+import com.hackathon.backend.controllers.package_.PostP;
 import com.hackathon.backend.dto.packageDto.EssentialPackageDto;
 import com.hackathon.backend.dto.packageDto.PackageDetailsDto;
 import com.hackathon.backend.dto.packageDto.PackageDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
-import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
-import com.hackathon.backend.entities.package_.packageFeatures.BenefitEntity;
-import com.hackathon.backend.entities.package_.packageFeatures.RoadmapEntity;
 import com.hackathon.backend.services.package_.PackageService;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.package_.PackageDetailsUtils;
 import com.hackathon.backend.utilities.package_.PackageEvaluationUtils;
@@ -23,13 +22,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,37 +51,35 @@ class PackageServiceTest {
     @Mock
     PackageDetailsUtils packageDetailsUtils;
 
+    @Mock
+    S3Service s3Service;
+
     @InjectMocks
     PackageService packageService;
 
     @Test
     void createPackage() {
-        //given
+        // given
         int countryId = 1;
 
-        PackageDto packageDto = new PackageDto();
-        packageDto.setPackageName("testPackage");
-        packageDto.setPrice(100);
-        packageDto.setMainImage("testImage");
-
-        PackageDetailsDto packageDetailsDto = new PackageDetailsDto();
-        packageDetailsDto.setImageOne("testImageOne");
-        packageDetailsDto.setImageTwo("testImageTwo");
-        packageDetailsDto.setImageThree("testImageThree");
-        packageDetailsDto.setDescription("testDesc");
-
-        packageDto.setPackageDetails(packageDetailsDto);
-
-        CountryEntity countryEntity = new CountryEntity();
-
+        PostP p = new PostP(
+                "testPackage",
+                100.0f,
+                0,
+                new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageTwo", "imageTwo.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageThree", "imageThree.jpg", "image/jpeg", new byte[0]),
+                "testDesc"
+        );
 
         //behavior
-        when(countryUtils.findCountryById(countryId)).thenReturn(countryEntity);
+        when(countryUtils.findCountryById(countryId)).thenReturn(new CountryEntity());
 
-        //when
-        ResponseEntity<?> response = packageService.createPackage(countryId, packageDto);
+        // when
+        ResponseEntity<?> response = packageService.createPackage(countryId, p);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
@@ -159,7 +155,7 @@ class PackageServiceTest {
         PackageService packageService = new PackageService(
                 packageUtils, packageDetailsUtils,
                 countryUtils,roadmapUtils,benefitUtils,
-                packageEvaluationUtils
+                packageEvaluationUtils,s3Service
         );
 
         //behavior

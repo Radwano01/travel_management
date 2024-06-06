@@ -1,5 +1,6 @@
 package com.hackathon.backend.hotel.services;
 
+import com.hackathon.backend.controllers.hotel.PostH;
 import com.hackathon.backend.dto.hotelDto.HotelDto;
 import com.hackathon.backend.dto.hotelDto.RoomDetailsDto;
 import com.hackathon.backend.entities.country.CountryEntity;
@@ -10,6 +11,7 @@ import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import com.hackathon.backend.services.hotel.HotelService;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
@@ -24,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,42 +59,45 @@ class HotelServiceTest {
     @Mock
     RoomFeaturesUtils roomFeaturesUtils;
 
+    @Mock
+    S3Service s3Service;
+
     @InjectMocks
     HotelService hotelService;
 
+
     @Test
     void createHotel() {
-        //given
+        // given
         int countryId = 1;
         CountryEntity country = new CountryEntity();
         country.setId(countryId);
 
-        HotelDto hotelDto = new HotelDto();
-        hotelDto.setHotelName("testHotel");
-        hotelDto.setMainImage("testMainImage");
-        hotelDto.setDescription("testDesc");
-        hotelDto.setHotelRoomsCount(10);
-        hotelDto.setAddress("testAddress");
+        PostH h = new PostH(
+                "testHotel",
+                new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]),
+                "testDesc",
+                10,
+                "testAddress",
+                0,
+                new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageTwo", "imageTwo.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageThree", "imageThree.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageFour", "imageFour.jpg", "image/jpeg", new byte[0]),
+                "testDesc",
+                100
+        );
 
-        RoomDetailsDto roomDetailsDto = new RoomDetailsDto();
-        roomDetailsDto.setImageOne("testImageOne");
-        roomDetailsDto.setImageTwo("testImageTwo");
-        roomDetailsDto.setImageThree("testImageThree");
-        roomDetailsDto.setImageFour("testImageFour");
-        roomDetailsDto.setDescription("testDesc");
-        roomDetailsDto.setPrice(100);
-
-        hotelDto.setRoomDetails(roomDetailsDto);
-
-        //behavior
+        // Mock the behavior
         when(countryUtils.findCountryById(countryId)).thenReturn(country);
 
-        //when
-        ResponseEntity<?> response = hotelService.createHotel(countryId, hotelDto);
+        // when
+        ResponseEntity<?> response = hotelService.createHotel(countryId, h);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
+
 
     @Test
     void getHotels() {

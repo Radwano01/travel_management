@@ -1,5 +1,6 @@
 package com.hackathon.backend.services.package_;
 
+import com.hackathon.backend.controllers.package_.PostP;
 import com.hackathon.backend.dto.packageDto.EssentialPackageDto;
 import com.hackathon.backend.dto.packageDto.PackageDetailsDto;
 import com.hackathon.backend.dto.packageDto.PackageDto;
@@ -9,6 +10,7 @@ import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
 import com.hackathon.backend.entities.package_.packageFeatures.BenefitEntity;
 import com.hackathon.backend.entities.package_.packageFeatures.RoadmapEntity;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.package_.PackageDetailsUtils;
 import com.hackathon.backend.utilities.package_.PackageEvaluationUtils;
@@ -36,28 +38,33 @@ public class PackageService {
     private final RoadmapUtils roadmapUtils;
     private final BenefitUtils benefitUtils;
     private final PackageEvaluationUtils packageEvaluationUtils;
+    private final S3Service s3Service;
 
     @Autowired
     public PackageService(PackageUtils packageUtils, PackageDetailsUtils packageDetailsUtils,
                           CountryUtils countryUtils, RoadmapUtils roadmapUtils,
-                          BenefitUtils benefitUtils, PackageEvaluationUtils packageEvaluationUtils){
+                          BenefitUtils benefitUtils, PackageEvaluationUtils packageEvaluationUtils,
+                          S3Service s3Service){
         this.packageUtils = packageUtils;
         this.packageDetailsUtils = packageDetailsUtils;
         this.countryUtils = countryUtils;
         this.roadmapUtils = roadmapUtils;
         this.benefitUtils = benefitUtils;
         this.packageEvaluationUtils = packageEvaluationUtils;
+        this.s3Service = s3Service;
     }
 
     public ResponseEntity<?> createPackage(int countryId,
-                                           @NonNull PackageDto packageDto){
+                                           @NonNull PostP p){
         try{
             CountryEntity country = countryUtils.findCountryById(countryId);
 
+            String packageMainImageName = s3Service.uploadFile(p.getMainImage());
+
             PackageEntity packageEntity = new PackageEntity(
-                    packageDto.getPackageName(),
-                    packageDto.getPrice(),
-                    packageDto.getMainImage(),
+                    p.getPackageName(),
+                    p.getPrice(),
+                    packageMainImageName,
                     country
             );
 
@@ -65,12 +72,15 @@ public class PackageService {
             country.getPackages().add(packageEntity);
             countryUtils.save(country);
 
-            PackageDetailsDto packageDetailsDto = packageDto.getPackageDetails();
+            String packageDetailsImageOneName = s3Service.uploadFile(p.getImageOne());
+            String packageDetailsImageTwoName = s3Service.uploadFile(p.getImageTwo());
+            String packageDetailsImageThreeName = s3Service.uploadFile(p.getImageThree());
+
             PackageDetailsEntity packageDetails = new PackageDetailsEntity(
-                    packageDetailsDto.getImageOne(),
-                    packageDetailsDto.getImageTwo(),
-                    packageDetailsDto.getImageThree(),
-                    packageDetailsDto.getDescription(),
+                    packageDetailsImageOneName,
+                    packageDetailsImageTwoName,
+                    packageDetailsImageThreeName,
+                    p.getDescription(),
                     packageEntity
             );
 

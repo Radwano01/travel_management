@@ -1,8 +1,6 @@
 package com.hackathon.backend.country.services;
-
-import com.hackathon.backend.dto.countryDto.CountryDetailsDto;
 import com.hackathon.backend.dto.countryDto.CountryDto;
-import com.hackathon.backend.dto.countryDto.CountryWithDetailsDto;
+import com.hackathon.backend.dto.countryDto.PostC;
 import com.hackathon.backend.entities.country.CountryDetailsEntity;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
@@ -10,14 +8,13 @@ import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
 import com.hackathon.backend.services.country.CountryService;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryDetailsUtils;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.country.PlaceUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
 import com.hackathon.backend.utilities.package_.PackageUtils;
 import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,25 +52,27 @@ class CountryServiceTest {
     @Mock
     PlaneFlightsUtils planeFlightsUtils;
 
+    @Mock
+    S3Service s3Service;
+
     @InjectMocks
     CountryService countryService;
 
     @Test
     void createCountry() {
         //given
-        CountryDetailsDto countryDetailsDto = new CountryDetailsDto();
-        countryDetailsDto.setImageOne("testImageOne");
-        countryDetailsDto.setImageTwo("testImageTwo");
-        countryDetailsDto.setImageThree("TestImageThree");
-        countryDetailsDto.setDescription("testDesc");
+        PostC c = new PostC(
+                "testCountry",
+                new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageTwo", "imageTwo.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageThree", "imageThree.jpg", "image/jpeg", new byte[0]),
+                "testDesc"
+        );
 
-        CountryWithDetailsDto countryWithDetailsDto = new CountryWithDetailsDto();
-        countryWithDetailsDto.setCountry("testCountry");
-        countryWithDetailsDto.setMainImage("testImage");
-        countryWithDetailsDto.setCountryDetails(countryDetailsDto);
-
-        //when
-        ResponseEntity<?> response = countryService.createCountry(countryWithDetailsDto);
+        // Assuming countryService.createCountry accepts a PostC object
+        // when
+        ResponseEntity<?> response = countryService.createCountry(c);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -144,7 +144,7 @@ class CountryServiceTest {
         country.setCountryDetails(countryDetails);
 
         CountryService countryService = new CountryService(countryUtils, countryDetailsUtils,
-                placeUtils, hotelUtils, packageUtils, planeFlightsUtils);
+                placeUtils, hotelUtils, packageUtils, planeFlightsUtils, s3Service);
 
         //behavior
         when(countryUtils.findCountryById(countryId)).thenReturn(country);

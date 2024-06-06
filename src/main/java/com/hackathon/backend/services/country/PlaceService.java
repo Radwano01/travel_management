@@ -2,9 +2,11 @@ package com.hackathon.backend.services.country;
 
 import com.hackathon.backend.dto.countryDto.placeDto.PlaceDetailsDto;
 import com.hackathon.backend.dto.countryDto.placeDto.PlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.PostP;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.country.PlaceDetailsUtils;
 import com.hackathon.backend.utilities.country.PlaceUtils;
@@ -28,23 +30,29 @@ public class PlaceService{
     private final CountryUtils countryUtils;
     private final PlaceUtils placeUtils;
     private final PlaceDetailsUtils placeDetailsUtils;
+    private final S3Service s3Service;
 
     @Autowired
     public PlaceService(CountryUtils countryUtils,
                         PlaceUtils placeUtils,
-                        PlaceDetailsUtils placeDetailsUtils) {
+                        PlaceDetailsUtils placeDetailsUtils,
+                        S3Service s3Service) {
         this.countryUtils = countryUtils;
         this.placeUtils = placeUtils;
         this.placeDetailsUtils = placeDetailsUtils;
+        this.s3Service = s3Service;
     }
 
     public ResponseEntity<?> createPlace(int countryId,
-                                         @NonNull PlaceDto placeDto) {
+                                         @NonNull PostP postP) {
         try{
             CountryEntity country = countryUtils.findCountryById(countryId);
+
+            String placeImageName = s3Service.uploadFile(postP.getMainImage());
+
             PlaceEntity place = new PlaceEntity(
-                    placeDto.getPlace(),
-                    placeDto.getMainImage(),
+                    postP.getPlace(),
+                    placeImageName,
                     country
             );
 
@@ -52,12 +60,15 @@ public class PlaceService{
             country.getPlaces().add(place);
             countryUtils.save(country);
 
-            PlaceDetailsDto placeDetailsDto = placeDto.getPlaceDetails();
+            String placeDetailsImageNameOne = s3Service.uploadFile(postP.getImageOne());
+            String placeDetailsImageNameTwo = s3Service.uploadFile(postP.getImageTwo());
+            String placeDetailsImageNameThree = s3Service.uploadFile(postP.getImageThree());
+
             PlaceDetailsEntity placeDetails = new PlaceDetailsEntity(
-                    placeDetailsDto.getImageOne(),
-                    placeDetailsDto.getImageTwo(),
-                    placeDetailsDto.getImageThree(),
-                    placeDetailsDto.getDescription(),
+                    placeDetailsImageNameOne,
+                    placeDetailsImageNameTwo,
+                    placeDetailsImageNameThree,
+                    postP.getDescription(),
                     place
             );
             placeDetailsUtils.save(placeDetails);

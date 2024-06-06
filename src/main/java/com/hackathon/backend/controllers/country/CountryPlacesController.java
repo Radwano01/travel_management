@@ -1,10 +1,12 @@
 package com.hackathon.backend.controllers.country;
 
 import com.hackathon.backend.dto.countryDto.placeDto.PlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.PostP;
 import com.hackathon.backend.services.country.PlaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(path = "${BASE_API}")
@@ -18,8 +20,22 @@ public class CountryPlacesController {
 
     @PostMapping(path = "${CREATE_PLACE_PATH}")
     public ResponseEntity<?> createPlace(@PathVariable("countryId") int countryId,
-                                         @RequestBody PlaceDto placeDto){
-        return placeService.createPlace(countryId,placeDto);
+                                         @RequestParam("place") String place,
+                                         @RequestParam("mainImage") MultipartFile mainImage,
+                                         @RequestParam("imageOne") MultipartFile imageOne,
+                                         @RequestParam("imageTwo") MultipartFile imageTwo,
+                                         @RequestParam("imageThree") MultipartFile imageThree,
+                                         @RequestParam("description") String description){
+        PostP p = new PostP(
+                place,
+                mainImage,
+                imageOne,
+                imageTwo,
+                imageThree,
+                description
+        );
+
+        return placeService.createPlace(countryId,p);
     }
 
     @GetMapping(path = "${GET_PLACES_PATH}")
