@@ -6,6 +6,7 @@ import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.user.RoleRepository;
 import com.hackathon.backend.security.JWTGenerator;
 import com.hackathon.backend.utilities.UserUtils;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JWTGenerator jwtGenerator;
     private final JavaMailSender javaMailSender;
+    private final S3Service s3Service;
 
 
     @Value("${VERIFY_LINK_TO_USER}")
@@ -45,13 +47,15 @@ public class UserService {
                        RoleRepository roleRepository,
                        JavaMailSender javaMailSender,
                        PasswordEncoder passwordEncoder,
-                       JWTGenerator jwtGenerator) {
+                       JWTGenerator jwtGenerator,
+                       S3Service s3Service) {
         this.authenticationManager = authenticationManager;
         this.userUtils = userUtils;
         this.roleRepository = roleRepository;
         this.javaMailSender = javaMailSender;
         this.passwordEncoder = passwordEncoder;
         this.jwtGenerator = jwtGenerator;
+        this.s3Service = s3Service;
     }
 
     public ResponseEntity<?> registerUser(@NonNull RegisterUserDto registerUserDto) {
@@ -69,11 +73,13 @@ public class UserService {
             RoleEntity role = roleRepository.findByRole("USER")
                     .orElseThrow(()-> new EntityNotFoundException("Role not found"));
 
+            String defaultImageForNewUsers = "https://travelmanagementimages.s3.eu-central-1.amazonaws.com/image_2024-06-07_134630578.png";
             UserEntity userEntity = new UserEntity(
                     registerUserDto.getUsername(),
                     registerUserDto.getEmail(),
                     passwordEncoder.encode(registerUserDto.getPassword()),
-                    role
+                    role,
+                    defaultImageForNewUsers
             );
             userUtils.save(userEntity);
             return ResponseEntity.ok("Account Created");
@@ -115,7 +121,9 @@ public class UserService {
     //delete
     public ResponseEntity<?> deleteUser(long userId) {
         try{
-            userUtils.deleteById(userId);
+            UserEntity user = userUtils.findById(userId);
+            s3Service.deleteFile(user.getImage());
+            userUtils.delete(user);
             return ResponseEntity.ok("Account deleted successfully");
         }catch (Exception e){
             return serverErrorException(e);
@@ -128,6 +136,7 @@ public class UserService {
         try {
             UserEntity user = userUtils.findById(userId);
             editHelper(user,editUserDto);
+            userUtils.save(user);
             return ResponseEntity.ok("user updated successfully");
         }catch (EntityNotFoundException e) {
             return notFoundException(e);
@@ -176,7 +185,11 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(editUserDto.getPassword()));
         }
         if(editUserDto.getImage() != null){
-            user.setImage(editUserDto.getImage());
+            if(user.getImage() != null) {
+                s3Service.deleteFile(user.getImage());
+            }
+            String userImageName = s3Service.uploadFile(editUserDto.getImage());
+            user.setImage(userImageName);
         }
     }
 }

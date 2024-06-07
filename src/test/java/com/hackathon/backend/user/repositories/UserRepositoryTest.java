@@ -33,7 +33,8 @@ class UserRepositoryTest {
                 "testUsername",
                 "test@gmail.com",
                 "testPassword",
-                role
+                role,
+                "test"
         );
         userRepository.save(user);
     }

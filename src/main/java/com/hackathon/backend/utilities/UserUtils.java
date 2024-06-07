@@ -65,4 +65,8 @@ public class UserUtils {
         mailMessage.setText("Please Click to the link to verify your account: "+message);
         return mailMessage;
     }
+
+    public void delete(UserEntity user) {
+        userRepository.delete(user);
+    }
 }

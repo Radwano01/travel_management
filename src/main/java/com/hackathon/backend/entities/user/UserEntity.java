@@ -28,7 +28,8 @@ public class UserEntity {
     private String email;
     private String password;
     private boolean verificationStatus = false;
-    private String image = "empty";
+
+    private String image;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="role_id")
@@ -41,11 +42,12 @@ public class UserEntity {
     private List<PackageEvaluationEntity> packageEvaluations = new ArrayList<>();
 
     public UserEntity(String username, String email,
-                      String password, RoleEntity role) {
+                      String password, RoleEntity role,
+                      String image) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.role = role;
-
+        this.image = image;
     }
 }
