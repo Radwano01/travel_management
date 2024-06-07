@@ -1,6 +1,8 @@
 package com.hackathon.backend.controllers.hotel;
 
-import com.hackathon.backend.dto.hotelDto.HotelDto;
+import com.hackathon.backend.dto.hotelDto.EditHotelDto;
+import com.hackathon.backend.dto.hotelDto.GetHotelDto;
+import com.hackathon.backend.dto.hotelDto.PostHotelDto;
 import com.hackathon.backend.services.hotel.HotelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +32,7 @@ public class HotelController {
                                          @RequestParam("imageFour") MultipartFile imageFour,
                                          @RequestParam("roomDescription") String roomDescription,
                                          @RequestParam("price") int price){
-        PostH h = new PostH(
+        PostHotelDto h = new PostHotelDto(
                 hotelName,
                 mainImage,
                 description,
@@ -55,8 +57,21 @@ public class HotelController {
     @PutMapping(path = "${EDIT_HOTEL_PATH}")
     public ResponseEntity<?> editHotel(@PathVariable("hotelId") long hotelId,
                                        @PathVariable("countryId") int countryId,
-                                       @RequestBody HotelDto hotelDto){
-        return hotelService.editHotel(hotelId, countryId, hotelDto);
+                                       @RequestParam(name = "hotelName", required = false) String hotelName,
+                                       @RequestParam(name = "mainImage", required = false) MultipartFile mainImage,
+                                       @RequestParam(name = "description", required = false) String description,
+                                       @RequestParam(name = "hotelRoomsCount", required = false) int hotelRoomsCount,
+                                       @RequestParam(name = "address", required = false) String address,
+                                       @RequestParam(name = "rate", required = false) float rate){
+        EditHotelDto editHotelDto = new EditHotelDto(
+                hotelName,
+                mainImage,
+                description,
+                hotelRoomsCount,
+                address,
+                rate
+        );
+        return hotelService.editHotel(hotelId, countryId, editHotelDto);
     }
 
     @DeleteMapping(path = "${DELETE_HOTEL_PATH}")

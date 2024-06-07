@@ -3,12 +3,11 @@ package com.hackathon.backend.dto.countryDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
 @NoArgsConstructor
-public class CountryDetailsDto {
+public class GetCountryDetailsDto {
     private int id;
     private String country;
     private String countryMainImage;
@@ -17,10 +16,10 @@ public class CountryDetailsDto {
     private String imageThree;
     private String description;
 
-    public CountryDetailsDto(int id, String imageOne,
-                             String imageTwo, String imageThree,
-                             String description, String country,
-                             String countryMainImage) {
+    public GetCountryDetailsDto(int id, String imageOne,
+                                String imageTwo, String imageThree,
+                                String description, String country,
+                                String countryMainImage) {
         this.id = id;
         this.imageOne = imageOne;
         this.imageTwo = imageTwo;

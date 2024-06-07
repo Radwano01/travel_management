@@ -1,7 +1,9 @@
 package com.hackathon.backend.controllers.package_;
 
 
-import com.hackathon.backend.dto.packageDto.PackageDto;
+import com.hackathon.backend.dto.packageDto.EditPackageDto;
+import com.hackathon.backend.dto.packageDto.GetPackageDto;
+import com.hackathon.backend.dto.packageDto.PostPackageDto;
 import com.hackathon.backend.services.package_.PackageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +32,7 @@ public class PackageController {
                                            @RequestParam("imageThree") MultipartFile imageThree,
                                            @RequestParam("description") String description) {
 
-        PostP p = new PostP(
+        PostPackageDto p = new PostPackageDto(
                 packageName,
                 price,
                 rate,
@@ -50,8 +52,17 @@ public class PackageController {
 
     @PutMapping(path = "${EDIT_PACKAGE_PATH}")
     public ResponseEntity<?> editPackage(@PathVariable("packageId") int packageId,
-                                         @RequestBody PackageDto packageDto){
-        return packageService.editPackage(packageId,packageDto);
+                                         @RequestParam(name = "packageName",required = false) String packageName,
+                                         @RequestParam(name = "price",required = false) float price,
+                                         @RequestParam(name = "rate",required = false) float rate,
+                                         @RequestParam(name = "mainImage",required = false) MultipartFile mainImage){
+        EditPackageDto editPackageDto = new EditPackageDto(
+                packageName,
+                price,
+                rate,
+                mainImage
+        );
+        return packageService.editPackage(packageId, editPackageDto);
     }
 
     @DeleteMapping(path = "${DELETE_PACKAGE_PATH}")

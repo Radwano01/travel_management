@@ -1,7 +1,7 @@
 package com.hackathon.backend.utilities.country;
 
 
-import com.hackathon.backend.dto.countryDto.CountryDto;
+import com.hackathon.backend.dto.countryDto.GetCountryDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.repositories.country.CountryRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -34,7 +34,7 @@ public class CountryUtils {
         countryRepository.save(country);
     }
 
-    public List<CountryDto> findAllCountries() {
+    public List<GetCountryDto> findAllCountries() {
         return countryRepository.findAllCountries();
     }
 

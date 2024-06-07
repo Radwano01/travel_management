@@ -1,7 +1,7 @@
 package com.hackathon.backend.controllers.country;
 
-import com.hackathon.backend.dto.countryDto.CountryDto;
-import com.hackathon.backend.dto.countryDto.PostC;
+import com.hackathon.backend.dto.countryDto.EditCountryDto;
+import com.hackathon.backend.dto.countryDto.PostCountryDto;
 import com.hackathon.backend.services.country.CountryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,7 @@ public class CountryController {
                                            @RequestParam("imageTwo") MultipartFile imageTwo,
                                            @RequestParam("imageThree") MultipartFile imageThree,
                                            @RequestParam("description") String description){
-        PostC c = new PostC(
+        PostCountryDto postCountryDto = new PostCountryDto(
                 countryName,
                 mainImage,
                 imageOne,
@@ -33,7 +33,7 @@ public class CountryController {
                 description
         );
 
-        return countryService.createCountry(c);
+        return countryService.createCountry(postCountryDto);
     }
 
     @GetMapping(path = "${GET_COUNTRIES_PATH}")
@@ -43,8 +43,13 @@ public class CountryController {
 
     @PutMapping(path = "${EDIT_COUNTRY_PATH}")
     public ResponseEntity<?> editCountry(@PathVariable("countryId") int countryId,
-                                         @RequestBody CountryDto countryDto){
-        return countryService.editCountry(countryId,countryDto);
+                                         @RequestParam(name = "country", required = false) String country,
+                                         @RequestParam(name = "mainImage", required = false) MultipartFile mainImage){
+        EditCountryDto editCountryDto = new EditCountryDto(
+                country,
+                mainImage
+        );
+        return countryService.editCountry(countryId, editCountryDto);
     }
 
     @DeleteMapping(path = "${DELETE_COUNTRY_PATH}")

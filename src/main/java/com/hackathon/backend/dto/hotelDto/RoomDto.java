@@ -12,7 +12,7 @@ public class RoomDto {
 
     private long id;
     private boolean status;
-    private RoomDetailsDto roomDetailsDto;
+    private GetRoomDetailsDto getRoomDetailsDto;
 
     public RoomDto(Long id, boolean status) {
         this.id = id;

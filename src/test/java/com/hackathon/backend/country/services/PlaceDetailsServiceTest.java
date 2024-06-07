@@ -1,9 +1,11 @@
 package com.hackathon.backend.country.services;
 
-import com.hackathon.backend.dto.countryDto.placeDto.PlaceDetailsDto;
+import com.hackathon.backend.dto.countryDto.placeDto.EditPlaceDetailsDto;
+import com.hackathon.backend.dto.countryDto.placeDto.GetPlaceDetailsDto;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.services.country.PlaceDetailsService;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.PlaceDetailsUtils;
 import com.hackathon.backend.utilities.country.PlaceUtils;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -25,6 +28,9 @@ class PlaceDetailsServiceTest {
 
     @Mock
     PlaceDetailsUtils placeDetailsUtils;
+
+    @Mock
+    S3Service s3Service;
 
     @InjectMocks
     PlaceDetailsService placeDetailsService;
@@ -51,7 +57,7 @@ class PlaceDetailsServiceTest {
 
         //when
         ResponseEntity<?> response = placeDetailsService.getSinglePlaceDetails(placeId);
-        PlaceDetailsDto responseData = (PlaceDetailsDto) response.getBody();
+        GetPlaceDetailsDto responseData = (GetPlaceDetailsDto) response.getBody();
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -82,23 +88,27 @@ class PlaceDetailsServiceTest {
         place.setMainImage("testImage");
         place.setPlaceDetails(placeDetails);
 
-        PlaceDetailsDto placeDetailsDto = new PlaceDetailsDto();
-        placeDetailsDto.setImageOne("testImageOne1");
-        placeDetailsDto.setImageTwo("testImageTwo1");
-        placeDetailsDto.setImageThree("testImageThree1");
-        placeDetailsDto.setDescription("testDesc1");
+        EditPlaceDetailsDto editPlaceDetailsDto = new EditPlaceDetailsDto(
+                new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageTwo", "imageTwo.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageThree", "imageThree.jpg", "image/jpeg", new byte[0]),
+                "testDesc1"
+        );
 
         //behavior
         when(placeUtils.findById(placeId)).thenReturn(place);
+        when(s3Service.uploadFile(editPlaceDetailsDto.getImageOne())).thenReturn("imageOne");
+        when(s3Service.uploadFile(editPlaceDetailsDto.getImageTwo())).thenReturn("imageTwo");
+        when(s3Service.uploadFile(editPlaceDetailsDto.getImageThree())).thenReturn("imageThree");
 
         //when
-        ResponseEntity<?> response = placeDetailsService.editPlaceDetails(placeId, placeDetailsDto);
+        ResponseEntity<?> response = placeDetailsService.editPlaceDetails(placeId, editPlaceDetailsDto);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("testImageOne1", place.getPlaceDetails().getImageOne());
-        assertEquals("testImageTwo1", place.getPlaceDetails().getImageTwo());
-        assertEquals("testImageThree1", place.getPlaceDetails().getImageThree());
+        assertEquals("imageOne", place.getPlaceDetails().getImageOne());
+        assertEquals("imageTwo", place.getPlaceDetails().getImageTwo());
+        assertEquals("imageThree", place.getPlaceDetails().getImageThree());
         assertEquals("testDesc1", place.getPlaceDetails().getDescription());
     }
 }

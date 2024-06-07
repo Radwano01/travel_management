@@ -1,6 +1,6 @@
 package com.hackathon.backend.hotel.repositories;
 
-import com.hackathon.backend.dto.hotelDto.HotelDto;
+import com.hackathon.backend.dto.hotelDto.GetHotelDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.repositories.country.CountryRepository;
@@ -55,7 +55,7 @@ class HotelRepositoryTest {
         int countryId = countryRepository.findAll().get(0).getId();
 
         //when
-        List<HotelDto> response = hotelRepository.findByCountryId(countryId);
+        List<GetHotelDto> response = hotelRepository.findByCountryId(countryId);
 
         //then
         assertEquals(response.get(0).getHotelName(), "testName");

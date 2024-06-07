@@ -1,4 +1,4 @@
-package com.hackathon.backend.controllers.hotel;
+package com.hackathon.backend.dto.hotelDto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PostH {
+public class PostHotelDto {
     private String hotelName;
     private MultipartFile mainImage;
     private String description;
@@ -22,12 +22,12 @@ public class PostH {
     private String roomDescription;
     private int price;
 
-    public PostH(String hotelName, MultipartFile mainImage,
-                 String description, int hotelRoomsCount,
-                 String address, float rate,
-                 MultipartFile imageOne, MultipartFile imageTwo,
-                 MultipartFile imageThree, MultipartFile imageFour,
-                 String roomDescription, int price) {
+    public PostHotelDto(String hotelName, MultipartFile mainImage,
+                        String description, int hotelRoomsCount,
+                        String address, float rate,
+                        MultipartFile imageOne, MultipartFile imageTwo,
+                        MultipartFile imageThree, MultipartFile imageFour,
+                        String roomDescription, int price) {
         this.hotelName = hotelName;
         this.mainImage = mainImage;
         this.description = description;

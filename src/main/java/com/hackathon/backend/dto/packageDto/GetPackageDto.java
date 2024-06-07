@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PackageDto {
+public class GetPackageDto {
 
     private int id;
     private String packageName;
@@ -19,22 +19,22 @@ public class PackageDto {
     private float rate;
     private String mainImage;
 
-    private PackageDetailsDto packageDetails;
+    private GetPackageDetailsDto packageDetails;
     private List<RoadmapEntity> roadmaps;
     private List<BenefitEntity> benefits;
 
-    public PackageDto(int id, String packageName,
-                      float price, float rate,
-                      String mainImage,
-                      PackageDetailsDto packageDetailsDto,
-                      List<RoadmapEntity> roadmaps,
-                      List<BenefitEntity> benefits) {
+    public GetPackageDto(int id, String packageName,
+                         float price, float rate,
+                         String mainImage,
+                         GetPackageDetailsDto getPackageDetailsDto,
+                         List<RoadmapEntity> roadmaps,
+                         List<BenefitEntity> benefits) {
         this.id = id;
         this.packageName = packageName;
         this.price = price;
         this.rate = rate;
         this.mainImage = mainImage;
-        this.packageDetails = packageDetailsDto;
+        this.packageDetails = getPackageDetailsDto;
         this.roadmaps = roadmaps;
         this.benefits = benefits;
     }

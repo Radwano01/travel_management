@@ -7,14 +7,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class CountryDto {
+public class GetCountryDto {
     private int id;
     private String country;
     private String mainImage;
 
-    public CountryDto(Integer id,
-                      String country,
-                      String mainImage) {
+    public GetCountryDto(Integer id,
+                         String country,
+                         String mainImage) {
         this.id = id;
         this.country = country;
         this.mainImage = mainImage;

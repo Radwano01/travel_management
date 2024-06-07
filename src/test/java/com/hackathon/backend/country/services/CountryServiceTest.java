@@ -1,6 +1,7 @@
 package com.hackathon.backend.country.services;
-import com.hackathon.backend.dto.countryDto.CountryDto;
-import com.hackathon.backend.dto.countryDto.PostC;
+import com.hackathon.backend.dto.countryDto.EditCountryDto;
+import com.hackathon.backend.dto.countryDto.GetCountryDto;
+import com.hackathon.backend.dto.countryDto.PostCountryDto;
 import com.hackathon.backend.entities.country.CountryDetailsEntity;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
@@ -61,7 +62,7 @@ class CountryServiceTest {
     @Test
     void createCountry() {
         //given
-        PostC c = new PostC(
+        PostCountryDto c = new PostCountryDto(
                 "testCountry",
                 new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]),
                 new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", new byte[0]),
@@ -81,20 +82,20 @@ class CountryServiceTest {
     @Test
     void getCountry() {
         //given
-        CountryDto countryDto = new CountryDto();
-        countryDto.setCountry("testCountry");
-        countryDto.setMainImage("testImage");
-        List<CountryDto> countryDtos = new ArrayList<>();
+        GetCountryDto getCountryDto = new GetCountryDto();
+        getCountryDto.setCountry("testCountry");
+        getCountryDto.setMainImage("testImage");
+        List<GetCountryDto> getCountryDtos = new ArrayList<>();
 
         //behavior
-        when(countryUtils.findAllCountries()).thenReturn(countryDtos);
+        when(countryUtils.findAllCountries()).thenReturn(getCountryDtos);
 
         //when
         ResponseEntity<?> response = countryService.getCountry();
 
         ///then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(countryDtos, response.getBody());
+        assertEquals(getCountryDtos, response.getBody());
     }
 
     @Test
@@ -106,20 +107,21 @@ class CountryServiceTest {
         country.setCountry("testCountry");
         country.setMainImage("testImage");
 
-        CountryDto countryDto = new CountryDto();
-        countryDto.setCountry("testCountry1");
-        countryDto.setMainImage("testImage1");
+        EditCountryDto editCountryDto = new EditCountryDto();
+        editCountryDto.setCountry("testCountry1");
+        editCountryDto.setMainImage(new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]));
 
         //behavior
         when(countryUtils.findCountryById(countryId)).thenReturn(country);
+        when(s3Service.uploadFile(editCountryDto.getMainImage())).thenReturn("newMainImage");
 
         //when
-        ResponseEntity<?> response = countryService.editCountry(countryId, countryDto);
+        ResponseEntity<?> response = countryService.editCountry(countryId, editCountryDto);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(countryDto.getCountry(), country.getCountry());
-        assertEquals(countryDto.getMainImage(), country.getMainImage());
+        assertEquals(editCountryDto.getCountry(), country.getCountry());
+        assertEquals("newMainImage", country.getMainImage());
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.hackathon.backend.country.repositories;
 
-import com.hackathon.backend.dto.countryDto.placeDto.EssentialPlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.GetEssentialPlaceDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.repositories.country.CountryRepository;
@@ -52,7 +52,7 @@ class PlaceRepositoryTest {
         int countryId = countryRepository.findAll().get(0).getId();
 
         //when
-        List<EssentialPlaceDto> places = placeRepository.findPlacesByCountryId(countryId);
+        List<GetEssentialPlaceDto> places = placeRepository.findPlacesByCountryId(countryId);
 
         //then
         assertEquals(places.get(0).getPlace(), "testPlace");

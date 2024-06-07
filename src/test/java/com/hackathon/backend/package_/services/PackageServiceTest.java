@@ -1,9 +1,9 @@
 package com.hackathon.backend.package_.services;
 
-import com.hackathon.backend.controllers.package_.PostP;
-import com.hackathon.backend.dto.packageDto.EssentialPackageDto;
-import com.hackathon.backend.dto.packageDto.PackageDetailsDto;
-import com.hackathon.backend.dto.packageDto.PackageDto;
+import com.hackathon.backend.dto.packageDto.EditPackageDto;
+import com.hackathon.backend.dto.packageDto.PostPackageDto;
+import com.hackathon.backend.dto.packageDto.GetEssentialPackageDto;
+import com.hackathon.backend.dto.packageDto.GetPackageDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
@@ -62,7 +62,7 @@ class PackageServiceTest {
         // given
         int countryId = 1;
 
-        PostP p = new PostP(
+        PostPackageDto p = new PostPackageDto(
                 "testPackage",
                 100.0f,
                 0,
@@ -88,26 +88,26 @@ class PackageServiceTest {
         //given
         int countryId = 1;
 
-        List<EssentialPackageDto> essentialPackageDtos = new ArrayList<>();
+        List<GetEssentialPackageDto> getEssentialPackageDtos = new ArrayList<>();
 
-        EssentialPackageDto essentialPackageDto = new EssentialPackageDto();
-        essentialPackageDto.setPackageName("testPackage");
-        essentialPackageDto.setMainImage("testImage");
+        GetEssentialPackageDto getEssentialPackageDto = new GetEssentialPackageDto();
+        getEssentialPackageDto.setPackageName("testPackage");
+        getEssentialPackageDto.setMainImage("testImage");
 
-        essentialPackageDtos.add(essentialPackageDto);
+        getEssentialPackageDtos.add(getEssentialPackageDto);
 
         //behavior
-        when(packageUtils.findPackagesByCountryId(countryId)).thenReturn(essentialPackageDtos);
+        when(packageUtils.findPackagesByCountryId(countryId)).thenReturn(getEssentialPackageDtos);
 
         //when
         ResponseEntity<?> response = packageService.getPackagesByCountry(countryId);
 
-        List<EssentialPackageDto> responseData = (List<EssentialPackageDto>) response.getBody();
+        List<GetEssentialPackageDto> responseData = (List<GetEssentialPackageDto>) response.getBody();
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(responseData);
-        assertEquals(essentialPackageDtos.get(0).getPackageName(), responseData.get(0).getPackageName());
-        assertEquals(essentialPackageDtos.get(0).getMainImage(), responseData.get(0).getMainImage());
+        assertEquals(getEssentialPackageDtos.get(0).getPackageName(), responseData.get(0).getPackageName());
+        assertEquals(getEssentialPackageDtos.get(0).getMainImage(), responseData.get(0).getMainImage());
     }
 
     @Test
@@ -122,24 +122,27 @@ class PackageServiceTest {
         packageEntity.setPrice(100);
         packageEntity.setRate(1.88f);
 
-        PackageDto packageDto = new PackageDto();
-        packageDto.setPackageName("testPackage1");
-        packageDto.setMainImage("testImage1");
-        packageDto.setPrice(111);
-        packageDto.setRate(1.99f);
+        EditPackageDto editPackageDto = new EditPackageDto(
+                "testPackage1",
+                100,
+                1.1f,
+                new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0])
+
+        );
 
         //behavior
         when(packageUtils.findById(packageId)).thenReturn(packageEntity);
+        when(s3Service.uploadFile(editPackageDto.getMainImage())).thenReturn("mainImage");
 
         //when
-        ResponseEntity<?> response = packageService.editPackage(packageId, packageDto);
+        ResponseEntity<?> response = packageService.editPackage(packageId, editPackageDto);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(packageDto.getPackageName(), packageEntity.getPackageName());
-        assertEquals(packageDto.getMainImage(), packageEntity.getMainImage());
-        assertEquals(packageDto.getPrice(), packageEntity.getPrice());
-        assertEquals(packageDto.getRate(), packageEntity.getRate());
+        assertEquals("testPackage1", packageEntity.getPackageName());
+        assertEquals("mainImage", packageEntity.getMainImage());
+        assertEquals(100, packageEntity.getPrice());
+        assertEquals(1.1f, packageEntity.getRate());
 
     }
 

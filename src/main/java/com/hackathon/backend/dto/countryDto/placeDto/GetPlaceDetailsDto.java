@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PlaceDetailsDto {
+public class GetPlaceDetailsDto {
     private int id;
     private String place;
     private String mainImage;
@@ -17,10 +17,10 @@ public class PlaceDetailsDto {
     private String description;
     //add packages variable soon!!
 
-    public PlaceDetailsDto(int id, String place,
-                           String mainImage, String imageOne,
-                           String imageTwo, String imageThree,
-                           String description) {
+    public GetPlaceDetailsDto(int id, String place,
+                              String mainImage, String imageOne,
+                              String imageTwo, String imageThree,
+                              String description) {
         this.id = id;
         this.place = place;
         this.mainImage = mainImage;

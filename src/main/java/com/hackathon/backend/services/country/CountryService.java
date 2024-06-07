@@ -21,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
 import java.util.List;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
@@ -53,31 +52,31 @@ public class CountryService{
         this.s3Service = s3Service;
     }
 
-    public ResponseEntity<?> createCountry(@NonNull PostC postC) {
+    public ResponseEntity<?> createCountry(@NonNull PostCountryDto postCountryDto) {
         try {
-            String countryName = postC.getCountry().trim().toLowerCase();
+            String countryName = postCountryDto.getCountry().trim().toLowerCase();
             boolean existsCountry = countryUtils.existsByCountry(countryName);
             if (existsCountry) {
                 return alreadyValidException("Country already exist: "+countryName);
             }
 
-            String countryImageName = s3Service.uploadFile(postC.getMainImage());
+            String countryImageName = s3Service.uploadFile(postCountryDto.getMainImage());
 
             CountryEntity country = new CountryEntity(
-                    postC.getCountry(),
+                    postCountryDto.getCountry(),
                     countryImageName
             );
             countryUtils.save(country);
 
-            String countryDetailsImageNameOne = s3Service.uploadFile(postC.getImageOne());
-            String countryDetailsImageNameTwo = s3Service.uploadFile(postC.getImageTwo());
-            String countryDetailsImageNameThree = s3Service.uploadFile(postC.getImageThree());
+            String countryDetailsImageNameOne = s3Service.uploadFile(postCountryDto.getImageOne());
+            String countryDetailsImageNameTwo = s3Service.uploadFile(postCountryDto.getImageTwo());
+            String countryDetailsImageNameThree = s3Service.uploadFile(postCountryDto.getImageThree());
 
             CountryDetailsEntity countryDetails = new CountryDetailsEntity(
                     countryDetailsImageNameOne,
                     countryDetailsImageNameTwo,
                     countryDetailsImageNameThree,
-                    postC.getDescription(),
+                    postCountryDto.getDescription(),
                     country
             );
             countryDetailsUtils.save(countryDetails);
@@ -91,7 +90,7 @@ public class CountryService{
 
     public ResponseEntity<?> getCountry() {
         try {
-            List<CountryDto> countries = countryUtils.findAllCountries();
+            List<GetCountryDto> countries = countryUtils.findAllCountries();
             return ResponseEntity.ok(countries);
         }catch (EmptyResultDataAccessException e) {
             return notFoundException("No country added yet!");
@@ -101,10 +100,10 @@ public class CountryService{
     }
 
     public ResponseEntity<?> editCountry(int countryId,
-                                        CountryDto countryDto) {
+                                        EditCountryDto editCountryDto) {
         try {
             CountryEntity country = countryUtils.findCountryById(countryId);
-            editHelper(country,countryDto);
+            editHelper(country, editCountryDto);
             countryUtils.save(country);
             return ResponseEntity.ok("Country edited successfully to: " + country.getCountry());
         }catch (EntityNotFoundException e){
@@ -138,7 +137,16 @@ public class CountryService{
                 planeFlightsUtils.delete(arrival);
             }
 
+            CountryDetailsEntity countryDetails = countryEntity.getCountryDetails();
+            String[] ls = new String[]{
+                countryEntity.getMainImage(),
+                countryDetails.getImageOne(),
+                countryDetails.getImageTwo(),
+                countryDetails.getImageThree()
+            };
+            s3Service.deleteFiles(ls);
             countryDetailsUtils.delete(countryEntity.getCountryDetails());
+            s3Service.deleteFile(countryEntity.getMainImage());
             countryUtils.delete(countryEntity);
             return ResponseEntity.ok("Country and country details deleted successfully");
         } catch (Exception e) {
@@ -147,12 +155,15 @@ public class CountryService{
     }
 
     private void editHelper(CountryEntity country,
-                            CountryDto countryDto) {
-        if (countryDto.getCountry() != null) {
-            country.setCountry(countryDto.getCountry());
+                            EditCountryDto editCountryDto) {
+        if (editCountryDto.getCountry() != null) {
+            boolean existsCountry = countryUtils.existsByCountry(country.getCountry());
+            if(!existsCountry) country.setCountry(editCountryDto.getCountry());
         }
-        if (countryDto.getMainImage() != null) {
-            country.setMainImage(countryDto.getMainImage());
+        if (editCountryDto.getMainImage() != null) {
+            s3Service.deleteFile(country.getMainImage());
+            String newMainImageName = s3Service.uploadFile(editCountryDto.getMainImage());
+            country.setMainImage(newMainImageName);
         }
     }
 }

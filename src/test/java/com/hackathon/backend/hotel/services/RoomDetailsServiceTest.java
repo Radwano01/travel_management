@@ -1,10 +1,12 @@
 package com.hackathon.backend.hotel.services;
 
-import com.hackathon.backend.dto.hotelDto.HotelDto;
-import com.hackathon.backend.dto.hotelDto.RoomDetailsDto;
+import com.hackathon.backend.dto.hotelDto.EditRoomDetailsDto;
+import com.hackathon.backend.dto.hotelDto.GetHotelDto;
+import com.hackathon.backend.dto.hotelDto.GetRoomDetailsDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
 import com.hackathon.backend.services.hotel.RoomDetailsService;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
 import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -26,6 +29,9 @@ class RoomDetailsServiceTest {
 
     @Mock
     RoomDetailsUtils roomDetailsUtils;
+
+    @Mock
+    S3Service s3Service;
 
     @InjectMocks
     RoomDetailsService roomDetailsService;
@@ -51,32 +57,35 @@ class RoomDetailsServiceTest {
         //when
         ResponseEntity<?> response = roomDetailsService.getRoomAllDetails(hotelId);
 
-        HotelDto hotelDto = (HotelDto) response.getBody();
-        RoomDetailsDto roomDetailsDto = hotelDto.getRoomDetails();
+        GetHotelDto getHotelDto = (GetHotelDto) response.getBody();
+        GetRoomDetailsDto getRoomDetailsDto = getHotelDto.getRoomDetails();
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(hotel.getId(), hotelDto.getId());
-        assertEquals(hotel.getHotelName(), hotelDto.getHotelName());
-        assertEquals(hotel.getAddress(), hotelDto.getAddress());
-        assertEquals(hotel.getRate(), hotelDto.getRate());
+        assertEquals(hotel.getId(), getHotelDto.getId());
+        assertEquals(hotel.getHotelName(), getHotelDto.getHotelName());
+        assertEquals(hotel.getAddress(), getHotelDto.getAddress());
+        assertEquals(hotel.getRate(), getHotelDto.getRate());
 
-        assertEquals(roomDetails.getImageOne(), roomDetailsDto.getImageOne());
-        assertEquals(roomDetails.getImageTwo(), roomDetailsDto.getImageTwo());
-        assertEquals(roomDetails.getImageThree(), roomDetailsDto.getImageThree());
-        assertEquals(roomDetails.getImageFour(), roomDetailsDto.getImageFour());
-        assertEquals(roomDetails.getDescription(), roomDetailsDto.getDescription());
-        assertEquals(roomDetails.getPrice(), roomDetailsDto.getPrice());
+        assertEquals(roomDetails.getImageOne(), getRoomDetailsDto.getImageOne());
+        assertEquals(roomDetails.getImageTwo(), getRoomDetailsDto.getImageTwo());
+        assertEquals(roomDetails.getImageThree(), getRoomDetailsDto.getImageThree());
+        assertEquals(roomDetails.getImageFour(), getRoomDetailsDto.getImageFour());
+        assertEquals(roomDetails.getDescription(), getRoomDetailsDto.getDescription());
+        assertEquals(roomDetails.getPrice(), getRoomDetailsDto.getPrice());
     }
 
     @Test
     void editRoomDetails() {
         //given
         long hotelId = 1L;
-        RoomDetailsDto roomDetailsDto = new RoomDetailsDto();
-        roomDetailsDto.setImageOne("testImageOne");
-        roomDetailsDto.setImageTwo("testImageTwo");
-        roomDetailsDto.setDescription("testDesc");
-        roomDetailsDto.setPrice(150);
+        EditRoomDetailsDto editRoomDetailsDto = new EditRoomDetailsDto(
+                new MockMultipartFile("imageOne", "mainImage.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageTwo", "mainImage.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageThree", "mainImage.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("imageFour", "mainImage.jpg", "image/jpeg", new byte[0]),
+                "testDesc",
+                100
+        );
 
         HotelEntity hotel = new HotelEntity();
         hotel.setId(hotelId);
@@ -85,15 +94,21 @@ class RoomDetailsServiceTest {
 
         //behavior
         when(hotelUtils.findHotelById(hotelId)).thenReturn(hotel);
+        when(s3Service.uploadFile(editRoomDetailsDto.getImageOne())).thenReturn("imageOne");
+        when(s3Service.uploadFile(editRoomDetailsDto.getImageTwo())).thenReturn("imageTwo");
+        when(s3Service.uploadFile(editRoomDetailsDto.getImageThree())).thenReturn("imageThree");
+        when(s3Service.uploadFile(editRoomDetailsDto.getImageFour())).thenReturn("imageFour");
 
         //when
-        ResponseEntity<?> response = roomDetailsService.editRoomDetails(hotelId, roomDetailsDto);
+        ResponseEntity<?> response = roomDetailsService.editRoomDetails(hotelId, editRoomDetailsDto);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(roomDetailsDto.getImageOne(), roomDetails.getImageOne());
-        assertEquals(roomDetailsDto.getImageTwo(), roomDetails.getImageTwo());
-        assertEquals(roomDetailsDto.getDescription(), roomDetails.getDescription());
-        assertEquals(roomDetailsDto.getPrice(), roomDetails.getPrice());
+        assertEquals("imageOne", roomDetails.getImageOne());
+        assertEquals("imageTwo", roomDetails.getImageTwo());
+        assertEquals("imageThree", roomDetails.getImageThree());
+        assertEquals("imageFour", roomDetails.getImageFour());
+        assertEquals("testDesc", roomDetails.getDescription());
+        assertEquals(100, roomDetails.getPrice());
     }
 }

@@ -1,9 +1,9 @@
 package com.hackathon.backend.services.package_;
 
-import com.hackathon.backend.controllers.package_.PostP;
-import com.hackathon.backend.dto.packageDto.EssentialPackageDto;
-import com.hackathon.backend.dto.packageDto.PackageDetailsDto;
-import com.hackathon.backend.dto.packageDto.PackageDto;
+import com.hackathon.backend.dto.packageDto.EditPackageDto;
+import com.hackathon.backend.dto.packageDto.PostPackageDto;
+import com.hackathon.backend.dto.packageDto.GetEssentialPackageDto;
+import com.hackathon.backend.dto.packageDto.GetPackageDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
@@ -55,15 +55,15 @@ public class PackageService {
     }
 
     public ResponseEntity<?> createPackage(int countryId,
-                                           @NonNull PostP p){
+                                           @NonNull PostPackageDto postPackageDto){
         try{
             CountryEntity country = countryUtils.findCountryById(countryId);
 
-            String packageMainImageName = s3Service.uploadFile(p.getMainImage());
+            String packageMainImageName = s3Service.uploadFile(postPackageDto.getMainImage());
 
             PackageEntity packageEntity = new PackageEntity(
-                    p.getPackageName(),
-                    p.getPrice(),
+                    postPackageDto.getPackageName(),
+                    postPackageDto.getPrice(),
                     packageMainImageName,
                     country
             );
@@ -72,15 +72,15 @@ public class PackageService {
             country.getPackages().add(packageEntity);
             countryUtils.save(country);
 
-            String packageDetailsImageOneName = s3Service.uploadFile(p.getImageOne());
-            String packageDetailsImageTwoName = s3Service.uploadFile(p.getImageTwo());
-            String packageDetailsImageThreeName = s3Service.uploadFile(p.getImageThree());
+            String packageDetailsImageOneName = s3Service.uploadFile(postPackageDto.getImageOne());
+            String packageDetailsImageTwoName = s3Service.uploadFile(postPackageDto.getImageTwo());
+            String packageDetailsImageThreeName = s3Service.uploadFile(postPackageDto.getImageThree());
 
             PackageDetailsEntity packageDetails = new PackageDetailsEntity(
                     packageDetailsImageOneName,
                     packageDetailsImageTwoName,
                     packageDetailsImageThreeName,
-                    p.getDescription(),
+                    postPackageDto.getDescription(),
                     packageEntity
             );
 
@@ -97,7 +97,7 @@ public class PackageService {
 
     public ResponseEntity<?> getPackagesByCountry(int countryId){
         try{
-            List<EssentialPackageDto> packages = packageUtils
+            List<GetEssentialPackageDto> packages = packageUtils
                     .findPackagesByCountryId(countryId);
             return ResponseEntity.ok(packages);
         }catch(EntityNotFoundException e){
@@ -109,10 +109,10 @@ public class PackageService {
 
     @Transactional
     public ResponseEntity<?> editPackage(int packageId,
-                                         PackageDto packageDto){
+                                         EditPackageDto editPackageDto){
         try{
             PackageEntity packageEntity = packageUtils.findById(packageId);
-            editHelper(packageEntity, packageDto);
+            editHelper(packageEntity, editPackageDto);
             packageUtils.save(packageEntity);
             return ResponseEntity.ok("Package edited successfully");
         }catch (EntityNotFoundException e){
@@ -142,7 +142,14 @@ public class PackageService {
                 benefitUtils.save(benefit);
             }
 
+            String[] ls = new String[]{
+                    packageDetails.getImageOne(),
+                    packageDetails.getImageTwo(),
+                    packageDetails.getImageThree()
+            };
+            s3Service.deleteFiles(ls);
             packageDetailsUtils.delete(packageDetails);
+            s3Service.deleteFile(packageEntity.getMainImage());
             packageUtils.delete(packageEntity);
             return ResponseEntity.ok("Package deleted successfully");
         }catch(EntityNotFoundException e){
@@ -153,18 +160,20 @@ public class PackageService {
     }
 
     private void editHelper(PackageEntity packageEntity,
-                            PackageDto packageDto) {
-        if(packageDto.getPackageName() != null){
-            packageEntity.setPackageName(packageDto.getPackageName());
+                            EditPackageDto editPackageDto) {
+        if(editPackageDto.getPackageName() != null){
+            packageEntity.setPackageName(editPackageDto.getPackageName());
         }
-        if(packageDto.getMainImage() != null){
-            packageEntity.setMainImage(packageDto.getMainImage());
+        if(editPackageDto.getMainImage() != null){
+            s3Service.deleteFile(packageEntity.getMainImage());
+            String packageMainImageName = s3Service.uploadFile(editPackageDto.getMainImage());
+            packageEntity.setMainImage(packageMainImageName);
         }
-        if(packageDto.getPrice() > 0){
-            packageEntity.setPrice(packageDto.getPrice());
+        if(editPackageDto.getPrice() > 0){
+            packageEntity.setPrice(editPackageDto.getPrice());
         }
-        if(packageDto.getRate() > 0){
-            packageEntity.setRate(packageDto.getRate());
+        if(editPackageDto.getRate() > 0){
+            packageEntity.setRate(editPackageDto.getRate());
         }
     }
 }

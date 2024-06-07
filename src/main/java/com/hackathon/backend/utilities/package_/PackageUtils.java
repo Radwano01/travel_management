@@ -1,13 +1,12 @@
 package com.hackathon.backend.utilities.package_;
 
-import com.hackathon.backend.dto.packageDto.EssentialPackageDto;
+import com.hackathon.backend.dto.packageDto.GetEssentialPackageDto;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.repositories.package_.PackageRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -24,7 +23,7 @@ public class PackageUtils {
         packageRepository.save(packageEntity);
     }
 
-    public List<EssentialPackageDto> findPackagesByCountryId(int countryId) {
+    public List<GetEssentialPackageDto> findPackagesByCountryId(int countryId) {
         return packageRepository.findPackagesByCountryId(countryId);
     }
 

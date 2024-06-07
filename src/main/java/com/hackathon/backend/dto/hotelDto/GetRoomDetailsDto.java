@@ -1,18 +1,14 @@
 package com.hackathon.backend.dto.hotelDto;
 
 
-import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
-import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
-public class RoomDetailsDto {
+public class GetRoomDetailsDto {
     private long id;
     private String imageOne;
     private String imageTwo;
@@ -22,9 +18,9 @@ public class RoomDetailsDto {
     private int price;
 
 
-    public RoomDetailsDto(String imageOne, String imageTwo,
-                          String imageThree, String imageFour,
-                          String description, int price) {
+    public GetRoomDetailsDto(String imageOne, String imageTwo,
+                             String imageThree, String imageFour,
+                             String description, int price) {
         this.imageOne = imageOne;
         this.imageTwo = imageTwo;
         this.imageThree = imageThree;

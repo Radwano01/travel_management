@@ -1,6 +1,6 @@
 package com.hackathon.backend.country.repositories;
 
-import com.hackathon.backend.dto.countryDto.CountryDto;
+import com.hackathon.backend.dto.countryDto.GetCountryDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.repositories.country.CountryRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -49,7 +49,7 @@ class CountryRepositoryTest {
     void findAllCountries() {
 
         //when
-        List<CountryDto> response = countryRepository.findAllCountries();
+        List<GetCountryDto> response = countryRepository.findAllCountries();
 
         //then
         assertEquals(response.get(0).getCountry(), "testCountry");

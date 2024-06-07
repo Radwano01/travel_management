@@ -7,12 +7,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PlaceDto {
-
+public class GetEssentialPlaceDto {
     private int id;
     private String place;
     private String mainImage;
-    private PlaceDetailsDto placeDetails;
-    // to edit place details
-    private String country;
+
+    public GetEssentialPlaceDto(int id, String place, String mainImage) {
+        this.id = id;
+        this.place = place;
+        this.mainImage = mainImage;
+    }
 }

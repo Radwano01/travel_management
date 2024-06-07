@@ -1,8 +1,7 @@
 package com.hackathon.backend.country.services;
 
-import com.hackathon.backend.dto.countryDto.placeDto.PlaceDetailsDto;
-import com.hackathon.backend.dto.countryDto.placeDto.PlaceDto;
-import com.hackathon.backend.dto.countryDto.placeDto.PostP;
+import com.hackathon.backend.dto.countryDto.placeDto.EditPlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.PostPlaceDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
@@ -49,7 +48,7 @@ class PlaceServiceTest {
         // given
         int countryId = 1;
 
-        PostP p = new PostP(
+        PostPlaceDto p = new PostPlaceDto(
                 "testPlace",
                 new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]),
                 new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", new byte[0]),
@@ -113,10 +112,10 @@ class PlaceServiceTest {
         //given
         int countryId = 1;
         int placeId = 1;
-        PlaceDto placeDto = new PlaceDto();
-        placeDto.setPlace("testPlace");
-        placeDto.setMainImage("testImage");
-        placeDto.setCountry("testCountry");
+        EditPlaceDto editPlaceDto = new EditPlaceDto(
+                "testPlace",
+                new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0])
+        );
 
         PlaceEntity place = new PlaceEntity();
         place.setId(placeId);
@@ -127,13 +126,16 @@ class PlaceServiceTest {
 
         //behavior
         when(countryUtils.findCountryById(countryId)).thenReturn(country);
+        when(s3Service.uploadFile(editPlaceDto.getMainImage())).thenReturn("mainImage");
 
         //when
-        ResponseEntity<?> response = placeService.editPlace(countryId,placeId,placeDto);
+        ResponseEntity<?> response = placeService.editPlace(countryId, placeId, editPlaceDto);
 
         //then
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("testPlace", place.getPlace());
+        assertEquals("mainImage", place.getMainImage());
     }
 
     @Test
@@ -146,6 +148,7 @@ class PlaceServiceTest {
 
         PlaceEntity place = new PlaceEntity();
         place.setId(placeId);
+        place.setMainImage("testImage");
         place.setPlaceDetails(placeDetails);
 
         CountryEntity country = new CountryEntity();
@@ -163,5 +166,6 @@ class PlaceServiceTest {
 
         verify(placeDetailsUtils).delete(placeDetails);
         verify(placeUtils).delete(place);
+        verify(s3Service).deleteFile(place.getMainImage());
     }
 }

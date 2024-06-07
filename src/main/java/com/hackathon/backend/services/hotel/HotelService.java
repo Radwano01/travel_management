@@ -1,10 +1,9 @@
 package com.hackathon.backend.services.hotel;
 
-import com.hackathon.backend.controllers.hotel.PostH;
-import com.hackathon.backend.dto.hotelDto.HotelDto;
-import com.hackathon.backend.dto.hotelDto.RoomDetailsDto;
+import com.hackathon.backend.dto.hotelDto.EditHotelDto;
+import com.hackathon.backend.dto.hotelDto.PostHotelDto;
+import com.hackathon.backend.dto.hotelDto.GetHotelDto;
 import com.hackathon.backend.entities.country.CountryEntity;
-import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
@@ -15,7 +14,6 @@ import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
-import com.hackathon.backend.utilities.country.PlaceUtils;
 import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
 import com.hackathon.backend.utilities.hotel.RoomUtils;
 import com.hackathon.backend.utilities.hotel.features.HotelFeaturesUtils;
@@ -65,42 +63,42 @@ public class HotelService {
     }
 
     public ResponseEntity<?> createHotel(int countryId,
-                                         @NonNull PostH postH) {
+                                         @NonNull PostHotelDto postHotelDto) {
         try {
             CountryEntity country = countryUtils.findCountryById(countryId);
 
-            String hotelImageName = s3Service.uploadFile(postH.getMainImage());
+            String hotelImageName = s3Service.uploadFile(postHotelDto.getMainImage());
 
             HotelEntity hotelEntity = new HotelEntity(
-                    postH.getHotelName(),
+                    postHotelDto.getHotelName(),
                     hotelImageName,
-                    postH.getDescription(),
-                    postH.getHotelRoomsCount(),
-                    postH.getAddress(),
+                    postHotelDto.getDescription(),
+                    postHotelDto.getHotelRoomsCount(),
+                    postHotelDto.getAddress(),
                     country
             );
 
             hotelUtils.save(hotelEntity);
 
-            String roomDetailsImageNameOne = s3Service.uploadFile(postH.getImageOne());
-            String roomDetailsImageNameTwo = s3Service.uploadFile(postH.getImageTwo());
-            String roomDetailsImageNameThree = s3Service.uploadFile(postH.getImageThree());
-            String roomDetailsImageNameFour = s3Service.uploadFile(postH.getImageFour());
+            String roomDetailsImageNameOne = s3Service.uploadFile(postHotelDto.getImageOne());
+            String roomDetailsImageNameTwo = s3Service.uploadFile(postHotelDto.getImageTwo());
+            String roomDetailsImageNameThree = s3Service.uploadFile(postHotelDto.getImageThree());
+            String roomDetailsImageNameFour = s3Service.uploadFile(postHotelDto.getImageFour());
 
             RoomDetailsEntity roomDetails = new RoomDetailsEntity(
                     roomDetailsImageNameOne,
                     roomDetailsImageNameTwo,
                     roomDetailsImageNameThree,
                     roomDetailsImageNameFour,
-                    postH.getDescription(),
-                    postH.getPrice(),
+                    postHotelDto.getDescription(),
+                    postHotelDto.getPrice(),
                     hotelEntity
             );
 
             hotelEntity.setRoomDetails(roomDetails);
             hotelUtils.save(hotelEntity);
             roomDetailsUtils.save(roomDetails);
-            return ResponseEntity.ok("Hotel created successfully: " + postH.getHotelName());
+            return ResponseEntity.ok("Hotel created successfully: " + postHotelDto.getHotelName());
         } catch (EntityNotFoundException e) {
             return notFoundException(e);
         } catch (Exception e) {
@@ -111,7 +109,7 @@ public class HotelService {
 
     public ResponseEntity<?> getHotels(int countryId) {
         try{
-            List<HotelDto> hotels = hotelUtils.findByCountryId(countryId);
+            List<GetHotelDto> hotels = hotelUtils.findByCountryId(countryId);
             return ResponseEntity.ok(hotels);
         }catch (Exception e){
             return serverErrorException(e);
@@ -121,12 +119,12 @@ public class HotelService {
     @Transactional
     public ResponseEntity<?> editHotel(long hotelId,
                                        int countryId,
-                                       HotelDto hotelDto){
+                                       EditHotelDto editHotelDto){
         try{
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
             CountryEntity country = countryUtils.findCountryById(countryId);
             hotel.setCountry(country);
-            editHelper(hotel, hotelDto);
+            editHelper(hotel, editHotelDto);
             hotelUtils.save(hotel);
             countryUtils.save(country);
             return ResponseEntity.ok("Hotel updated Successfully: "+hotel.getHotelName());
@@ -169,7 +167,16 @@ public class HotelService {
                 roomFeaturesUtils.save(roomFeature);
             }
 
+            String[] ls = new String[]{
+                    roomDetails.getImageOne(),
+                    roomDetails.getImageTwo(),
+                    roomDetails.getImageThree(),
+                    roomDetails.getImageFour()
+            };
+
+            s3Service.deleteFiles(ls);
             roomDetailsUtils.delete(roomDetails);
+            s3Service.deleteFile(hotel.getMainImage());
             hotelUtils.delete(hotel);
             return ResponseEntity.ok("Hotel deleted Successfully");
         }catch (EntityNotFoundException e) {
@@ -180,24 +187,26 @@ public class HotelService {
     }
 
     private void editHelper(HotelEntity hotel,
-                            HotelDto hotelDto) {
-        if (hotelDto.getHotelName() != null) {
-            hotel.setHotelName(hotelDto.getHotelName());
+                            EditHotelDto editHotelDto) {
+        if (editHotelDto.getHotelName() != null) {
+            hotel.setHotelName(editHotelDto.getHotelName());
         }
-        if (hotelDto.getMainImage() != null) {
-            hotel.setMainImage(hotelDto.getMainImage());
+        if (editHotelDto.getMainImage() != null) {
+            s3Service.deleteFile(hotel.getMainImage());
+            String hotelMainImageName = s3Service.uploadFile(editHotelDto.getMainImage());
+            hotel.setMainImage(hotelMainImageName);
         }
-        if (hotelDto.getDescription() != null) {
-            hotel.setDescription(hotelDto.getDescription());
+        if (editHotelDto.getDescription() != null) {
+            hotel.setDescription(editHotelDto.getDescription());
         }
-        if (hotel.getHotelRoomsCount() >= hotelDto.getHotelRoomsCount()) {
-            hotel.setHotelRoomsCount(hotelDto.getHotelRoomsCount());
+        if (hotel.getHotelRoomsCount() >= editHotelDto.getHotelRoomsCount()) {
+            hotel.setHotelRoomsCount(editHotelDto.getHotelRoomsCount());
         }
-        if (hotelDto.getAddress() != null) {
-            hotel.setAddress(hotelDto.getAddress());
+        if (editHotelDto.getAddress() != null) {
+            hotel.setAddress(editHotelDto.getAddress());
         }
-        if (hotelDto.getRate() != hotel.getRate()) {
-            hotel.setRate(hotelDto.getRate());
+        if (editHotelDto.getRate() != hotel.getRate()) {
+            hotel.setRate(editHotelDto.getRate());
         }
     }
 }

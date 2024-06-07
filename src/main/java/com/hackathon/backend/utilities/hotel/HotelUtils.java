@@ -1,7 +1,6 @@
 package com.hackathon.backend.utilities.hotel;
 
-import com.hackathon.backend.dto.hotelDto.HotelDto;
-import com.hackathon.backend.entities.country.PlaceEntity;
+import com.hackathon.backend.dto.hotelDto.GetHotelDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.repositories.hotel.HotelRepository;
 import com.hackathon.backend.utilities.country.CountryUtils;
@@ -10,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class HotelUtils {
@@ -32,20 +29,11 @@ public class HotelUtils {
                 .orElseThrow(()-> new EntityNotFoundException("Hotel id not found"));
     }
 
-    public PlaceEntity findPlaceByIdInCountry(@NonNull int countryId,
-                                      @NonNull int placeId){
-        Optional<PlaceEntity> foundPlace = countryUtils.findCountryById(countryId)
-                .getPlaces().stream()
-                .filter((place)-> place.getId() == placeId)
-                .findFirst();
-        return foundPlace.orElse(null);
-    }
-
     public void save(HotelEntity hotelEntity) {
         hotelRepository.save(hotelEntity);
     }
 
-    public List<HotelDto> findByCountryId(int countryId) {
+    public List<GetHotelDto> findByCountryId(int countryId) {
         return hotelRepository.findByCountryId(countryId);
     }
 

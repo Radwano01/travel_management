@@ -2,6 +2,7 @@ package com.hackathon.backend.utilities.amazonServices;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -43,5 +45,15 @@ public class S3Service {
             e.printStackTrace();
         }
         return fileUrl;
+    }
+
+    public void deleteFile(String fileName){
+        amazonS3.deleteObject(new DeleteObjectRequest(BUCKET_NAME, fileName));
+    }
+
+    public void deleteFiles(String[] fileNames){
+        for(String fileName:fileNames){
+            amazonS3.deleteObject(new DeleteObjectRequest(BUCKET_NAME, fileName));
+        }
     }
 }

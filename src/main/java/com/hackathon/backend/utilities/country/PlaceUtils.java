@@ -1,13 +1,9 @@
 package com.hackathon.backend.utilities.country;
 
-import com.hackathon.backend.dto.countryDto.placeDto.EssentialPlaceDto;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.repositories.country.PlaceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class PlaceUtils {

@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PackageDetailsDto {
+public class GetPackageDetailsDto {
 
     private int id;
     private String imageOne;
@@ -15,9 +15,9 @@ public class PackageDetailsDto {
     private String imageThree;
     private String description;
 
-    public PackageDetailsDto(int id, String imageOne,
-                             String imageTwo, String imageThree,
-                             String description) {
+    public GetPackageDetailsDto(int id, String imageOne,
+                                String imageTwo, String imageThree,
+                                String description) {
         this.id = id;
         this.imageOne = imageOne;
         this.imageTwo = imageTwo;

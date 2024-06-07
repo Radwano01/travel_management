@@ -1,8 +1,7 @@
 package com.hackathon.backend.services.country;
 
-import com.hackathon.backend.dto.countryDto.placeDto.PlaceDetailsDto;
-import com.hackathon.backend.dto.countryDto.placeDto.PlaceDto;
-import com.hackathon.backend.dto.countryDto.placeDto.PostP;
+import com.hackathon.backend.dto.countryDto.placeDto.EditPlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.PostPlaceDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
@@ -44,14 +43,14 @@ public class PlaceService{
     }
 
     public ResponseEntity<?> createPlace(int countryId,
-                                         @NonNull PostP postP) {
+                                         @NonNull PostPlaceDto postPlaceDto) {
         try{
             CountryEntity country = countryUtils.findCountryById(countryId);
 
-            String placeImageName = s3Service.uploadFile(postP.getMainImage());
+            String placeImageName = s3Service.uploadFile(postPlaceDto.getMainImage());
 
             PlaceEntity place = new PlaceEntity(
-                    postP.getPlace(),
+                    postPlaceDto.getPlace(),
                     placeImageName,
                     country
             );
@@ -60,15 +59,15 @@ public class PlaceService{
             country.getPlaces().add(place);
             countryUtils.save(country);
 
-            String placeDetailsImageNameOne = s3Service.uploadFile(postP.getImageOne());
-            String placeDetailsImageNameTwo = s3Service.uploadFile(postP.getImageTwo());
-            String placeDetailsImageNameThree = s3Service.uploadFile(postP.getImageThree());
+            String placeDetailsImageNameOne = s3Service.uploadFile(postPlaceDto.getImageOne());
+            String placeDetailsImageNameTwo = s3Service.uploadFile(postPlaceDto.getImageTwo());
+            String placeDetailsImageNameThree = s3Service.uploadFile(postPlaceDto.getImageThree());
 
             PlaceDetailsEntity placeDetails = new PlaceDetailsEntity(
                     placeDetailsImageNameOne,
                     placeDetailsImageNameTwo,
                     placeDetailsImageNameThree,
-                    postP.getDescription(),
+                    postPlaceDto.getDescription(),
                     place
             );
             placeDetailsUtils.save(placeDetails);
@@ -97,13 +96,13 @@ public class PlaceService{
     @Transactional
     public ResponseEntity<?> editPlace(int countryId,
                                        int placeId,
-                                       PlaceDto placeDto) {
+                                       EditPlaceDto editPlaceDto) {
         try{
             CountryEntity country = countryUtils.findCountryById(countryId);
             Optional<PlaceEntity> place = country.getPlaces().stream()
                     .filter((data)-> data.getId() == placeId).findFirst();
             if(place.isPresent()) {
-                editHelper(place.get(), placeDto, countryId);
+                editHelper(place.get(), editPlaceDto);
                 placeUtils.save(place.get());
                 countryUtils.save(country);
                 return ResponseEntity.ok("Place updated successfully");
@@ -126,7 +125,17 @@ public class PlaceService{
                     .filter((data)-> data.getId() == placeId).findFirst();
 
             if(place.isPresent()) {
-                placeDetailsUtils.delete(place.get().getPlaceDetails());
+                PlaceDetailsEntity placeDetails = place.get().getPlaceDetails();
+                String[] ls = new String[]{
+                        placeDetails.getImageOne(),
+                        placeDetails.getImageTwo(),
+                        placeDetails.getImageThree()
+                };
+
+                s3Service.deleteFiles(ls);
+                placeDetailsUtils.delete(placeDetails);
+
+                s3Service.deleteFile(place.get().getMainImage());
                 placeUtils.delete(place.get());
                 countryUtils.save(country);
                 return ResponseEntity.ok("Place deleted successfully");
@@ -141,19 +150,13 @@ public class PlaceService{
     }
 
     private void editHelper(PlaceEntity place,
-                            PlaceDto placeDto,
-                            int countryId) {
-        if(placeDto.getPlace() != null){
-            place.setPlace(placeDto.getPlace());
+                            EditPlaceDto editPlaceDto) {
+        if(editPlaceDto.getPlace() != null){
+            place.setPlace(editPlaceDto.getPlace());
         }
-        if(placeDto.getMainImage() != null){
-            place.setMainImage(placeDto.getMainImage());
-        }
-        if(placeDto.getCountry() != null){
-            CountryEntity country = countryUtils
-                    .findCountryById(countryId);
-            place.setCountry(country);
-            countryUtils.save(country);
+        if(editPlaceDto.getMainImage() != null){
+            String placeMainImageName = s3Service.uploadFile(editPlaceDto.getMainImage());
+            place.setMainImage(placeMainImageName);
         }
     }
 }

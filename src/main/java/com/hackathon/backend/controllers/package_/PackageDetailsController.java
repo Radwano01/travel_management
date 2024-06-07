@@ -1,11 +1,13 @@
 package com.hackathon.backend.controllers.package_;
 
 
-import com.hackathon.backend.dto.packageDto.PackageDetailsDto;
+import com.hackathon.backend.dto.packageDto.EditPackageDetailsDto;
+import com.hackathon.backend.dto.packageDto.GetPackageDetailsDto;
 import com.hackathon.backend.services.package_.PackageDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(path = "${BASE_API}")
@@ -25,7 +27,16 @@ public class PackageDetailsController {
 
     @PutMapping(path = "${EDIT_PACKAGE_DETAILS_PATH}")
     public ResponseEntity<?> editPackageDetails(@PathVariable("packageDetailsId") int packageDetailsId,
-                                                @RequestBody PackageDetailsDto packageDetailsDto){
-        return packageDetailsService.editPackageDetails(packageDetailsId, packageDetailsDto);
+                                                @RequestParam(name = "imageOne", required = false) MultipartFile imageOne,
+                                                @RequestParam(name = "imageTwo", required = false) MultipartFile imageTwo,
+                                                @RequestParam(name = "imageThree", required = false) MultipartFile imageThree,
+                                                @RequestParam(name = "description", required = false) String description){
+        EditPackageDetailsDto editPackageDetailsDto = new EditPackageDetailsDto(
+                imageOne,
+                imageTwo,
+                imageThree,
+                description
+        );
+        return packageDetailsService.editPackageDetails(packageDetailsId, editPackageDetailsDto);
     }
 }

@@ -1,7 +1,7 @@
 package com.hackathon.backend.controllers.country;
 
-import com.hackathon.backend.dto.countryDto.placeDto.PlaceDto;
-import com.hackathon.backend.dto.countryDto.placeDto.PostP;
+import com.hackathon.backend.dto.countryDto.placeDto.EditPlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.PostPlaceDto;
 import com.hackathon.backend.services.country.PlaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class CountryPlacesController {
                                          @RequestParam("imageTwo") MultipartFile imageTwo,
                                          @RequestParam("imageThree") MultipartFile imageThree,
                                          @RequestParam("description") String description){
-        PostP p = new PostP(
+        PostPlaceDto postPlaceDto = new PostPlaceDto(
                 place,
                 mainImage,
                 imageOne,
@@ -35,7 +35,7 @@ public class CountryPlacesController {
                 description
         );
 
-        return placeService.createPlace(countryId,p);
+        return placeService.createPlace(countryId, postPlaceDto);
     }
 
     @GetMapping(path = "${GET_PLACES_PATH}")
@@ -46,8 +46,13 @@ public class CountryPlacesController {
     @PutMapping(path = "${EDIT_PLACE_PATH}")
     public ResponseEntity<?> editPlace(@PathVariable("countryId") int countryId,
                                        @PathVariable("placeId") int placeId,
-                                       @RequestBody PlaceDto placeDto){
-        return placeService.editPlace(countryId,placeId,placeDto);
+                                       @RequestParam("place") String place,
+                                       @RequestParam("mainImage") MultipartFile mainImage){
+        EditPlaceDto editPlaceDto = new EditPlaceDto(
+                place,
+                mainImage
+        );
+        return placeService.editPlace(countryId, placeId, editPlaceDto);
     }
 
     @DeleteMapping(path = "${DELETE_PLACE_PATH}")

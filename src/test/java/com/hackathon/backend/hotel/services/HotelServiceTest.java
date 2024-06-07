@@ -1,8 +1,8 @@
 package com.hackathon.backend.hotel.services;
 
-import com.hackathon.backend.controllers.hotel.PostH;
-import com.hackathon.backend.dto.hotelDto.HotelDto;
-import com.hackathon.backend.dto.hotelDto.RoomDetailsDto;
+import com.hackathon.backend.dto.hotelDto.EditHotelDto;
+import com.hackathon.backend.dto.hotelDto.PostHotelDto;
+import com.hackathon.backend.dto.hotelDto.GetHotelDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
@@ -73,7 +73,7 @@ class HotelServiceTest {
         CountryEntity country = new CountryEntity();
         country.setId(countryId);
 
-        PostH h = new PostH(
+        PostHotelDto h = new PostHotelDto(
                 "testHotel",
                 new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]),
                 "testDesc",
@@ -106,34 +106,34 @@ class HotelServiceTest {
         CountryEntity country = new CountryEntity();
         country.setId(countryId);
 
-        List<HotelDto> hotelDtos = new ArrayList<>();
+        List<GetHotelDto> getHotelDtos = new ArrayList<>();
 
-        HotelDto hotelDto = new HotelDto();
-        hotelDto.setId(1);
-        hotelDto.setHotelName("testHotel");
-        hotelDto.setMainImage("testImage");
-        hotelDto.setDescription("testDesc");
-        hotelDto.setAddress("testAddress");
-        hotelDto.setRate(2.50f);
+        GetHotelDto getHotelDto = new GetHotelDto();
+        getHotelDto.setId(1);
+        getHotelDto.setHotelName("testHotel");
+        getHotelDto.setMainImage("testImage");
+        getHotelDto.setDescription("testDesc");
+        getHotelDto.setAddress("testAddress");
+        getHotelDto.setRate(2.50f);
 
-        hotelDtos.add(hotelDto);
+        getHotelDtos.add(getHotelDto);
 
         //behavior
-        when(hotelUtils.findByCountryId(countryId)).thenReturn(hotelDtos);
+        when(hotelUtils.findByCountryId(countryId)).thenReturn(getHotelDtos);
 
         //when
         ResponseEntity<?> response = hotelService.getHotels(countryId);
 
-        List<HotelDto> hotelDtoList = (List<HotelDto>) response.getBody();
+        List<GetHotelDto> getHotelDtoList = (List<GetHotelDto>) response.getBody();
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(hotelDto.getId(), hotelDtoList.get(0).getId());
-        assertEquals(hotelDto.getHotelName(), hotelDtoList.get(0).getHotelName());
-        assertEquals(hotelDto.getMainImage(), hotelDtoList.get(0).getMainImage());
-        assertEquals(hotelDto.getDescription(), hotelDtoList.get(0).getDescription());
-        assertEquals(hotelDto.getAddress(), hotelDtoList.get(0).getAddress());
-        assertEquals(hotelDto.getRate(), hotelDtoList.get(0).getRate());
+        assertEquals(getHotelDto.getId(), getHotelDtoList.get(0).getId());
+        assertEquals(getHotelDto.getHotelName(), getHotelDtoList.get(0).getHotelName());
+        assertEquals(getHotelDto.getMainImage(), getHotelDtoList.get(0).getMainImage());
+        assertEquals(getHotelDto.getDescription(), getHotelDtoList.get(0).getDescription());
+        assertEquals(getHotelDto.getAddress(), getHotelDtoList.get(0).getAddress());
+        assertEquals(getHotelDto.getRate(), getHotelDtoList.get(0).getRate());
     }
 
     @Test
@@ -141,13 +141,13 @@ class HotelServiceTest {
         //given
         long hotelId = 1L;
         int countryId = 1;
-        HotelDto hotelDto = new HotelDto();
-        hotelDto.setHotelName("testHotel");
-        hotelDto.setMainImage("testImage");
-        hotelDto.setDescription("testDescription");
-        hotelDto.setHotelRoomsCount(80);
-        hotelDto.setAddress("testAddress");
-        hotelDto.setRate(3.5f);
+        EditHotelDto getHotelDto = new EditHotelDto();
+        getHotelDto.setHotelName("testHotel");
+        new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]);
+        getHotelDto.setDescription("testDescription");
+        getHotelDto.setHotelRoomsCount(80);
+        getHotelDto.setAddress("testAddress");
+        getHotelDto.setRate(3.5f);
 
         HotelEntity hotel = new HotelEntity();
         hotel.setHotelName("testHotel");
@@ -163,7 +163,7 @@ class HotelServiceTest {
         when(countryUtils.findCountryById(countryId)).thenReturn(country);
 
         //when
-        ResponseEntity<?> response = hotelService.editHotel(hotelId, countryId, hotelDto);
+        ResponseEntity<?> response = hotelService.editHotel(hotelId, countryId, getHotelDto);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());

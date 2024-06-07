@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class HotelDto {
+public class GetHotelDto {
 
     private long id;
     private String hotelName;
@@ -21,13 +21,13 @@ public class HotelDto {
     private int hotelRoomsCount;
     private String address;
     private float rate;
-    private RoomDetailsDto roomDetails;
+    private GetRoomDetailsDto roomDetails;
     private List<HotelFeaturesEntity> hotelFeatures;
     private List<RoomFeaturesEntity> roomFeatures;
 
-    public HotelDto(long id, String hotelName,
-                    String mainImage, String description,
-                    String address, float rate) {
+    public GetHotelDto(long id, String hotelName,
+                       String mainImage, String description,
+                       String address, float rate) {
         this.id = id;
         this.hotelName = hotelName;
         this.mainImage = mainImage;
@@ -36,16 +36,16 @@ public class HotelDto {
         this.rate = rate;
     }
 
-    public HotelDto(long id, String hotelName,
-                    String address, float rate,
-                    RoomDetailsDto roomDetailsDto,
-                    List<HotelFeaturesEntity> hotelFeatures,
-                    List<RoomFeaturesEntity> roomFeatures) {
+    public GetHotelDto(long id, String hotelName,
+                       String address, float rate,
+                       GetRoomDetailsDto getRoomDetailsDto,
+                       List<HotelFeaturesEntity> hotelFeatures,
+                       List<RoomFeaturesEntity> roomFeatures) {
         this.id = id;
         this.hotelName = hotelName;
         this.address = address;
         this.rate = rate;
-        this.roomDetails = roomDetailsDto;
+        this.roomDetails = getRoomDetailsDto;
         this.hotelFeatures = hotelFeatures;
         this.roomFeatures = roomFeatures;
     }

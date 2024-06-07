@@ -1,6 +1,6 @@
 package com.hackathon.backend.package_.repositories;
 
-import com.hackathon.backend.dto.packageDto.EssentialPackageDto;
+import com.hackathon.backend.dto.packageDto.GetEssentialPackageDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.repositories.country.CountryRepository;
@@ -53,7 +53,7 @@ class PackageRepositoryTest {
         int countryId = countryRepository.findAll().get(0).getId();
 
         //when
-        List<EssentialPackageDto> response = packageRepository.findPackagesByCountryId(countryId);
+        List<GetEssentialPackageDto> response = packageRepository.findPackagesByCountryId(countryId);
 
         //then
         assertEquals(response.get(0).getPackageName(), "testPackage");
