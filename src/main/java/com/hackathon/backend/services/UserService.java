@@ -59,6 +59,10 @@ public class UserService {
     }
 
     public ResponseEntity<?> registerUser(@NonNull RegisterUserDto registerUserDto) {
+        if(!userUtils.isStrongPassword(registerUserDto.getPassword())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password must be at least 8 characters long and contain"
+                    + " at least one uppercase letter, one lowercase letter, one number, and one special character.");
+        }
         try {
             boolean checkExistsEmail = userUtils
                     .existsByEmail(registerUserDto.getEmail());
@@ -133,6 +137,10 @@ public class UserService {
     @Transactional
     public ResponseEntity<?> editUser(long userId,
                                       EditUserDto editUserDto) {
+        if(!editUserDto.getPassword().isEmpty() && !userUtils.isStrongPassword(editUserDto.getPassword())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password must be at least 8 characters long and contain"
+                    + " at least one uppercase letter, one lowercase letter, one number, and one special character.");
+        }
         try {
             UserEntity user = userUtils.findById(userId);
             editHelper(user,editUserDto);

@@ -58,6 +58,10 @@ public class UserUtils {
         userRepository.deleteAll();
     }
 
+    public void delete(UserEntity user) {
+        userRepository.delete(user);
+    }
+
     public SimpleMailMessage sendMessageToEmail(String email, String message){
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(email);
@@ -66,7 +70,18 @@ public class UserUtils {
         return mailMessage;
     }
 
-    public void delete(UserEntity user) {
-        userRepository.delete(user);
+    public boolean isStrongPassword(String password){
+
+        boolean isUppercase = false, isLowercase = false, isDigit = false, isSpecial = false;
+
+        for(char c:password.toCharArray()){
+            if(Character.isUpperCase(c)) isUppercase = true;
+            else if(Character.isLowerCase(c)) isLowercase = true;
+            else if(Character.isDigit(c)) isDigit = true;
+            else isSpecial = true;
+        }
+
+        return isUppercase && isLowercase && isDigit && isSpecial;
     }
+
 }
