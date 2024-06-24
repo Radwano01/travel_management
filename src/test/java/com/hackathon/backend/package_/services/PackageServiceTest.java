@@ -120,12 +120,12 @@ class PackageServiceTest {
         packageEntity.setPackageName("testPackage");
         packageEntity.setMainImage("testImage");
         packageEntity.setPrice(100);
-        packageEntity.setRate(1.88f);
+        packageEntity.setRate(1);
 
         EditPackageDto editPackageDto = new EditPackageDto(
                 "testPackage1",
                 100,
-                1.1f,
+                1,
                 new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0])
 
         );
@@ -142,7 +142,7 @@ class PackageServiceTest {
         assertEquals("testPackage1", packageEntity.getPackageName());
         assertEquals("mainImage", packageEntity.getMainImage());
         assertEquals(100, packageEntity.getPrice());
-        assertEquals(1.1f, packageEntity.getRate());
+        assertEquals(1, packageEntity.getRate());
 
     }
 

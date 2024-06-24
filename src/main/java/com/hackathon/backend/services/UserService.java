@@ -59,7 +59,7 @@ public class UserService {
     }
 
     public ResponseEntity<?> registerUser(@NonNull RegisterUserDto registerUserDto) {
-        if(!userUtils.isStrongPassword(registerUserDto.getPassword())){
+        if(!isStrongPassword(registerUserDto.getPassword())){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password must be at least 8 characters long and contain"
                     + " at least one uppercase letter, one lowercase letter, one number, and one special character.");
         }
@@ -77,7 +77,7 @@ public class UserService {
             RoleEntity role = roleRepository.findByRole("USER")
                     .orElseThrow(()-> new EntityNotFoundException("Role not found"));
 
-            String defaultImageForNewUsers = "https://travelmanagementimages.s3.eu-central-1.amazonaws.com/image_2024-06-07_134630578.png";
+            String defaultImageForNewUsers = "https://travelmanagementimages.s3.eu-central-1.amazonaws.com/default_user_image.png";
             UserEntity userEntity = new UserEntity(
                     registerUserDto.getUsername(),
                     registerUserDto.getEmail(),
@@ -135,23 +135,24 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<?> editUser(long userId,
-                                      EditUserDto editUserDto) {
-        if(!editUserDto.getPassword().isEmpty() && !userUtils.isStrongPassword(editUserDto.getPassword())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password must be at least 8 characters long and contain"
-                    + " at least one uppercase letter, one lowercase letter, one number, and one special character.");
-        }
+    public ResponseEntity<?> editUser(long userId, EditUserDto editUserDto) {
         try {
+            if (!isStrongPassword(editUserDto.getPassword())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
+            }
+
             UserEntity user = userUtils.findById(userId);
-            editHelper(user,editUserDto);
+            editHelper(user, editUserDto);
             userUtils.save(user);
+
             return ResponseEntity.ok("user updated successfully");
-        }catch (EntityNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             return notFoundException(e);
-        }catch (Exception e){
+        } catch (Exception e) {
             return serverErrorException(e);
         }
     }
+
 
     @Transactional
     public ResponseEntity<?> verifyUser(String email) {
@@ -199,5 +200,22 @@ public class UserService {
             String userImageName = s3Service.uploadFile(editUserDto.getImage());
             user.setImage(userImageName);
         }
+    }
+
+    public boolean isStrongPassword(String password){
+        if (password == null || password.length() < 8) {
+            return false;
+        }
+
+        boolean isUppercase = false, isLowercase = false, isDigit = false, isSpecial = false;
+
+        for(char c:password.toCharArray()){
+            if(Character.isUpperCase(c)) isUppercase = true;
+            else if(Character.isLowerCase(c)) isLowercase = true;
+            else if(Character.isDigit(c)) isDigit = true;
+            else isSpecial = true;
+        }
+
+        return isUppercase && isLowercase && isDigit && isSpecial;
     }
 }

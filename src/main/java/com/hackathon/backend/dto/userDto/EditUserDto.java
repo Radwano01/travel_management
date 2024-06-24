@@ -11,4 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class EditUserDto {
     private String password;
     private MultipartFile image;
+
+    public EditUserDto(String password, MultipartFile image) {
+        this.password = password;
+        this.image = image;
+    }
 }

@@ -75,6 +75,7 @@ public class HotelService {
                     postHotelDto.getDescription(),
                     postHotelDto.getHotelRoomsCount(),
                     postHotelDto.getAddress(),
+                    postHotelDto.getPrice(),
                     country
             );
 
@@ -95,9 +96,10 @@ public class HotelService {
                     hotelEntity
             );
 
+            roomDetailsUtils.save(roomDetails);
+
             hotelEntity.setRoomDetails(roomDetails);
             hotelUtils.save(hotelEntity);
-            roomDetailsUtils.save(roomDetails);
             return ResponseEntity.ok("Hotel created successfully: " + postHotelDto.getHotelName());
         } catch (EntityNotFoundException e) {
             return notFoundException(e);
@@ -139,52 +141,65 @@ public class HotelService {
     public ResponseEntity<?> deleteHotel(long hotelId) {
         try {
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
+
+            if (hotel == null) {
+                throw new EntityNotFoundException("Hotel not found");
+            }
+
             RoomDetailsEntity roomDetails = hotel.getRoomDetails();
             CountryEntity country = hotel.getCountry();
 
-            for(RoomEntity room: hotel.getRooms()){
+            if (country != null) {
+                country.getHotels().remove(hotel);
+                countryUtils.save(country);
+            }
+
+            for (RoomEntity room : hotel.getRooms()) {
                 roomUtils.delete(room);
             }
 
-            country.getHotels().remove(hotel);
-            countryUtils.save(country);
-
-            for(HotelEvaluationEntity evaluation:hotel.getEvaluations()){
+            for (HotelEvaluationEntity evaluation : hotel.getEvaluations()) {
                 hotelEvaluationUtils.delete(evaluation);
             }
 
-            List<HotelFeaturesEntity> hotelFeatures = roomDetails.getHotelFeatures();
+            if (roomDetails != null) {
+                List<HotelFeaturesEntity> hotelFeatures = roomDetails.getHotelFeatures();
+                if (hotelFeatures != null) {
+                    for (HotelFeaturesEntity hotelFeature : hotelFeatures) {
+                        roomDetails.getHotelFeatures().remove(hotelFeature);
+                        hotelFeaturesUtils.save(hotelFeature);
+                    }
+                }
 
-            for(HotelFeaturesEntity hotelFeature:hotelFeatures){
-                roomDetails.getHotelFeatures().remove(hotelFeature);
-                hotelFeaturesUtils.save(hotelFeature);
+                List<RoomFeaturesEntity> roomFeatures = roomDetails.getRoomFeatures();
+                if (roomFeatures != null) {
+                    for (RoomFeaturesEntity roomFeature : roomFeatures) {
+                        roomDetails.getRoomFeatures().remove(roomFeature);
+                        roomFeaturesUtils.save(roomFeature);
+                    }
+                }
+
+                String[] ls = new String[]{
+                        roomDetails.getImageOne(),
+                        roomDetails.getImageTwo(),
+                        roomDetails.getImageThree(),
+                        roomDetails.getImageFour()
+                };
+
+                s3Service.deleteFiles(ls);
+                roomDetailsUtils.delete(roomDetails);
             }
 
-            List<RoomFeaturesEntity> roomFeatures = roomDetails.getRoomFeatures();
-
-            for(RoomFeaturesEntity roomFeature:roomFeatures){
-                roomDetails.getRoomFeatures().remove(roomFeature);
-                roomFeaturesUtils.save(roomFeature);
-            }
-
-            String[] ls = new String[]{
-                    roomDetails.getImageOne(),
-                    roomDetails.getImageTwo(),
-                    roomDetails.getImageThree(),
-                    roomDetails.getImageFour()
-            };
-
-            s3Service.deleteFiles(ls);
-            roomDetailsUtils.delete(roomDetails);
             s3Service.deleteFile(hotel.getMainImage());
             hotelUtils.delete(hotel);
             return ResponseEntity.ok("Hotel deleted Successfully");
-        }catch (EntityNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             return notFoundException(e);
-        }catch (Exception e){
+        } catch (Exception e) {
             return serverErrorException(e);
         }
     }
+
 
     private void editHelper(HotelEntity hotel,
                             EditHotelDto editHotelDto) {

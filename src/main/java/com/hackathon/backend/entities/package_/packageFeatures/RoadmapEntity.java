@@ -1,5 +1,6 @@
 package com.hackathon.backend.entities.package_.packageFeatures;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import jakarta.persistence.*;
@@ -22,7 +23,8 @@ public class RoadmapEntity {
     private int id;
     private String roadmap;
 
-    @ManyToMany
+    @JsonIgnore
+    @ManyToMany(mappedBy = "roadmaps", fetch = FetchType.LAZY)
     private List<PackageDetailsEntity> packageDetails = new ArrayList<>();
 
     public RoadmapEntity(String roadmap){

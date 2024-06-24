@@ -7,6 +7,7 @@ import com.hackathon.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(path = "${BASE_API}")
@@ -48,7 +49,12 @@ public class UserController {
 
     @PutMapping(path="${USER_EDIT_PATH}")
     public ResponseEntity<?> editUserDetails(@PathVariable("userId") long userId,
-                                             @RequestBody EditUserDto editUserDto){
+                                             @RequestParam(name = "password", required = false) String password,
+                                             @RequestParam(name = "image", required = false) MultipartFile image){
+        EditUserDto editUserDto = new EditUserDto(
+                password,
+                image
+        );
         return userService.editUser(userId,editUserDto);
 
     }

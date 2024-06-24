@@ -38,6 +38,7 @@ class HotelRepositoryTest {
                 "testDesc",
                 100,
                 "testAddress",
+                3,
                 country
         );
         hotelRepository.save(hotel);
@@ -62,6 +63,6 @@ class HotelRepositoryTest {
         assertEquals(response.get(0).getMainImage(), "testImage");
         assertEquals(response.get(0).getDescription(), "testDesc");
         assertEquals(response.get(0).getAddress(), "testAddress");
-        assertEquals(response.get(0).getRate(), 0f);
+        assertEquals(response.get(0).getRate(), 3);
     }
 }

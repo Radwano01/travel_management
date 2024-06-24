@@ -1,6 +1,7 @@
 package com.hackathon.backend.services.country;
 
 import com.hackathon.backend.dto.countryDto.placeDto.EditPlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.GetEssentialPlaceDto;
 import com.hackathon.backend.dto.countryDto.placeDto.PostPlaceDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
@@ -83,9 +84,8 @@ public class PlaceService{
 
     public ResponseEntity<?> getPlacesByCountry(int countryId){
         try{
-            CountryEntity country = countryUtils.findCountryById(countryId);
-            List<PlaceEntity> placeEntities =  country.getPlaces();
-            return ResponseEntity.ok(placeEntities);
+            List<GetEssentialPlaceDto> places = placeUtils.findPlacesByCountryId(countryId);
+            return ResponseEntity.ok(places);
         }catch(EntityNotFoundException e){
             return notFoundException(e);
         }catch(Exception e){

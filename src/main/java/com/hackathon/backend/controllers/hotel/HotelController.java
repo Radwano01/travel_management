@@ -26,6 +26,7 @@ public class HotelController {
                                          @RequestParam("description") String description,
                                          @RequestParam("hotelRoomsCount") int hotelRoomsCount,
                                          @RequestParam("address") String address,
+                                         @RequestParam("rate") int rate,
                                          @RequestParam("imageOne") MultipartFile imageOne,
                                          @RequestParam("imageTwo") MultipartFile imageTwo,
                                          @RequestParam("imageThree") MultipartFile imageThree,
@@ -38,7 +39,7 @@ public class HotelController {
                 description,
                 hotelRoomsCount,
                 address,
-                0,
+                rate,
                 imageOne,
                 imageTwo,
                 imageThree,
@@ -62,7 +63,7 @@ public class HotelController {
                                        @RequestParam(name = "description", required = false) String description,
                                        @RequestParam(name = "hotelRoomsCount", required = false) int hotelRoomsCount,
                                        @RequestParam(name = "address", required = false) String address,
-                                       @RequestParam(name = "rate", required = false) float rate){
+                                       @RequestParam(name = "rate", required = false) int rate){
         EditHotelDto editHotelDto = new EditHotelDto(
                 hotelName,
                 mainImage,

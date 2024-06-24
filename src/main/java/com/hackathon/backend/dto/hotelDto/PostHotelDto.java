@@ -14,7 +14,7 @@ public class PostHotelDto {
     private String description;
     private int hotelRoomsCount;
     private String address;
-    private float rate;
+    private int rate;
     private MultipartFile imageOne;
     private MultipartFile imageTwo;
     private MultipartFile imageThree;
@@ -24,7 +24,7 @@ public class PostHotelDto {
 
     public PostHotelDto(String hotelName, MultipartFile mainImage,
                         String description, int hotelRoomsCount,
-                        String address, float rate,
+                        String address, int rate,
                         MultipartFile imageOne, MultipartFile imageTwo,
                         MultipartFile imageThree, MultipartFile imageFour,
                         String roomDescription, int price) {

@@ -25,7 +25,7 @@ public class PackageController {
     public ResponseEntity<?> createPackage(@PathVariable("countryId") int countryId,
                                            @RequestParam("packageName") String packageName,
                                            @RequestParam("price") float price,
-                                           @RequestParam("rate") float rate,
+                                           @RequestParam("rate") int rate,
                                            @RequestParam("mainImage") MultipartFile mainImage,
                                            @RequestParam("imageOne") MultipartFile imageOne,
                                            @RequestParam("imageTwo") MultipartFile imageTwo,
@@ -54,7 +54,7 @@ public class PackageController {
     public ResponseEntity<?> editPackage(@PathVariable("packageId") int packageId,
                                          @RequestParam(name = "packageName",required = false) String packageName,
                                          @RequestParam(name = "price",required = false) float price,
-                                         @RequestParam(name = "rate",required = false) float rate,
+                                         @RequestParam(name = "rate",required = false) int rate,
                                          @RequestParam(name = "mainImage",required = false) MultipartFile mainImage){
         EditPackageDto editPackageDto = new EditPackageDto(
                 packageName,

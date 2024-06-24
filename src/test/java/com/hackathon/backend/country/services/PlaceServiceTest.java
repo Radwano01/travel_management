@@ -1,6 +1,7 @@
 package com.hackathon.backend.country.services;
 
 import com.hackathon.backend.dto.countryDto.placeDto.EditPlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.GetEssentialPlaceDto;
 import com.hackathon.backend.dto.countryDto.placeDto.PostPlaceDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -90,14 +92,22 @@ class PlaceServiceTest {
 
         country.getPlaces().add(place);
 
+        GetEssentialPlaceDto getEssentialPlaceDto = new GetEssentialPlaceDto();
+        getEssentialPlaceDto.setId(place.getId());
+        getEssentialPlaceDto.setPlace(place.getPlace());
+        getEssentialPlaceDto.setMainImage(place.getMainImage());
+
+        List<GetEssentialPlaceDto> res = new ArrayList<>();
+        res.add(getEssentialPlaceDto);
+
         //behavior
-        when(countryUtils.findCountryById(countryId)).thenReturn(country);
+        when(placeUtils.findPlacesByCountryId(countryId)).thenReturn(res);
 
         //when
         ResponseEntity<?> response = placeService.getPlacesByCountry(countryId);
 
-        List<PlaceEntity> placeEntities = (List<PlaceEntity>) response.getBody();
-        PlaceEntity responseData = placeEntities.get(0);
+        List<GetEssentialPlaceDto> placeEntities = (List<GetEssentialPlaceDto>) response.getBody();
+        GetEssentialPlaceDto responseData = placeEntities.get(0);
 
         //then
 

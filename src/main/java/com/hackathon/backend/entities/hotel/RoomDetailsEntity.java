@@ -10,11 +10,11 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "roomDetails")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "roomDetails")
 public class RoomDetailsEntity {
 
     @Id
@@ -35,13 +35,13 @@ public class RoomDetailsEntity {
     @JoinColumn(name = "hotel_id")
     private HotelEntity hotel;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "hotelFeaturesRelation",
             joinColumns = @JoinColumn(name = "room_details_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "feature_id", referencedColumnName = "id"))
     private List<HotelFeaturesEntity> hotelFeatures = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "roomFeaturesRelation",
             joinColumns = @JoinColumn(name = "room_details_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "feature_id", referencedColumnName = "id"))

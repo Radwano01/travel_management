@@ -1,5 +1,6 @@
 package com.hackathon.backend.entities.package_.packageFeatures;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import jakarta.persistence.*;
@@ -22,7 +23,8 @@ public class BenefitEntity{
     private int id;
     private String benefit;
 
-    @ManyToMany
+    @JsonIgnore
+    @ManyToMany(mappedBy = "benefits", fetch = FetchType.LAZY)
     private List<PackageDetailsEntity> packageDetails = new ArrayList<>();
 
     public BenefitEntity(String benefit){

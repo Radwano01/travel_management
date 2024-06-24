@@ -36,6 +36,7 @@ class PackageRepositoryTest {
                 "testPackage",
                 200,
                 "testImage",
+                4,
                 country
         );
         packageRepository.save(packageEntity);

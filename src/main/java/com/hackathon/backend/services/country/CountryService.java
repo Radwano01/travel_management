@@ -3,18 +3,30 @@ package com.hackathon.backend.services.country;
 import com.hackathon.backend.dto.countryDto.*;
 import com.hackathon.backend.entities.country.CountryDetailsEntity;
 import com.hackathon.backend.entities.country.CountryEntity;
+import com.hackathon.backend.entities.country.PlaceDetailsEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
+import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
+import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
+import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
+import com.hackathon.backend.repositories.hotel.hotelFeatures.HotelFeaturesRepository;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryDetailsUtils;
 import com.hackathon.backend.utilities.country.CountryUtils;
+import com.hackathon.backend.utilities.country.PlaceDetailsUtils;
 import com.hackathon.backend.utilities.country.PlaceUtils;
+import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
+import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
+import com.hackathon.backend.utilities.hotel.RoomUtils;
+import com.hackathon.backend.utilities.hotel.features.HotelFeaturesUtils;
+import com.hackathon.backend.utilities.hotel.features.RoomFeaturesUtils;
 import com.hackathon.backend.utilities.package_.PackageUtils;
 import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +43,13 @@ public class CountryService{
     private final CountryUtils countryUtils;
     private final CountryDetailsUtils countryDetailsUtils;
     private final PlaceUtils placeUtils;
+    private final PlaceDetailsUtils placeDetailsUtils;
     private final HotelUtils hotelUtils;
+    private final RoomDetailsUtils roomDetailsUtils;
+    private final HotelEvaluationUtils hotelEvaluationUtils;
+    private final RoomUtils roomUtils;
+    private final HotelFeaturesUtils hotelFeaturesUtils;
+    private final RoomFeaturesUtils roomFeaturesUtils;
     private final PackageUtils packageUtils;
     private final PlaneFlightsUtils planeFlightsUtils;
     private final S3Service s3Service;
@@ -39,14 +57,27 @@ public class CountryService{
     @Autowired
     public CountryService(CountryUtils countryUtils,
                           CountryDetailsUtils countryDetailsUtils,
-                          PlaceUtils placeUtils, HotelUtils hotelUtils,
+                          PlaceUtils placeUtils,
+                          PlaceDetailsUtils placeDetailsUtils,
+                          HotelUtils hotelUtils,
+                          RoomDetailsUtils roomDetailsUtils,
+                          HotelEvaluationUtils hotelEvaluationUtils,
+                          RoomUtils roomUtils,
+                          HotelFeaturesUtils hotelFeaturesUtils,
+                          RoomFeaturesUtils roomFeaturesUtils,
                           PackageUtils packageUtils,
                           PlaneFlightsUtils planeFlightsUtils,
                           S3Service s3Service) {
         this.countryUtils = countryUtils;
         this.countryDetailsUtils = countryDetailsUtils;
         this.placeUtils = placeUtils;
+        this.placeDetailsUtils = placeDetailsUtils;
         this.hotelUtils = hotelUtils;
+        this.roomDetailsUtils = roomDetailsUtils;
+        this.hotelEvaluationUtils = hotelEvaluationUtils;
+        this.roomUtils = roomUtils;
+        this.hotelFeaturesUtils = hotelFeaturesUtils;
+        this.roomFeaturesUtils = roomFeaturesUtils;
         this.packageUtils = packageUtils;
         this.planeFlightsUtils = planeFlightsUtils;
         this.s3Service = s3Service;
@@ -99,6 +130,7 @@ public class CountryService{
         }
     }
 
+    @Transactional
     public ResponseEntity<?> editCountry(int countryId,
                                         EditCountryDto editCountryDto) {
         try {
@@ -113,15 +145,35 @@ public class CountryService{
         }
     }
 
+    @Transactional
     public ResponseEntity<?> deleteCountry(int countryId) {
         try {
             CountryEntity countryEntity = countryUtils.findCountryById(countryId);
 
             for(PlaceEntity place:countryEntity.getPlaces()){
+                PlaceDetailsEntity placeDetails = place.getPlaceDetails();
+                if(placeDetails != null){
+                    placeDetailsUtils.delete(placeDetails);
+                }
                 placeUtils.delete(place);
             }
 
             for(HotelEntity hotel:countryEntity.getHotels()){
+                RoomDetailsEntity roomDetails = hotel.getRoomDetails();
+                if(roomDetails != null){
+                    roomDetailsUtils.delete(roomDetails);
+                }
+                List<HotelEvaluationEntity> hotelEvaluation = hotel.getEvaluations();
+                if(hotelEvaluation != null){
+                    for (HotelEvaluationEntity hotelEvaluationEntity : hotelEvaluation) {
+                        hotelEvaluationUtils.delete(hotelEvaluationEntity);
+                    }
+                }
+                if(hotel.getRooms() != null){
+                    for(RoomEntity room:hotel.getRooms()){
+                        roomUtils.delete(room);
+                    }
+                }
                 hotelUtils.delete(hotel);
             }
 
@@ -157,7 +209,7 @@ public class CountryService{
     private void editHelper(CountryEntity country,
                             EditCountryDto editCountryDto) {
         if (editCountryDto.getCountry() != null) {
-            boolean existsCountry = countryUtils.existsByCountry(country.getCountry());
+            boolean existsCountry = countryUtils.existsByCountry(editCountryDto.getCountry());
             if(!existsCountry) country.setCountry(editCountryDto.getCountry());
         }
         if (editCountryDto.getMainImage() != null) {

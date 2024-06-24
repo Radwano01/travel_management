@@ -1,5 +1,6 @@
 package com.hackathon.backend.entities.hotel.hotelFeatures;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -22,7 +23,8 @@ public class RoomFeaturesEntity {
 
     private String roomFeatures;
 
-    @ManyToMany
+    @JsonIgnore
+    @ManyToMany(mappedBy = "roomFeatures", fetch = FetchType.LAZY)
     private List<RoomDetailsEntity> roomDetails = new ArrayList<>();
 
     public RoomFeaturesEntity(String roomFeature) {

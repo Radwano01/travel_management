@@ -7,11 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "planeSeats")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "planeSeats")
 public class PlaneSeatsEntity {
 
     @Id

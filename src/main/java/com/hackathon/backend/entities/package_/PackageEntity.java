@@ -24,7 +24,7 @@ public class PackageEntity{
     private String packageName;
     private float price;
     private String mainImage;
-    private float rate = 0;
+    private int rate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id")
@@ -40,10 +40,12 @@ public class PackageEntity{
     public PackageEntity(String packageName,
                          float price,
                          String mainImage,
+                         int rate,
                          CountryEntity country){
         this.packageName = packageName;
         this.price = price;
         this.mainImage = mainImage;
+        this.rate = rate;
         this.country = country;
     }
 }

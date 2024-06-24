@@ -147,7 +147,7 @@ class HotelServiceTest {
         getHotelDto.setDescription("testDescription");
         getHotelDto.setHotelRoomsCount(80);
         getHotelDto.setAddress("testAddress");
-        getHotelDto.setRate(3.5f);
+        getHotelDto.setRate(3);
 
         HotelEntity hotel = new HotelEntity();
         hotel.setHotelName("testHotel");
@@ -155,7 +155,7 @@ class HotelServiceTest {
         hotel.setDescription("testDesc");
         hotel.setHotelRoomsCount(80);
         hotel.setAddress("testAddress");
-        hotel.setRate(3.5f);
+        hotel.setRate(3);
 
         //behavior
         CountryEntity country = new CountryEntity();
@@ -174,7 +174,7 @@ class HotelServiceTest {
         assertEquals("testDescription", hotel.getDescription());
         assertEquals(80, hotel.getHotelRoomsCount());
         assertEquals("testAddress", hotel.getAddress());
-        assertEquals(3.5f, hotel.getRate());
+        assertEquals(3, hotel.getRate());
     }
 
     @Test

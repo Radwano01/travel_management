@@ -47,7 +47,7 @@ class PackageDetailsServiceTest {
         packageEntity.setPackageName("testPackage");
         packageEntity.setMainImage("testImage");
         packageEntity.setPrice(100);
-        packageEntity.setRate(2.50f);
+        packageEntity.setRate(2);
 
         PackageDetailsEntity packageDetailsEntity = new PackageDetailsEntity();
         packageDetailsEntity.setId(1);

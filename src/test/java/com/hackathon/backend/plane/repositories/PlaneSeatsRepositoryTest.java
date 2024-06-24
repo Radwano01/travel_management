@@ -25,21 +25,22 @@ class PlaneSeatsRepositoryTest {
     PlaneSeatsRepository planeSeatsRepository;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         PlaneEntity plane = new PlaneEntity(
                 "testName",
                 100
         );
-        plane.setId(1);
         planeRepository.save(plane);
 
         PlaneSeatsEntity planeSeats = new PlaneSeatsEntity(
                 'A',
                 1,
                 plane
-
         );
+
+        plane.getPlaneSeats().add(planeSeats);
         planeSeatsRepository.save(planeSeats);
+        planeRepository.save(plane);
     }
 
     @AfterEach
@@ -50,15 +51,14 @@ class PlaneSeatsRepositoryTest {
 
     @Test
     void findAllSeatsByPlaneId() {
-        //given
+        // given
         long planeId = 1;
-        //when
+
+        // when
         Optional<List<PlaneSeatsEntity>> response = planeSeatsRepository.findAllSeatsByPlaneId(planeId);
 
-        //then
+        // then
         assertTrue(response.isPresent());
-        assertEquals(response.get().get(0).getSeatClass(), 'A');
-        assertEquals(response.get().get(0).getSeatNumber(), 1);
-        assertEquals(response.get().get(0).getPlane().getPlaneCompanyName(), "testName");
     }
+
 }

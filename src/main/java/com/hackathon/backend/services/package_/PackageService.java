@@ -65,6 +65,7 @@ public class PackageService {
                     postPackageDto.getPackageName(),
                     postPackageDto.getPrice(),
                     packageMainImageName,
+                    postPackageDto.getRate(),
                     country
             );
 

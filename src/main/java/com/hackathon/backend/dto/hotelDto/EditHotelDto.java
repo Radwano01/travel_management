@@ -14,14 +14,14 @@ public class EditHotelDto {
     private String description;
     private int hotelRoomsCount;
     private String address;
-    private float rate;
+    private int rate;
 
     public EditHotelDto(String hotelName,
                         MultipartFile mainImage,
                         String description,
                         int hotelRoomsCount,
                         String address,
-                        float rate) {
+                        int rate) {
         this.hotelName = hotelName;
         this.mainImage = mainImage;
         this.description = description;

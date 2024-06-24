@@ -17,7 +17,7 @@ public class RoomFeaturesController {
     }
 
     @PostMapping(path = "${CREATE_ROOM_FEATURE_PATH}")
-    public ResponseEntity<?> createRoomFeature(String roomFeature){
+    public ResponseEntity<?> createRoomFeature(@RequestParam("roomFeature") String roomFeature){
         return roomFeaturesService.createRoomFeature(roomFeature);
     }
 

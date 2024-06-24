@@ -11,15 +11,14 @@ import org.springframework.web.multipart.MultipartFile;
 public class PostPackageDto {
     private String packageName;
     private float price;
-    private float rate;
+    private int rate;
     private MultipartFile mainImage;
-
     private MultipartFile imageOne;
     private MultipartFile imageTwo;
     private MultipartFile imageThree;
     private String description;
 
-    public PostPackageDto(String packageName, float price, float rate, MultipartFile mainImage,
+    public PostPackageDto(String packageName, float price, int rate, MultipartFile mainImage,
                           MultipartFile imageOne, MultipartFile imageTwo, MultipartFile imageThree,
                           String description) {
         this.packageName = packageName;

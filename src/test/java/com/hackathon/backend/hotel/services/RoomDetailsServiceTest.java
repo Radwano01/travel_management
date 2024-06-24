@@ -57,14 +57,10 @@ class RoomDetailsServiceTest {
         //when
         ResponseEntity<?> response = roomDetailsService.getRoomAllDetails(hotelId);
 
-        GetHotelDto getHotelDto = (GetHotelDto) response.getBody();
-        GetRoomDetailsDto getRoomDetailsDto = getHotelDto.getRoomDetails();
+        GetRoomDetailsDto getRoomDetailsDto = (GetRoomDetailsDto) response.getBody();
+
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(hotel.getId(), getHotelDto.getId());
-        assertEquals(hotel.getHotelName(), getHotelDto.getHotelName());
-        assertEquals(hotel.getAddress(), getHotelDto.getAddress());
-        assertEquals(hotel.getRate(), getHotelDto.getRate());
 
         assertEquals(roomDetails.getImageOne(), getRoomDetailsDto.getImageOne());
         assertEquals(roomDetails.getImageTwo(), getRoomDetailsDto.getImageTwo());

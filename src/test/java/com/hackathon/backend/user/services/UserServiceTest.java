@@ -1,4 +1,4 @@
-package com.hackathon.backend.services;
+package com.hackathon.backend.user.services;
 
 import com.hackathon.backend.dto.userDto.AuthResponseDto;
 import com.hackathon.backend.dto.userDto.EditUserDto;
@@ -8,13 +8,13 @@ import com.hackathon.backend.entities.user.RoleEntity;
 import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.user.RoleRepository;
 import com.hackathon.backend.security.JWTGenerator;
+import com.hackathon.backend.services.UserService;
 import com.hackathon.backend.utilities.UserUtils;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,7 +60,7 @@ class UserServiceTest {
     @Test
     void registerUser() {
         //given
-        RegisterUserDto registerUserDto = new RegisterUserDto("username", "email@example.com", "password");
+        RegisterUserDto registerUserDto = new RegisterUserDto("username", "email@example.com", "Password123!");
         RoleEntity role = new RoleEntity();
 
         //behavior
@@ -131,19 +131,20 @@ class UserServiceTest {
     void editUser() {
         //given
         long userId = 1L;
-        EditUserDto editUserDto = new EditUserDto();
-        editUserDto.setPassword("newPassword");
-        MockMultipartFile newImageFile = new MockMultipartFile("newImage1", "image.jpg", "image/jpeg", "image data".getBytes());
-        editUserDto.setImage(newImageFile);
+
+        EditUserDto editUserDto = new EditUserDto(
+                "Password123!",
+                new MockMultipartFile("newImage1", "image.jpg", "image/jpeg", "image data".getBytes())
+        );
 
         UserEntity userEntity = new UserEntity();
         userEntity.setId(userId);
-        userEntity.setPassword("oldPassword");
+        userEntity.setPassword("Password12345!");
         userEntity.setImage("oldImage");
 
         //behavior
         when(userUtils.findById(userId)).thenReturn(userEntity);
-        when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
+        when(passwordEncoder.encode(editUserDto.getPassword())).thenReturn("encodedNewPassword123!!");
         when(s3Service.uploadFile(any(MockMultipartFile.class))).thenReturn("newImageUrl");
 
         //when
@@ -152,13 +153,15 @@ class UserServiceTest {
         //then
         assertEquals("user updated successfully", response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("encodedNewPassword", userEntity.getPassword());
+        assertEquals("encodedNewPassword123!!", userEntity.getPassword());
         assertEquals("newImageUrl", userEntity.getImage());
 
         verify(s3Service, times(1)).deleteFile("oldImage");
-        verify(s3Service, times(1)).uploadFile(newImageFile);
+        verify(s3Service, times(1)).uploadFile(editUserDto.getImage());
         verify(userUtils, times(1)).save(userEntity);
     }
+
+
 
 
     @Test

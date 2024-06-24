@@ -4,16 +4,29 @@ import com.hackathon.backend.dto.countryDto.GetCountryDto;
 import com.hackathon.backend.dto.countryDto.PostCountryDto;
 import com.hackathon.backend.entities.country.CountryDetailsEntity;
 import com.hackathon.backend.entities.country.CountryEntity;
+import com.hackathon.backend.entities.country.PlaceDetailsEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
+import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
+import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
+import com.hackathon.backend.entities.hotel.RoomEntity;
+import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
+import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
+import com.hackathon.backend.repositories.hotel.hotelFeatures.HotelFeaturesRepository;
 import com.hackathon.backend.services.country.CountryService;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryDetailsUtils;
 import com.hackathon.backend.utilities.country.CountryUtils;
+import com.hackathon.backend.utilities.country.PlaceDetailsUtils;
 import com.hackathon.backend.utilities.country.PlaceUtils;
+import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
+import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
+import com.hackathon.backend.utilities.hotel.RoomUtils;
+import com.hackathon.backend.utilities.hotel.features.HotelFeaturesUtils;
+import com.hackathon.backend.utilities.hotel.features.RoomFeaturesUtils;
 import com.hackathon.backend.utilities.package_.PackageUtils;
 import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
 import org.junit.jupiter.api.Test;
@@ -45,7 +58,24 @@ class CountryServiceTest {
     PlaceUtils placeUtils;
 
     @Mock
+    PlaceDetailsUtils placeDetailsUtils;
+    @Mock
     HotelUtils hotelUtils;
+
+    @Mock
+    RoomDetailsUtils roomDetailsUtils;
+
+    @Mock
+    HotelEvaluationUtils hotelEvaluationUtils;
+
+    @Mock
+    RoomUtils roomUtils;
+
+    @Mock
+    HotelFeaturesUtils hotelFeaturesUtils;
+
+    @Mock
+    RoomFeaturesUtils roomFeaturesUtils;
 
     @Mock
     PackageUtils packageUtils;
@@ -126,13 +156,30 @@ class CountryServiceTest {
 
     @Test
     void deleteCountry() {
-        //given
+        // given
         int countryId = 1;
         CountryEntity country = new CountryEntity();
         country.setId(countryId);
 
         PlaceEntity place = new PlaceEntity();
+        PlaceDetailsEntity placeDetails = new PlaceDetailsEntity();
+        place.setPlaceDetails(placeDetails);
+
         HotelEntity hotel = new HotelEntity();
+        RoomDetailsEntity roomDetails = new RoomDetailsEntity();
+        HotelEvaluationEntity hotelEvaluation = new HotelEvaluationEntity();
+        RoomEntity room = new RoomEntity();
+
+        HotelFeaturesEntity hotelFeature = new HotelFeaturesEntity();
+        RoomFeaturesEntity roomFeature = new RoomFeaturesEntity();
+
+        hotel.setRoomDetails(roomDetails);
+        hotel.getEvaluations().add(hotelEvaluation);
+        hotel.getRooms().add(room);
+
+        roomDetails.setHotelFeatures(List.of(hotelFeature));
+        roomDetails.setRoomFeatures(List.of(roomFeature));
+
         PackageEntity packageEntity = new PackageEntity();
         PlaneFlightsEntity departingFlight = new PlaneFlightsEntity();
         PlaneFlightsEntity arrivingFlight = new PlaneFlightsEntity();
@@ -146,23 +193,30 @@ class CountryServiceTest {
         country.setCountryDetails(countryDetails);
 
         CountryService countryService = new CountryService(countryUtils, countryDetailsUtils,
-                placeUtils, hotelUtils, packageUtils, planeFlightsUtils, s3Service);
+                placeUtils, placeDetailsUtils, hotelUtils, roomDetailsUtils, hotelEvaluationUtils, roomUtils,
+                hotelFeaturesUtils, roomFeaturesUtils, packageUtils, planeFlightsUtils, s3Service);
 
-        //behavior
+        // behavior
         when(countryUtils.findCountryById(countryId)).thenReturn(country);
 
-        //when
+        // when
         ResponseEntity<?> response = countryService.deleteCountry(countryId);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(placeDetailsUtils).delete(placeDetails);
         verify(placeUtils).delete(place);
         verify(hotelUtils).delete(hotel);
+        verify(hotelEvaluationUtils).delete(hotelEvaluation);
+        verify(roomUtils).delete(room);
+        verify(roomDetailsUtils).delete(roomDetails);
         verify(packageUtils).delete(packageEntity);
         verify(planeFlightsUtils).delete(departingFlight);
         verify(planeFlightsUtils).delete(arrivingFlight);
         verify(countryDetailsUtils).delete(countryDetails);
         verify(countryUtils).delete(country);
     }
+
+
 
 }

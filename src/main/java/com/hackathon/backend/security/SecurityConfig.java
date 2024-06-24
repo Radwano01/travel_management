@@ -1,6 +1,9 @@
 package com.hackathon.backend.security;
 
 
+import com.hackathon.backend.entities.user.RoleEntity;
+import com.hackathon.backend.repositories.user.RoleRepository;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,12 +26,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final JWTAuthEntryPoint jwtAuthEntryPoint;
+    private final RoleRepository roleRepository;
 
     @Autowired
     public SecurityConfig(CustomUserDetailsService customUserDetailsService,
-                          JWTAuthEntryPoint jwtAuthEntryPoint){
+                          JWTAuthEntryPoint jwtAuthEntryPoint,
+                          RoleRepository roleRepository){
         this.customUserDetailsService = customUserDetailsService;
         this.jwtAuthEntryPoint = jwtAuthEntryPoint;
+        this.roleRepository = roleRepository;
     }
 
     @Bean
@@ -59,5 +65,20 @@ public class SecurityConfig {
     @Bean
     public JWTAuthenticationFilter jwtAuthenticationFilter() {
         return new JWTAuthenticationFilter();
+    }
+
+    @PostConstruct
+    public void role(){
+        RoleEntity userRole = new RoleEntity("USER");
+        boolean existsUserRole = roleRepository.existsByRole(userRole.getRole());
+        if(!existsUserRole){
+            roleRepository.save(userRole);
+        }
+
+        RoleEntity adminRole = new RoleEntity("ADMIN");
+        boolean existsAdminRole = roleRepository.existsByRole(adminRole.getRole());
+        if(!existsAdminRole){
+            roleRepository.save(adminRole);
+        }
     }
 }

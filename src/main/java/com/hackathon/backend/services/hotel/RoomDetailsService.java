@@ -38,6 +38,12 @@ public class RoomDetailsService {
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
             RoomDetailsEntity roomDetails = hotel.getRoomDetails();
             GetRoomDetailsDto getRoomDetailsDto = new GetRoomDetailsDto(
+                    hotel.getId(),
+                    hotel.getHotelName(),
+                    hotel.getAddress(),
+                    hotel.getRate(),
+                    roomDetails.getHotelFeatures(),
+                    roomDetails.getRoomFeatures(),
                     roomDetails.getImageOne(),
                     roomDetails.getImageTwo(),
                     roomDetails.getImageThree(),
@@ -46,17 +52,7 @@ public class RoomDetailsService {
                     roomDetails.getPrice()
             );
 
-            GetHotelDto getHotelDto = new GetHotelDto(
-                    hotel.getId(),
-                    hotel.getHotelName(),
-                    hotel.getAddress(),
-                    hotel.getRate(),
-                    getRoomDetailsDto,
-                    roomDetails.getHotelFeatures(),
-                    roomDetails.getRoomFeatures()
-
-            );
-            return ResponseEntity.ok(getHotelDto);
+            return ResponseEntity.ok(getRoomDetailsDto);
         }catch (Exception e){
             return serverErrorException(e);
         }

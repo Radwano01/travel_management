@@ -8,11 +8,12 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "planes")
+
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "planes")
 public class PlaneEntity {
 
     @Id

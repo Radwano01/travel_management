@@ -18,12 +18,8 @@ public class GetHotelDto {
     private String hotelName;
     private String mainImage;
     private String description;
-    private int hotelRoomsCount;
     private String address;
     private float rate;
-    private GetRoomDetailsDto roomDetails;
-    private List<HotelFeaturesEntity> hotelFeatures;
-    private List<RoomFeaturesEntity> roomFeatures;
 
     public GetHotelDto(long id, String hotelName,
                        String mainImage, String description,
@@ -34,20 +30,6 @@ public class GetHotelDto {
         this.description = description;
         this.address = address;
         this.rate = rate;
-    }
-
-    public GetHotelDto(long id, String hotelName,
-                       String address, float rate,
-                       GetRoomDetailsDto getRoomDetailsDto,
-                       List<HotelFeaturesEntity> hotelFeatures,
-                       List<RoomFeaturesEntity> roomFeatures) {
-        this.id = id;
-        this.hotelName = hotelName;
-        this.address = address;
-        this.rate = rate;
-        this.roomDetails = getRoomDetailsDto;
-        this.hotelFeatures = hotelFeatures;
-        this.roomFeatures = roomFeatures;
     }
 
 }
