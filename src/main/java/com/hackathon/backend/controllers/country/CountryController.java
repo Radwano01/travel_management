@@ -41,6 +41,11 @@ public class CountryController {
         return countryService.getCountry();
     }
 
+//    @GetMapping(path = "${GET_COUNTRIES_NAMES_PATH}")
+//    public ResponseEntity<?> getCountriesNames(){
+//        return countryService.getCountries();
+//    }
+
     @PutMapping(path = "${EDIT_COUNTRY_PATH}")
     public ResponseEntity<?> editCountry(@PathVariable("countryId") int countryId,
                                          @RequestParam(name = "country", required = false) String country,

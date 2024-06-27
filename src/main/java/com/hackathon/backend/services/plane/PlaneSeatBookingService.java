@@ -6,6 +6,7 @@ import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.plane.PlaneSeatsBookingRepository;
 import com.hackathon.backend.repositories.plane.PlaneSeatsRepository;
 import com.hackathon.backend.utilities.UserUtils;
+import com.hackathon.backend.utilities.plane.PlaneSeatsUtils;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
@@ -25,7 +26,7 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 public class PlaneSeatBookingService {
 
     private final UserUtils userUtils;
-    private final PlaneSeatsRepository planeSeatsRepository;
+    private final PlaneSeatsUtils planeSeatsUtils;
     private final PlaneSeatsBookingRepository planeSeatsBookingRepository;
 
     @Value("${STRIPE_SECRET_KEY}")
@@ -33,10 +34,10 @@ public class PlaneSeatBookingService {
 
     @Autowired
     public PlaneSeatBookingService(UserUtils userUtils,
-                              PlaneSeatsRepository planeSeatsRepository,
+                                   PlaneSeatsUtils planeSeatsUtils,
                               PlaneSeatsBookingRepository planeSeatsBookingRepository) {
         this.userUtils = userUtils;
-        this.planeSeatsRepository = planeSeatsRepository;
+        this.planeSeatsUtils = planeSeatsUtils;
         this.planeSeatsBookingRepository = planeSeatsBookingRepository;
     }
 
@@ -50,8 +51,7 @@ public class PlaneSeatBookingService {
             if(!userVerification) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is Not Verified yet!");
             }
-            PlaneSeatsEntity seat = planeSeatsRepository.findById(planeId)
-                    .orElseThrow(() -> new EntityNotFoundException("Visa id is not found"));
+            PlaneSeatsEntity seat = planeSeatsUtils.findById(planeId);
             if (!seat.isStatus()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Visa Not Valid!");
             }

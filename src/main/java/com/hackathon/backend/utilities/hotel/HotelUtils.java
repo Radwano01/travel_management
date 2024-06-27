@@ -1,8 +1,10 @@
 package com.hackathon.backend.utilities.hotel;
 
+import com.hackathon.backend.dto.hotelDto.EditHotelDto;
 import com.hackathon.backend.dto.hotelDto.GetHotelDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.repositories.hotel.HotelRepository;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +17,13 @@ import java.util.List;
 public class HotelUtils {
 
     private final HotelRepository hotelRepository;
-    private final CountryUtils countryUtils;
+    private final S3Service s3Service;
 
     @Autowired
     public HotelUtils(HotelRepository hotelRepository,
-                      CountryUtils countryUtils) {
+                      S3Service s3Service) {
         this.hotelRepository = hotelRepository;
-        this.countryUtils = countryUtils;
+        this.s3Service = s3Service;
     }
 
     public HotelEntity findHotelById(@NonNull long hotelId){
@@ -39,5 +41,42 @@ public class HotelUtils {
 
     public void delete(HotelEntity hotel) {
         hotelRepository.delete(hotel);
+    }
+
+    public boolean checkHelper(EditHotelDto editHotelDto){
+        return  editHotelDto.getHotelName() != null ||
+                editHotelDto.getMainImage() != null ||
+                editHotelDto.getDescription() != null ||
+                editHotelDto.getHotelRoomsCount() != null ||
+                editHotelDto.getAddress() != null ||
+                editHotelDto.getPrice() != null ||
+                editHotelDto.getRate() != null;
+    }
+
+    public void editHelper(HotelEntity hotel,
+                            EditHotelDto editHotelDto) {
+        if (editHotelDto.getHotelName() != null) {
+            hotel.setHotelName(editHotelDto.getHotelName());
+        }
+        if (editHotelDto.getMainImage() != null) {
+            s3Service.deleteFile(hotel.getMainImage());
+            String hotelMainImageName = s3Service.uploadFile(editHotelDto.getMainImage());
+            hotel.setMainImage(hotelMainImageName);
+        }
+        if (editHotelDto.getDescription() != null) {
+            hotel.setDescription(editHotelDto.getDescription());
+        }
+        if (editHotelDto.getHotelRoomsCount() != null) {
+            hotel.setHotelRoomsCount(editHotelDto.getHotelRoomsCount());
+        }
+        if (editHotelDto.getAddress() != null) {
+            hotel.setAddress(editHotelDto.getAddress());
+        }
+        if (editHotelDto.getPrice() != null && editHotelDto.getPrice() > 0) {
+            hotel.setAddress(editHotelDto.getAddress());
+        }
+        if (editHotelDto.getRate() != null && editHotelDto.getRate()  > 0 && editHotelDto.getRate() <= 5) {
+            hotel.setRate(editHotelDto.getRate());
+        }
     }
 }

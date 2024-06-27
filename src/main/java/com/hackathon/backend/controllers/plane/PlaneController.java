@@ -1,5 +1,6 @@
 package com.hackathon.backend.controllers.plane;
 
+import com.hackathon.backend.dto.planeDto.EditPlaneDto;
 import com.hackathon.backend.dto.planeDto.PlaneDto;
 import com.hackathon.backend.services.plane.PlaneService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,8 @@ public class PlaneController {
 
     @PutMapping(path="${EDIT_PLANE_PATH}")
     public ResponseEntity<?> editPlane(@PathVariable("planeId") Long planeId,
-                                       @RequestBody PlaneDto planeDto){
-        return planeService.editPlane(planeId, planeDto);
+                                       @RequestBody EditPlaneDto editPlaneDto){
+        return planeService.editPlane(planeId, editPlaneDto);
     }
 
     @DeleteMapping(path = "${DELETE_PLANE_PATH}")

@@ -26,8 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
-import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
+import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class PackageService {
@@ -112,8 +111,11 @@ public class PackageService {
     public ResponseEntity<?> editPackage(int packageId,
                                          EditPackageDto editPackageDto){
         try{
+            if(!packageUtils.checkHelper(editPackageDto)){
+                return badRequestException("you sent an empty data to change");
+            }
             PackageEntity packageEntity = packageUtils.findById(packageId);
-            editHelper(packageEntity, editPackageDto);
+            packageUtils.editHelper(packageEntity, editPackageDto);
             packageUtils.save(packageEntity);
             return ResponseEntity.ok("Package edited successfully");
         }catch (EntityNotFoundException e){
@@ -157,24 +159,6 @@ public class PackageService {
             return notFoundException(e);
         }catch(Exception e){
             return serverErrorException(e);
-        }
-    }
-
-    private void editHelper(PackageEntity packageEntity,
-                            EditPackageDto editPackageDto) {
-        if(editPackageDto.getPackageName() != null){
-            packageEntity.setPackageName(editPackageDto.getPackageName());
-        }
-        if(editPackageDto.getMainImage() != null){
-            s3Service.deleteFile(packageEntity.getMainImage());
-            String packageMainImageName = s3Service.uploadFile(editPackageDto.getMainImage());
-            packageEntity.setMainImage(packageMainImageName);
-        }
-        if(editPackageDto.getPrice() > 0){
-            packageEntity.setPrice(editPackageDto.getPrice());
-        }
-        if(editPackageDto.getRate() > 0){
-            packageEntity.setRate(editPackageDto.getRate());
         }
     }
 }

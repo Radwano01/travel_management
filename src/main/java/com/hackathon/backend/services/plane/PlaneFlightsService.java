@@ -1,13 +1,14 @@
 package com.hackathon.backend.services.plane;
 
 import com.hackathon.backend.dto.planeDto.FlightDto;
-import com.hackathon.backend.entities.country.CountryEntity;
+import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
-import com.hackathon.backend.utilities.country.CountryUtils;
+import com.hackathon.backend.utilities.plane.AirPortsUtils;
 import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
 import com.hackathon.backend.utilities.plane.PlaneUtils;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,118 +22,99 @@ public class PlaneFlightsService {
 
     private final PlaneFlightsUtils planeFlightsUtils;
     private final PlaneUtils planeUtils;
-    private final CountryUtils countryUtils;
+    private final AirPortsUtils airPortsUtils;
 
     @Autowired
     public PlaneFlightsService(PlaneFlightsUtils planeFlightsUtils,
-                               PlaneUtils planeUtils, CountryUtils countryUtils) {
+                               PlaneUtils planeUtils,
+                               AirPortsUtils airPortsUtils) {
         this.planeFlightsUtils = planeFlightsUtils;
         this.planeUtils = planeUtils;
-        this.countryUtils = countryUtils;
+        this.airPortsUtils = airPortsUtils;
     }
 
-    public ResponseEntity<?> addFlight(long planeId, int departureCountryId,
-                                       int destinationCountryId, FlightDto flightDto) {
-        try{
+    public ResponseEntity<?> addFlight(long planeId, long departureAirPortId,
+                                       long destinationAirPortId, FlightDto flightDto) {
+        try {
             PlaneEntity plane = planeUtils.findPlaneById(planeId);
-            if(plane.getFlight() != null){
+            if (plane.getFlight() != null) {
                 return alreadyValidException("This plane has already flight");
             }
-            CountryEntity departureCountry = countryUtils.findCountryById(departureCountryId);
-            CountryEntity destinationCountry = countryUtils.findCountryById(destinationCountryId);
+            AirPortEntity departureAirPort = airPortsUtils.findById(departureAirPortId);
+            AirPortEntity destinationAirPort = airPortsUtils.findById(destinationAirPortId);
             PlaneFlightsEntity planeFlights = new PlaneFlightsEntity(
                     flightDto.getPrice(),
                     plane,
-                    departureCountry,
-                    destinationCountry,
+                    departureAirPort,
+                    destinationAirPort,
                     flightDto.getDepartureTime(),
                     flightDto.getArrivalTime()
             );
             planeFlightsUtils.save(planeFlights);
             return ResponseEntity.ok("Flight added successfully");
-        }catch(EntityNotFoundException e){
+        } catch (EntityNotFoundException e) {
             return notFoundException(e);
-        }catch (Exception e){
-            return serverErrorException(e);
-        }
-    }
-    
-    // For now, we filter using country in the future I'll add cities
-    public ResponseEntity<?> getFlights(int departureCountryId,
-                                        int destinationCountryId) {
-        try{
-            List<PlaneFlightsEntity> planeFlights = planeFlightsUtils
-                    .findAllByDepartureCountryIdAndDestinationCountryId(
-                            departureCountryId, destinationCountryId
-                    );
-            List<FlightDto> flights = planeFlights.stream()
-                    .map((flight)-> new FlightDto(
-                            flight.getId(),
-                            flight.getPrice(),
-                            flight.getPlane().getPlaneCompanyName(),
-                            flight.getDepartureCountry().getCountry(),
-                            flight.getDestinationCountry().getCountry(),
-                            flight.getDepartureTime(),
-                            flight.getArrivalTime()
-                    )).toList();
-            return ResponseEntity.ok(flights);
-        }catch (Exception e){
+        } catch (Exception e) {
             return serverErrorException(e);
         }
     }
 
+    public ResponseEntity<?> getFlights(int departurePlaceId,
+                                        int destinationPlaceId) {
+        try {
+            List<PlaneFlightsEntity> planeFlights = planeFlightsUtils
+                    .findAllByDeparturePlaceIdAndDestinationPlaceId(
+                            departurePlaceId, destinationPlaceId
+                    );
+            List<FlightDto> flights = planeFlights.stream()
+                    .map((flight) -> new FlightDto(
+                            flight.getId(),
+                            flight.getPlane().getPlaneCompanyName(),
+                            flight.getPrice(),
+                            flight.getDepartureAirPort().getAirPortName(),
+                            flight.getDepartureAirPort().getAirPortCode(),
+                            flight.getDestinationAirPort().getAirPortName(),
+                            flight.getDestinationAirPort().getAirPortCode(),
+                            flight.getDepartureTime(),
+                            flight.getArrivalTime()
+                    )).toList();
+            return ResponseEntity.ok(flights);
+        } catch (Exception e) {
+            return serverErrorException(e);
+        }
+    }
+
+    @Transactional
     public ResponseEntity<?> editFlight(long flightId,
-                                        int departureCountryId,
-                                        int destinationCountryId,
                                         FlightDto flightDto) {
-        try{
+        try {
+            if(!planeFlightsUtils.checkHelper(flightDto)){
+                return badRequestException("you sent an empty data to change");
+            }
             PlaneFlightsEntity planeFlights = planeFlightsUtils.findById(flightId);
-            editHelper(planeFlights, flightDto, departureCountryId, destinationCountryId);
+            planeFlightsUtils.editHelper(planeFlights, flightDto);
             planeFlightsUtils.save(planeFlights);
             return ResponseEntity.ok("Flight edit successfully");
-        }catch (EntityNotFoundException e){
+        } catch (EntityNotFoundException e) {
             return notFoundException(e);
-        }catch (Exception e){
+        } catch (Exception e) {
             return serverErrorException(e);
         }
     }
 
     public ResponseEntity<?> deleteFlight(long flightId) {
-        try{
+        try {
             PlaneFlightsEntity planeFlights = planeFlightsUtils.findById(flightId);
-            if(planeFlights != null) {
+            if (planeFlights != null) {
                 planeFlightsUtils.deleteById(flightId);
                 return ResponseEntity.ok("flight deleted successfully");
-            }else{
+            } else {
                 return notFoundException("flight not found");
             }
-        }catch (EntityNotFoundException e){
+        } catch (EntityNotFoundException e) {
             return notFoundException(e);
-        }catch (Exception e){
+        } catch (Exception e) {
             return serverErrorException(e);
-        }
-    }
-
-    private void editHelper(PlaneFlightsEntity planeFlights,
-                            FlightDto flightDto,
-                            int departureCountryId,
-                            int destinationCountryId) {
-        if(flightDto.getPrice() >= 0){
-            planeFlights.setPrice(flightDto.getPrice());
-        }
-        if(flightDto.getDepartureTime() != null){
-            planeFlights.setDepartureTime(flightDto.getDepartureTime());
-        }
-        if(flightDto.getArrivalTime() != null){
-            planeFlights.setArrivalTime(flightDto.getArrivalTime());
-        }
-        if(planeFlights.getDepartureCountry().getId() != departureCountryId){
-            CountryEntity departureCountry = countryUtils.findCountryById(departureCountryId);
-            planeFlights.setDepartureCountry(departureCountry);
-        }
-        if(planeFlights.getDestinationCountry().getId() != destinationCountryId){
-            CountryEntity destinationCountry = countryUtils.findCountryById(destinationCountryId);
-            planeFlights.setDestinationCountry(destinationCountry);
         }
     }
 }

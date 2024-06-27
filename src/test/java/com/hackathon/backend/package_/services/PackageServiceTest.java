@@ -64,7 +64,7 @@ class PackageServiceTest {
 
         PostPackageDto p = new PostPackageDto(
                 "testPackage",
-                100.0f,
+                100,
                 0,
                 new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]),
                 new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", new byte[0]),
@@ -93,6 +93,7 @@ class PackageServiceTest {
         GetEssentialPackageDto getEssentialPackageDto = new GetEssentialPackageDto();
         getEssentialPackageDto.setPackageName("testPackage");
         getEssentialPackageDto.setMainImage("testImage");
+        getEssentialPackageDto.setPrice(200);
 
         getEssentialPackageDtos.add(getEssentialPackageDto);
 
@@ -108,6 +109,7 @@ class PackageServiceTest {
         assertNotNull(responseData);
         assertEquals(getEssentialPackageDtos.get(0).getPackageName(), responseData.get(0).getPackageName());
         assertEquals(getEssentialPackageDtos.get(0).getMainImage(), responseData.get(0).getMainImage());
+        assertEquals(getEssentialPackageDtos.get(0).getPrice(), responseData.get(0).getPrice());
     }
 
     @Test

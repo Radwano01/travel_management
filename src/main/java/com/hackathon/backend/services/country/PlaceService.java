@@ -21,8 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
-import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
+import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class PlaceService{
@@ -98,11 +97,14 @@ public class PlaceService{
                                        int placeId,
                                        EditPlaceDto editPlaceDto) {
         try{
+            if(!placeUtils.checkHelper(editPlaceDto)){
+                return badRequestException("you sent an empty data to change");
+            }
             CountryEntity country = countryUtils.findCountryById(countryId);
             Optional<PlaceEntity> place = country.getPlaces().stream()
                     .filter((data)-> data.getId() == placeId).findFirst();
             if(place.isPresent()) {
-                editHelper(place.get(), editPlaceDto);
+                placeUtils.editHelper(place.get(), editPlaceDto);
                 placeUtils.save(place.get());
                 countryUtils.save(country);
                 return ResponseEntity.ok("Place updated successfully");
@@ -146,17 +148,6 @@ public class PlaceService{
             return notFoundException(e);
         }catch (Exception e){
             return serverErrorException(e);
-        }
-    }
-
-    private void editHelper(PlaceEntity place,
-                            EditPlaceDto editPlaceDto) {
-        if(editPlaceDto.getPlace() != null){
-            place.setPlace(editPlaceDto.getPlace());
-        }
-        if(editPlaceDto.getMainImage() != null){
-            String placeMainImageName = s3Service.uploadFile(editPlaceDto.getMainImage());
-            place.setMainImage(placeMainImageName);
         }
     }
 }

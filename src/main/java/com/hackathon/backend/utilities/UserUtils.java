@@ -1,8 +1,10 @@
 package com.hackathon.backend.utilities;
 
 
+import com.hackathon.backend.dto.userDto.EditUserDto;
 import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.user.UserRepository;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -18,10 +20,16 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 public class UserUtils {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final S3Service s3Service;
 
     @Autowired
-    public UserUtils(UserRepository userRepository) {
+    public UserUtils(UserRepository userRepository,
+                     PasswordEncoder passwordEncoder,
+                     S3Service s3Service) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.s3Service = s3Service;
     }
 
     public UserEntity findById(long userId) {
@@ -69,5 +77,24 @@ public class UserUtils {
         mailMessage.setSubject("Email Verification From Hackathon Project");
         mailMessage.setText("Please Click to the link to verify your account: "+message);
         return mailMessage;
+    }
+
+    public boolean checkHelper(EditUserDto editUserDto){
+        return  editUserDto.getImage() != null ||
+                editUserDto.getPassword() != null;
+    }
+
+    public void editHelper(UserEntity user,
+                            EditUserDto editUserDto) {
+        if (editUserDto.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(editUserDto.getPassword()));
+        }
+        if(editUserDto.getImage() != null){
+            if(user.getImage() != null) {
+                s3Service.deleteFile(user.getImage());
+            }
+            String userImageName = s3Service.uploadFile(editUserDto.getImage());
+            user.setImage(userImageName);
+        }
     }
 }

@@ -114,7 +114,7 @@ class HotelServiceTest {
         getHotelDto.setMainImage("testImage");
         getHotelDto.setDescription("testDesc");
         getHotelDto.setAddress("testAddress");
-        getHotelDto.setRate(2.50f);
+        getHotelDto.setRate(2);
 
         getHotelDtos.add(getHotelDto);
 

@@ -26,20 +26,16 @@ public class PlaneFlightsController {
     }
 
     @GetMapping(path = "${GET_FLIGHT_PATH}")
-    public ResponseEntity<?> getFlight(@PathVariable("departureCountryId") int departureCountryId,
-                                       @PathVariable("destinationCountryId") int destinationCountryId){
-        return planeFlightsService.getFlights(departureCountryId,destinationCountryId);
+    public ResponseEntity<?> getFlight(@PathVariable("departurePlaceId") int departurePlaceId,
+                                       @PathVariable("destinationPlaceId") int destinationPlaceId){
+        return planeFlightsService.getFlights(departurePlaceId,destinationPlaceId);
     }
 
     @PutMapping(path = "${EDIT_FLIGHT_PATH}")
     public ResponseEntity<?> editFlight(@PathVariable("flightId") long flightId,
-                                        @PathVariable("departureCountryId") int departureCountryId,
-                                        @PathVariable("destinationCountryId") int destinationCountryId,
                                         @RequestBody FlightDto flightDto){
         return planeFlightsService.editFlight(
                 flightId,
-                departureCountryId,
-                destinationCountryId,
                 flightDto
         );
     }

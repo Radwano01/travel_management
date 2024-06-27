@@ -40,6 +40,9 @@ public class UserService {
     @Value("${VERIFY_LINK_TO_USER}")
     private String verifyLink;
 
+    @Value("${DEFAULT_USER_IMAGE}")
+    private String default_user_image;
+
 
     @Autowired
     public UserService(AuthenticationManager authenticationManager,
@@ -77,7 +80,7 @@ public class UserService {
             RoleEntity role = roleRepository.findByRole("USER")
                     .orElseThrow(()-> new EntityNotFoundException("Role not found"));
 
-            String defaultImageForNewUsers = "https://travelmanagementimages.s3.eu-central-1.amazonaws.com/default_user_image.png";
+            String defaultImageForNewUsers = default_user_image;
             UserEntity userEntity = new UserEntity(
                     registerUserDto.getUsername(),
                     registerUserDto.getEmail(),
@@ -137,14 +140,20 @@ public class UserService {
     @Transactional
     public ResponseEntity<?> editUser(long userId, EditUserDto editUserDto) {
         try {
+            if(!userUtils.checkHelper(editUserDto)){
+                return badRequestException("you sent an empty data to change");
+            }
             if (!isStrongPassword(editUserDto.getPassword())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Password must be at least 8 characters" +
+                                " long and contain at least one uppercase" +
+                                " letter, one lowercase letter, one number," +
+                                " and one special character.");
             }
 
             UserEntity user = userUtils.findById(userId);
-            editHelper(user, editUserDto);
+            userUtils.editHelper(user, editUserDto);
             userUtils.save(user);
-
             return ResponseEntity.ok("user updated successfully");
         } catch (EntityNotFoundException e) {
             return notFoundException(e);
@@ -186,19 +195,6 @@ public class UserService {
             return notFoundException(e);
         } catch (Exception e){
             return serverErrorException(e);
-        }
-    }
-
-    private void editHelper(UserEntity user, EditUserDto editUserDto) {
-        if (editUserDto.getPassword() != null) {
-            user.setPassword(passwordEncoder.encode(editUserDto.getPassword()));
-        }
-        if(editUserDto.getImage() != null){
-            if(user.getImage() != null) {
-                s3Service.deleteFile(user.getImage());
-            }
-            String userImageName = s3Service.uploadFile(editUserDto.getImage());
-            user.setImage(userImageName);
         }
     }
 

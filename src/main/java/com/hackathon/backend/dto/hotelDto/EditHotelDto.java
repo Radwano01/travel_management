@@ -12,21 +12,24 @@ public class EditHotelDto {
     private String hotelName;
     private MultipartFile mainImage;
     private String description;
-    private int hotelRoomsCount;
+    private Integer hotelRoomsCount;
     private String address;
-    private int rate;
+    private Integer price;
+    private Integer rate;
 
     public EditHotelDto(String hotelName,
                         MultipartFile mainImage,
                         String description,
-                        int hotelRoomsCount,
+                        Integer hotelRoomsCount,
                         String address,
-                        int rate) {
+                        Integer price,
+                        Integer rate) {
         this.hotelName = hotelName;
         this.mainImage = mainImage;
         this.description = description;
         this.hotelRoomsCount = hotelRoomsCount;
         this.address = address;
+        this.price = price;
         this.rate = rate;
     }
 }

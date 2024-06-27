@@ -1,9 +1,11 @@
 package com.hackathon.backend.utilities.country;
 
 
+import com.hackathon.backend.dto.countryDto.EditCountryDto;
 import com.hackathon.backend.dto.countryDto.GetCountryDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.repositories.country.CountryRepository;
+import com.hackathon.backend.utilities.amazonServices.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -15,10 +17,13 @@ import java.util.List;
 public class CountryUtils {
 
     private final CountryRepository countryRepository;
+    private final S3Service s3Service;
 
     @Autowired
-    public CountryUtils(CountryRepository countryRepository) {
+    public CountryUtils(CountryRepository countryRepository,
+                        S3Service s3Service) {
         this.countryRepository = countryRepository;
+        this.s3Service = s3Service;
     }
 
     public CountryEntity findCountryById(@NonNull int countryId){
@@ -40,5 +45,23 @@ public class CountryUtils {
 
     public void delete(CountryEntity countryEntity) {
         countryRepository.delete(countryEntity);
+    }
+
+    public boolean checkHelper(EditCountryDto editCountryDto){
+        return  editCountryDto.getCountry() != null ||
+                editCountryDto.getMainImage() != null;
+    }
+
+    public void editHelper(CountryEntity country,
+                            EditCountryDto editCountryDto) {
+        if (editCountryDto.getCountry() != null) {
+            boolean existsCountry = existsByCountry(editCountryDto.getCountry());
+            if(!existsCountry) country.setCountry(editCountryDto.getCountry());
+        }
+        if (editCountryDto.getMainImage() != null) {
+            s3Service.deleteFile(country.getMainImage());
+            String newMainImageName = s3Service.uploadFile(editCountryDto.getMainImage());
+            country.setMainImage(newMainImageName);
+        }
     }
 }

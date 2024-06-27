@@ -1,6 +1,7 @@
 package com.hackathon.backend.package_.services;
 
 import com.hackathon.backend.dto.hotelDto.HotelEvaluationDto;
+import com.hackathon.backend.dto.packageDto.EditPackageEvaluationDto;
 import com.hackathon.backend.dto.packageDto.PackageEvaluationDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
@@ -107,9 +108,9 @@ class PackageEvaluationServiceTest {
     void editComment() {
         //given
         long commentId = 1L;
-        PackageEvaluationDto packageEvaluationDto = new PackageEvaluationDto();
-        packageEvaluationDto.setComment("testComment");
-        packageEvaluationDto.setRate(2.50f);
+        EditPackageEvaluationDto editPackageEvaluationDto = new EditPackageEvaluationDto();
+        editPackageEvaluationDto.setComment("testComment");
+        editPackageEvaluationDto.setRate(2.50f);
         PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity("testComment1", 3.5f,
                 new UserEntity(), new PackageEntity());
 
@@ -117,12 +118,12 @@ class PackageEvaluationServiceTest {
         when(packageEvaluationUtils.findById(commentId)).thenReturn(packageEvaluation);
 
         //when
-        ResponseEntity<?> response = packageEvaluationService.editComment(commentId, packageEvaluationDto);
+        ResponseEntity<?> response = packageEvaluationService.editComment(commentId, editPackageEvaluationDto);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(packageEvaluationDto.getComment(), packageEvaluation.getComment());
-        assertEquals(packageEvaluationDto.getRate(), packageEvaluation.getRate());
+        assertEquals(editPackageEvaluationDto.getComment(), packageEvaluation.getComment());
+        assertEquals(editPackageEvaluationDto.getRate(), packageEvaluation.getRate());
         verify(packageEvaluationUtils).save(packageEvaluation);
     }
 

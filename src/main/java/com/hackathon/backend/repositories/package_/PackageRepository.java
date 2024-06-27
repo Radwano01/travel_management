@@ -12,7 +12,7 @@ import java.util.List;
 public interface PackageRepository extends JpaRepository<PackageEntity, Integer> {
 
     @Query("SELECT new com.hackathon.backend.dto.packageDto.GetEssentialPackageDto" +
-            "(p.id, p.packageName, p.mainImage)" +
+            "(p.id, p.packageName, p.mainImage, p.price)" +
             " FROM PackageEntity p WHERE p.country.id = :countryId")
     List<GetEssentialPackageDto> findPackagesByCountryId(int countryId);
 }

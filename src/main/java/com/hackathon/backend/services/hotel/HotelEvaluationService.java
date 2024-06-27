@@ -1,5 +1,6 @@
 package com.hackathon.backend.services.hotel;
 
+import com.hackathon.backend.dto.hotelDto.EditHotelEvaluationDto;
 import com.hackathon.backend.dto.hotelDto.HotelEvaluationDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
@@ -85,15 +86,13 @@ public class HotelEvaluationService {
 
     @Transactional
     public ResponseEntity<?> editComment(long commentId,
-                                         HotelEvaluationDto hotelEvaluationDto) {
+                                         EditHotelEvaluationDto editHotelEvaluationDto) {
         try{
+            if(!hotelEvaluationUtils.checkHelper(editHotelEvaluationDto)){
+                return badRequestException("you sent an empty data to change");
+            }
             HotelEvaluationEntity hotelEvaluation = hotelEvaluationUtils.findById(commentId);
-            if(hotelEvaluationDto.getComment() != null){
-                hotelEvaluation.setComment(hotelEvaluationDto.getComment());
-            }
-            if(hotelEvaluation.getRate() >= 0f){
-                hotelEvaluation.setRate(hotelEvaluationDto.getRate());
-            }
+            hotelEvaluationUtils.editHelper(hotelEvaluation, editHotelEvaluationDto);
             hotelEvaluationUtils.save(hotelEvaluation);
             return ResponseEntity.ok("Comment updated successfully");
         }catch (EntityNotFoundException e){

@@ -1,5 +1,6 @@
 package com.hackathon.backend.services.package_;
 
+import com.hackathon.backend.dto.packageDto.EditPackageEvaluationDto;
 import com.hackathon.backend.dto.packageDto.PackageEvaluationDto;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
@@ -18,8 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
-import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
+import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class PackageEvaluationService {
@@ -91,15 +91,13 @@ public class PackageEvaluationService {
 
     @Transactional
     public ResponseEntity<?> editComment(long commentId,
-                                         PackageEvaluationDto packageEvaluationDto) {
+                                         EditPackageEvaluationDto editPackageEvaluationDto) {
         try {
+            if(!packageEvaluationUtils.checkHelper(editPackageEvaluationDto)){
+                return badRequestException("you sent an empty data to change");
+            }
             PackageEvaluationEntity packageEvaluation = packageEvaluationUtils.findById(commentId);
-            if (packageEvaluationDto.getComment() != null) {
-                packageEvaluation.setComment(packageEvaluationDto.getComment());
-            }
-            if (packageEvaluationDto.getRate() > 0) {
-                packageEvaluation.setRate(packageEvaluationDto.getRate());
-            }
+            packageEvaluationUtils.editHelper(packageEvaluation, editPackageEvaluationDto);
             packageEvaluationUtils.save(packageEvaluation);
             return ResponseEntity.ok("Comment updated successfully");
         } catch (EntityNotFoundException e) {

@@ -1,5 +1,6 @@
 package com.hackathon.backend.controllers.package_;
 
+import com.hackathon.backend.dto.packageDto.EditPackageEvaluationDto;
 import com.hackathon.backend.dto.packageDto.PackageEvaluationDto;
 import com.hackathon.backend.services.package_.PackageEvaluationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +32,8 @@ public class PackageEvaluationController {
 
     @PutMapping(path = "${EDIT_PACKAGE_EVALUATION_PATH}")
     public ResponseEntity<?> editComment(@PathVariable("commentId") long commentId,
-                                         @RequestBody PackageEvaluationDto packageEvaluationDto){
-        return packageEvaluationService.editComment(commentId, packageEvaluationDto);
+                                         @RequestBody EditPackageEvaluationDto editPackageEvaluationDto){
+        return packageEvaluationService.editComment(commentId, editPackageEvaluationDto);
     }
 
     @DeleteMapping(path = "${REMOVE_PACKAGE_EVALUATION_PATH}")

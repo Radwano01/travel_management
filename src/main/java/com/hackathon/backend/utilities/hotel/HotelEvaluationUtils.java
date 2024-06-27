@@ -1,5 +1,7 @@
 package com.hackathon.backend.utilities.hotel;
 
+import com.hackathon.backend.dto.hotelDto.EditHotelEvaluationDto;
+import com.hackathon.backend.dto.hotelDto.HotelEvaluationDto;
 import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
 import com.hackathon.backend.repositories.hotel.HotelEvaluationRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,5 +35,22 @@ public class HotelEvaluationUtils {
 
     public void delete(HotelEvaluationEntity hotelEvaluation) {
         hotelEvaluationRepository.delete(hotelEvaluation);
+    }
+
+    public boolean checkHelper(EditHotelEvaluationDto editHotelEvaluationDto){
+        return  editHotelEvaluationDto.getComment() != null ||
+                editHotelEvaluationDto.getRate() != null;
+    }
+
+    public void editHelper(HotelEvaluationEntity hotelEvaluation,
+                           EditHotelEvaluationDto editHotelEvaluationDto){
+        if(editHotelEvaluationDto.getComment() != null){
+            hotelEvaluation.setComment(editHotelEvaluationDto.getComment());
+        }
+        if(editHotelEvaluationDto.getRate() != null &&
+                editHotelEvaluationDto.getRate() >= 0f &&
+                editHotelEvaluationDto.getRate() <= 5f){
+            hotelEvaluation.setRate(editHotelEvaluationDto.getRate());
+        }
     }
 }

@@ -1,5 +1,7 @@
 package com.hackathon.backend.utilities.plane;
 
+import com.hackathon.backend.dto.planeDto.EditPlaneSeatDto;
+import com.hackathon.backend.dto.planeDto.PlaneSeatDto;
 import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
 import com.hackathon.backend.repositories.plane.PlaneSeatsRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -39,5 +41,27 @@ public class PlaneSeatsUtils {
 
     public void delete(PlaneSeatsEntity planeSeats) {
         planeSeatsRepository.delete(planeSeats);
+    }
+
+    public boolean checkHelper(EditPlaneSeatDto editPlaneSeatDto){
+        return  editPlaneSeatDto.getSeatClass() != null ||
+                editPlaneSeatDto.getSeatNumber() != null;
+    }
+
+    public void editHelper(PlaneSeatsEntity planeSeats,
+                            EditPlaneSeatDto editPlaneSeatDto) {
+        if(planeSeats.getPlane().getNumSeats() > editPlaneSeatDto.getSeatNumber()){
+            planeSeats.setSeatNumber(editPlaneSeatDto.getSeatNumber());
+        }
+        switch (editPlaneSeatDto.getSeatClass()){
+            case 'A':
+            case 'B':
+            case 'C':
+            case 'D':
+                planeSeats.setSeatClass(editPlaneSeatDto.getSeatClass());
+                break;
+            default:
+                break;
+        }
     }
 }

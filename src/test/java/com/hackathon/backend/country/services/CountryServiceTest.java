@@ -66,22 +66,8 @@ class CountryServiceTest {
     RoomDetailsUtils roomDetailsUtils;
 
     @Mock
-    HotelEvaluationUtils hotelEvaluationUtils;
-
-    @Mock
-    RoomUtils roomUtils;
-
-    @Mock
-    HotelFeaturesUtils hotelFeaturesUtils;
-
-    @Mock
-    RoomFeaturesUtils roomFeaturesUtils;
-
-    @Mock
     PackageUtils packageUtils;
 
-    @Mock
-    PlaneFlightsUtils planeFlightsUtils;
 
     @Mock
     S3Service s3Service;
@@ -156,67 +142,53 @@ class CountryServiceTest {
 
     @Test
     void deleteCountry() {
-        // given
-        int countryId = 1;
-        CountryEntity country = new CountryEntity();
-        country.setId(countryId);
+        //given
+        CountryEntity countryEntity = new CountryEntity();
+        countryEntity.setId(1);
+        countryEntity.setMainImage("mainImage.jpg");
 
-        PlaceEntity place = new PlaceEntity();
+        PlaceEntity placeEntity = new PlaceEntity();
         PlaceDetailsEntity placeDetails = new PlaceDetailsEntity();
-        place.setPlaceDetails(placeDetails);
+        placeEntity.setPlaceDetails(placeDetails);
+        List<PlaceEntity> places = new ArrayList<>();
+        places.add(placeEntity);
+        countryEntity.setPlaces(places);
 
-        HotelEntity hotel = new HotelEntity();
+        HotelEntity hotelEntity = new HotelEntity();
         RoomDetailsEntity roomDetails = new RoomDetailsEntity();
-        HotelEvaluationEntity hotelEvaluation = new HotelEvaluationEntity();
-        RoomEntity room = new RoomEntity();
-
-        HotelFeaturesEntity hotelFeature = new HotelFeaturesEntity();
-        RoomFeaturesEntity roomFeature = new RoomFeaturesEntity();
-
-        hotel.setRoomDetails(roomDetails);
-        hotel.getEvaluations().add(hotelEvaluation);
-        hotel.getRooms().add(room);
-
-        roomDetails.setHotelFeatures(List.of(hotelFeature));
-        roomDetails.setRoomFeatures(List.of(roomFeature));
+        hotelEntity.setRoomDetails(roomDetails);
+        List<HotelEntity> hotels = new ArrayList<>();
+        hotels.add(hotelEntity);
+        countryEntity.setHotels(hotels);
 
         PackageEntity packageEntity = new PackageEntity();
-        PlaneFlightsEntity departingFlight = new PlaneFlightsEntity();
-        PlaneFlightsEntity arrivingFlight = new PlaneFlightsEntity();
+        List<PackageEntity> packages = new ArrayList<>();
+        packages.add(packageEntity);
+        countryEntity.setPackages(packages);
+
         CountryDetailsEntity countryDetails = new CountryDetailsEntity();
+        countryDetails.setImageOne("imageOne.jpg");
+        countryDetails.setImageTwo("imageTwo.jpg");
+        countryDetails.setImageThree("imageThree.jpg");
+        countryEntity.setCountryDetails(countryDetails);
 
-        country.setPlaces(List.of(place));
-        country.setHotels(List.of(hotel));
-        country.setPackages(List.of(packageEntity));
-        country.setDepartingFlights(List.of(departingFlight));
-        country.setArrivingFlights(List.of(arrivingFlight));
-        country.setCountryDetails(countryDetails);
+        //behavior
+        when(countryUtils.findCountryById(1)).thenReturn(countryEntity);
 
-        CountryService countryService = new CountryService(countryUtils, countryDetailsUtils,
-                placeUtils, placeDetailsUtils, hotelUtils, roomDetailsUtils, hotelEvaluationUtils, roomUtils,
-                hotelFeaturesUtils, roomFeaturesUtils, packageUtils, planeFlightsUtils, s3Service);
+        //when
+        ResponseEntity<?> response = countryService.deleteCountry(1);
 
-        // behavior
-        when(countryUtils.findCountryById(countryId)).thenReturn(country);
+        //then
+        assertEquals(ResponseEntity.ok("Country and country details deleted successfully"), response);
 
-        // when
-        ResponseEntity<?> response = countryService.deleteCountry(countryId);
-
-        // then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(placeDetailsUtils).delete(placeDetails);
-        verify(placeUtils).delete(place);
-        verify(hotelUtils).delete(hotel);
-        verify(hotelEvaluationUtils).delete(hotelEvaluation);
-        verify(roomUtils).delete(room);
-        verify(roomDetailsUtils).delete(roomDetails);
-        verify(packageUtils).delete(packageEntity);
-        verify(planeFlightsUtils).delete(departingFlight);
-        verify(planeFlightsUtils).delete(arrivingFlight);
-        verify(countryDetailsUtils).delete(countryDetails);
-        verify(countryUtils).delete(country);
+        verify(placeDetailsUtils).delete(any(PlaceDetailsEntity.class));
+        verify(placeUtils).delete(any(PlaceEntity.class));
+        verify(roomDetailsUtils).delete(any(RoomDetailsEntity.class));
+        verify(hotelUtils).delete(any(HotelEntity.class));verify(packageUtils).delete(any(PackageEntity.class));
+        verify(countryDetailsUtils).delete(any(CountryDetailsEntity.class));
+        verify(countryUtils).delete(any(CountryEntity.class));
+        verify(s3Service).deleteFiles(any(String[].class));
+        verify(s3Service).deleteFile("mainImage.jpg");
     }
-
-
 
 }

@@ -53,12 +53,14 @@ public class BenefitService{
     }
 
     @Transactional
-    public ResponseEntity<?> editBenefit(int benefitId, String benefit){
+    public ResponseEntity<?> editBenefit(int benefitId,
+                                         String benefit){
         try{
-            BenefitEntity benefitEntity = benefitUtils.findById(benefitId);
-            if(benefit != null){
-                benefitEntity.setBenefit(benefit);
+            if(benefit == null){
+                return badRequestException("you sent an empty data to change");
             }
+            BenefitEntity benefitEntity = benefitUtils.findById(benefitId);
+            benefitEntity.setBenefit(benefit);
             benefitUtils.save(benefitEntity);
             return ResponseEntity.ok("Benefit edit successfully");
         }catch(EntityNotFoundException e){

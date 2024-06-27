@@ -27,8 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
-import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
+import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class HotelService {
@@ -75,7 +74,7 @@ public class HotelService {
                     postHotelDto.getDescription(),
                     postHotelDto.getHotelRoomsCount(),
                     postHotelDto.getAddress(),
-                    postHotelDto.getPrice(),
+                    postHotelDto.getRate(),
                     country
             );
 
@@ -91,7 +90,7 @@ public class HotelService {
                     roomDetailsImageNameTwo,
                     roomDetailsImageNameThree,
                     roomDetailsImageNameFour,
-                    postHotelDto.getDescription(),
+                    postHotelDto.getRoomDescription(),
                     postHotelDto.getPrice(),
                     hotelEntity
             );
@@ -123,10 +122,13 @@ public class HotelService {
                                        int countryId,
                                        EditHotelDto editHotelDto){
         try{
+            if(!hotelUtils.checkHelper(editHotelDto)){
+                return badRequestException("you sent an empty data to change");
+            }
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
             CountryEntity country = countryUtils.findCountryById(countryId);
             hotel.setCountry(country);
-            editHelper(hotel, editHotelDto);
+            hotelUtils.editHelper(hotel, editHotelDto);
             hotelUtils.save(hotel);
             countryUtils.save(country);
             return ResponseEntity.ok("Hotel updated Successfully: "+hotel.getHotelName());
@@ -197,31 +199,6 @@ public class HotelService {
             return notFoundException(e);
         } catch (Exception e) {
             return serverErrorException(e);
-        }
-    }
-
-
-    private void editHelper(HotelEntity hotel,
-                            EditHotelDto editHotelDto) {
-        if (editHotelDto.getHotelName() != null) {
-            hotel.setHotelName(editHotelDto.getHotelName());
-        }
-        if (editHotelDto.getMainImage() != null) {
-            s3Service.deleteFile(hotel.getMainImage());
-            String hotelMainImageName = s3Service.uploadFile(editHotelDto.getMainImage());
-            hotel.setMainImage(hotelMainImageName);
-        }
-        if (editHotelDto.getDescription() != null) {
-            hotel.setDescription(editHotelDto.getDescription());
-        }
-        if (hotel.getHotelRoomsCount() >= editHotelDto.getHotelRoomsCount()) {
-            hotel.setHotelRoomsCount(editHotelDto.getHotelRoomsCount());
-        }
-        if (editHotelDto.getAddress() != null) {
-            hotel.setAddress(editHotelDto.getAddress());
-        }
-        if (editHotelDto.getRate() != hotel.getRate()) {
-            hotel.setRate(editHotelDto.getRate());
         }
     }
 }

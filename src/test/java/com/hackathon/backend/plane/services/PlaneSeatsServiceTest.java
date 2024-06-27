@@ -1,5 +1,6 @@
 package com.hackathon.backend.plane.services;
 
+import com.hackathon.backend.dto.planeDto.EditPlaneSeatDto;
 import com.hackathon.backend.dto.planeDto.PlaneDto;
 import com.hackathon.backend.dto.planeDto.PlaneSeatDto;
 import com.hackathon.backend.dto.planeDto.ValidSeatDto;
@@ -110,15 +111,15 @@ class PlaneSeatsServiceTest {
 
         plane.getPlaneSeats().add(planeSeat);
 
-        PlaneSeatDto planeSeatDto = new PlaneSeatDto();
-        planeSeatDto.setSeatNumber(25);
-        planeSeatDto.setSeatClass('B');
+        EditPlaneSeatDto editPlaneSeatDto = new EditPlaneSeatDto();
+        editPlaneSeatDto.setSeatNumber(25);
+        editPlaneSeatDto.setSeatClass('B');
 
         //behavior
         when(planeSeatsUtils.findById(seatId)).thenReturn(planeSeat);
 
         //when
-        ResponseEntity<?> response = planeSeatsService.editSeat(seatId, planeSeatDto);
+        ResponseEntity<?> response = planeSeatsService.editSeat(seatId, editPlaneSeatDto);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());

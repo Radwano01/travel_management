@@ -1,5 +1,6 @@
 package com.hackathon.backend.plane.services;
 
+import com.hackathon.backend.dto.planeDto.EditPlaneDto;
 import com.hackathon.backend.dto.planeDto.PlaneDto;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
@@ -59,20 +60,20 @@ class PlaneServiceTest {
         plane.setPlaneCompanyName("testPlane");
         plane.setNumSeats(100);
 
-        PlaneDto planeDto = new PlaneDto();
-        planeDto.setPlaneCompanyName("testPlane1");
-        planeDto.setNumSeats(101);
+        EditPlaneDto editPlaneDto = new EditPlaneDto();
+        editPlaneDto.setPlaneCompanyName("testPlane1");
+        editPlaneDto.setNumSeats(101);
 
         //behavior
         when(planeUtils.findPlaneById(planeId)).thenReturn(plane);
 
         //when
-        ResponseEntity<?> response = planeService.editPlane(planeId, planeDto);
+        ResponseEntity<?> response = planeService.editPlane(planeId, editPlaneDto);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(planeDto.getPlaneCompanyName(), plane.getPlaneCompanyName());
-        assertEquals(planeDto.getNumSeats(), plane.getNumSeats());
+        assertEquals(editPlaneDto.getPlaneCompanyName(), plane.getPlaneCompanyName());
+        assertEquals(editPlaneDto.getNumSeats(), plane.getNumSeats());
         verify(planeUtils).findPlaneById(planeId);
         verify(planeUtils).save(plane);
     }

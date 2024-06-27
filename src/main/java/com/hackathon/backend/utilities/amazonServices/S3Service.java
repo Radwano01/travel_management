@@ -33,27 +33,34 @@ public class S3Service {
     }
 
     public String uploadFile(MultipartFile file) {
-        String fileUrl = "";
+        String fileName = "";
         try {
             File convertedFile = convertMultiPartFileToFile(file);
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
             amazonS3.putObject(new PutObjectRequest(BUCKET_NAME, fileName, convertedFile)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
-            fileUrl = amazonS3.getUrl(BUCKET_NAME, fileName).toString();
             convertedFile.delete();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return fileUrl;
+        return fileName;
     }
 
     public void deleteFile(String fileName){
-        amazonS3.deleteObject(new DeleteObjectRequest(BUCKET_NAME, fileName));
+        try{
+            amazonS3.deleteObject(new DeleteObjectRequest(BUCKET_NAME, fileName));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void deleteFiles(String[] fileNames){
-        for(String fileName:fileNames){
-            amazonS3.deleteObject(new DeleteObjectRequest(BUCKET_NAME, fileName));
+        try{
+            for(String fileName:fileNames){
+                amazonS3.deleteObject(new DeleteObjectRequest(BUCKET_NAME, fileName));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.hackathon.backend.controllers.hotel;
 
+import com.hackathon.backend.dto.hotelDto.EditHotelEvaluationDto;
 import com.hackathon.backend.dto.hotelDto.HotelEvaluationDto;
 import com.hackathon.backend.services.hotel.HotelEvaluationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,14 +32,14 @@ public class HotelEvaluationController {
 
     @PutMapping(path = "${EDIT_HOTEL_EVALUATION_PATH}")
     public ResponseEntity<?> editComment(@PathVariable("commentId") long commentId,
-                                        @RequestBody HotelEvaluationDto hotelEvaluationDto){
-        return hotelEvaluationService.editComment(commentId,hotelEvaluationDto);
+                                         @RequestBody EditHotelEvaluationDto editHotelEvaluationDto){
+        return hotelEvaluationService.editComment(commentId, editHotelEvaluationDto);
     }
 
     @DeleteMapping(path = "${REMOVE_HOTEL_EVALUATION_PATH}")
     public ResponseEntity<?> deleteComment(@PathVariable("hotelId") long hotelId,
-                                         @PathVariable("userId") long userId,
-                                         @PathVariable("commentId") long commentId){
+                                           @PathVariable("userId") long userId,
+                                           @PathVariable("commentId") long commentId){
         return hotelEvaluationService.removeComment(hotelId,userId,commentId);
     }
 }

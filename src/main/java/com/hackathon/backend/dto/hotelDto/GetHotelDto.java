@@ -19,11 +19,11 @@ public class GetHotelDto {
     private String mainImage;
     private String description;
     private String address;
-    private float rate;
+    private int rate;
 
     public GetHotelDto(long id, String hotelName,
                        String mainImage, String description,
-                       String address, float rate) {
+                       String address, int rate) {
         this.id = id;
         this.hotelName = hotelName;
         this.mainImage = mainImage;

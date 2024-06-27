@@ -1,5 +1,7 @@
 package com.hackathon.backend.utilities.package_;
 
+import com.hackathon.backend.dto.packageDto.EditPackageEvaluationDto;
+import com.hackathon.backend.dto.packageDto.PackageEvaluationDto;
 import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
 import com.hackathon.backend.repositories.package_.PackageEvaluationRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,5 +30,20 @@ public class PackageEvaluationUtils {
 
     public void delete(PackageEvaluationEntity packageEvaluation) {
         packageEvaluationRepository.delete(packageEvaluation);
+    }
+
+    public boolean checkHelper(EditPackageEvaluationDto evaluationDto){
+        return  evaluationDto.getComment() != null ||
+                evaluationDto.getRate() != null;
+    }
+
+    public void editHelper(PackageEvaluationEntity packageEvaluation,
+                           EditPackageEvaluationDto editPackageEvaluationDto){
+        if (editPackageEvaluationDto.getComment() != null) {
+            packageEvaluation.setComment(editPackageEvaluationDto.getComment());
+        }
+        if (editPackageEvaluationDto.getRate() > 0) {
+            packageEvaluation.setRate(editPackageEvaluationDto.getRate());
+        }
     }
 }

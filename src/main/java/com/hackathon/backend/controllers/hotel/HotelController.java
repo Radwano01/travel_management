@@ -61,15 +61,17 @@ public class HotelController {
                                        @RequestParam(name = "hotelName", required = false) String hotelName,
                                        @RequestParam(name = "mainImage", required = false) MultipartFile mainImage,
                                        @RequestParam(name = "description", required = false) String description,
-                                       @RequestParam(name = "hotelRoomsCount", required = false) int hotelRoomsCount,
+                                       @RequestParam(name = "hotelRoomsCount", required = false) Integer hotelRoomsCount,
                                        @RequestParam(name = "address", required = false) String address,
-                                       @RequestParam(name = "rate", required = false) int rate){
+                                       @RequestParam(name = "price", required = false) Integer price,
+                                       @RequestParam(name = "rate", required = false) Integer rate){
         EditHotelDto editHotelDto = new EditHotelDto(
                 hotelName,
                 mainImage,
                 description,
                 hotelRoomsCount,
                 address,
+                price,
                 rate
         );
         return hotelService.editHotel(hotelId, countryId, editHotelDto);

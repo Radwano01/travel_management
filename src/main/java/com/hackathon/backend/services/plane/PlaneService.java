@@ -1,6 +1,7 @@
 package com.hackathon.backend.services.plane;
 
 
+import com.hackathon.backend.dto.planeDto.EditPlaneDto;
 import com.hackathon.backend.dto.planeDto.PlaneDto;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
@@ -18,8 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
-import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
+import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class PlaneService{
@@ -52,10 +52,13 @@ public class PlaneService{
 
     @Transactional
     public ResponseEntity<?> editPlane(long planeId,
-                                       PlaneDto planeDto){
+                                       EditPlaneDto editPlaneDto){
         try{
+            if(!planeUtils.checkHelper(editPlaneDto)){
+                return badRequestException("you sent an empty data to change");
+            }
             PlaneEntity planeEntity = planeUtils.findPlaneById(planeId);
-            editHelper(planeEntity, planeDto);
+            planeUtils.editHelper(planeEntity, editPlaneDto);
             planeUtils.save(planeEntity);
             return ResponseEntity.ok("Plane updated Successfully");
         }catch (EntityNotFoundException e){
@@ -73,22 +76,11 @@ public class PlaneService{
             for(PlaneSeatsEntity planeSeats:plane.getPlaneSeats()){
                 planeSeatsUtils.delete(planeSeats);
             }
-
             planeFlightsUtils.delete(plane.getFlight());
             planeUtils.delete(plane);
             return ResponseEntity.ok("Plane deleted successfully");
         }catch (Exception e){
             return serverErrorException(e);
-        }
-    }
-
-    private void editHelper(PlaneEntity plane,
-                            PlaneDto planeDto) {
-        if(planeDto.getPlaneCompanyName() != null){
-            plane.setPlaneCompanyName(planeDto.getPlaneCompanyName());
-        }
-        if(planeDto.getNumSeats() > 0){
-            plane.setNumSeats(planeDto.getNumSeats());
         }
     }
 }

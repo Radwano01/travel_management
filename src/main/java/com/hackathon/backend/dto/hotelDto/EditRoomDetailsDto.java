@@ -14,7 +14,7 @@ public class EditRoomDetailsDto {
     private MultipartFile imageThree;
     private MultipartFile imageFour;
     private String description;
-    private int price;
+    private Integer price;
 
     public EditRoomDetailsDto(MultipartFile imageOne,
                               MultipartFile imageTwo,

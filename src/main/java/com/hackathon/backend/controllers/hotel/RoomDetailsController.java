@@ -31,7 +31,7 @@ public class RoomDetailsController {
                                              @RequestParam(name = "imageThree", required = false) MultipartFile imageThree,
                                              @RequestParam(name = "imageFour", required = false) MultipartFile imageFour,
                                              @RequestParam(name = "description", required = false) String description,
-                                             @RequestParam(name = "price", required = false) int price) {
+                                             @RequestParam(name = "price", required = false) Integer price) {
         EditRoomDetailsDto editRoomDetailsDto = new EditRoomDetailsDto(
                 imageOne,
                 imageTwo,

@@ -14,8 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
-import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
+import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class RoomFeaturesService {
@@ -66,10 +65,11 @@ public class RoomFeaturesService {
     public ResponseEntity<?> editRoomFeature(int featureId,
                                              String roomFeature){
         try{
-            RoomFeaturesEntity roomFeatures = roomFeaturesUtils.findById(featureId);
-            if(roomFeature != null){
-                roomFeatures.setRoomFeatures(roomFeature);
+            if(roomFeature == null){
+                return badRequestException("you sent an empty data to change");
             }
+            RoomFeaturesEntity roomFeatures = roomFeaturesUtils.findById(featureId);
+            roomFeatures.setRoomFeatures(roomFeature);
             roomFeaturesUtils.save(roomFeatures);
             return ResponseEntity.ok("Room Feature edited successfully");
         }catch (Exception e){

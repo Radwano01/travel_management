@@ -55,12 +55,14 @@ public class RoadmapService{
     }
 
     @Transactional
-    public ResponseEntity<?> editRoadmap(int roadmapId,String roadmap){
+    public ResponseEntity<?> editRoadmap(int roadmapId,
+                                         String roadmap){
         try{
-            RoadmapEntity roadmapEntity = roadmapUtils.findById(roadmapId);
             if(roadmap != null){
-                roadmapEntity.setRoadmap(roadmap);
+                return badRequestException("you sent an empty data to change");
             }
+            RoadmapEntity roadmapEntity = roadmapUtils.findById(roadmapId);
+            roadmapEntity.setRoadmap(roadmap);
             roadmapUtils.save(roadmapEntity);
             return ResponseEntity.ok("Roadmap edited successfully");
         }catch(EntityNotFoundException e){

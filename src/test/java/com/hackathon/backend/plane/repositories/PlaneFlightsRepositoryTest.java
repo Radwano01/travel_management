@@ -1,9 +1,13 @@
 package com.hackathon.backend.plane.repositories;
 
 import com.hackathon.backend.entities.country.CountryEntity;
+import com.hackathon.backend.entities.country.PlaceEntity;
+import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
 import com.hackathon.backend.repositories.country.CountryRepository;
+import com.hackathon.backend.repositories.country.PlaceRepository;
+import com.hackathon.backend.repositories.plane.AirPortRepository;
 import com.hackathon.backend.repositories.plane.PlaneFlightsRepository;
 import com.hackathon.backend.repositories.plane.PlaneRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -21,27 +25,40 @@ import static org.junit.jupiter.api.Assertions.*;
 class PlaneFlightsRepositoryTest {
 
     @Autowired
-    CountryRepository countryRepository;
+    AirPortRepository airPortRepository;
 
     @Autowired
     PlaneRepository planeRepository;
+
+    @Autowired
+    PlaceRepository placeRepository;
 
     @Autowired
     PlaneFlightsRepository planeFlightsRepository;
 
     @BeforeEach
     void setUp(){
-        CountryEntity countryDeparture = new CountryEntity(
-                "testCountry",
-                "testImage"
-        );
-        countryRepository.save(countryDeparture);
+        PlaceEntity place1 = new PlaceEntity();
+        place1.setPlace("test1");
+        placeRepository.save(place1);
 
-        CountryEntity countryDestination = new CountryEntity(
-                "testCountry",
-                "testImage"
+        PlaceEntity place2 = new PlaceEntity();
+        place2.setPlace("test2");
+        placeRepository.save(place2);
+
+        AirPortEntity airPortEntity1 = new AirPortEntity(
+                "airport one",
+                "QWE",
+                place1
         );
-        countryRepository.save(countryDestination);
+        airPortRepository.save(airPortEntity1);
+
+        AirPortEntity airPortEntity2 = new AirPortEntity(
+                "airport two",
+                "QWE",
+                place2
+        );
+        airPortRepository.save(airPortEntity2);
 
         PlaneEntity plane = new PlaneEntity(
                 "testName",
@@ -52,10 +69,10 @@ class PlaneFlightsRepositoryTest {
         PlaneFlightsEntity planeFlights = new PlaneFlightsEntity(
                 200,
                 plane,
-                countryDeparture,
-                countryDestination,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusHours(2)
+                airPortEntity1,
+                airPortEntity2,
+                "2024:10:01T20:00:00",
+                "2024:10:01T23:00:00"
         );
         planeFlightsRepository.save(planeFlights);
     }
@@ -64,22 +81,25 @@ class PlaneFlightsRepositoryTest {
     void tearDown(){
         planeFlightsRepository.deleteAll();
         planeRepository.deleteAll();
-        countryRepository.deleteAll();
+        airPortRepository.deleteAll();
+        placeRepository.deleteAll();
     }
 
     @Test
     void findAllByDepartureCountryIdAndDestinationCountryId(){
         //given
-        int departureId = countryRepository.findAll().get(0).getId();
-        int destinationId = countryRepository.findAll().get(1).getId();
+        int departureId = airPortRepository.findAll().get(0).getPlace().getId();
+        int destinationId = airPortRepository.findAll().get(1).getPlace().getId();
 
         //when
         List<PlaneFlightsEntity> response = planeFlightsRepository
-                .findAllByDepartureCountryIdAndDestinationCountryId(departureId,destinationId);
+                .findAllByDeparturePlaceIdAndDestinationPlaceId(departureId,destinationId);
 
         //then
-        assertEquals(response.get(0).getDepartureCountry().getCountry(), "testCountry");
-        assertEquals(response.get(0).getDestinationCountry().getCountry(), "testCountry");
+        assertEquals(response.get(0).getDepartureAirPort().getPlace().getPlace(), "test1");
+        assertEquals(response.get(0).getDestinationAirPort().getPlace().getPlace(), "test2");
+        assertEquals(response.get(0).getDepartureAirPort().getAirPortName(), "airport one");
+        assertEquals(response.get(0).getDestinationAirPort().getAirPortName(), "airport two");
         assertEquals(response.get(0).getPlane().getPlaneCompanyName(), "testName");
         assertEquals(response.get(0).getPrice(), 200);
     }

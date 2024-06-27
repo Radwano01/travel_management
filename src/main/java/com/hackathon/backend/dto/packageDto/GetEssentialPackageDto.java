@@ -11,12 +11,15 @@ public class GetEssentialPackageDto {
     private int id;
     private String packageName;
     private String mainImage;
+    private int price;
 
     public GetEssentialPackageDto(int id,
                                   String packageName,
-                                  String mainImage){
+                                  String mainImage,
+                                  int price){
         this.id = id;
         this.packageName = packageName;
         this.mainImage = mainImage;
+        this.price = price;
     }
 }

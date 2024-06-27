@@ -13,8 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
-import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
+import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class CountryDetailsService {
@@ -57,8 +56,11 @@ public class CountryDetailsService {
     public ResponseEntity<?> editCountryDetails(int countryId,
                                                 EditCountryDetailsDto editCountryDetailsDto) {
         try {
+            if(!countryDetailsUtils.checkHelper(editCountryDetailsDto)){
+                return badRequestException("you sent an empty data to change");
+            }
             CountryEntity country = countryUtils.findCountryById(countryId);
-            editHelper(country.getCountryDetails(), editCountryDetailsDto);
+            countryDetailsUtils.editHelper(country.getCountryDetails(), editCountryDetailsDto);
             countryUtils.save(country);
             countryDetailsUtils.save(country.getCountryDetails());
             return ResponseEntity.ok("Country details updated successfully");
@@ -66,28 +68,6 @@ public class CountryDetailsService {
             return notFoundException(e);
         } catch (Exception e) {
             return serverErrorException(e);
-        }
-    }
-
-    private void editHelper(CountryDetailsEntity countryDetails,
-                            EditCountryDetailsDto editCountryDetailsDto) {
-        if(editCountryDetailsDto.getImageOne() != null){
-            s3Service.deleteFile(countryDetails.getImageOne());
-            String countryDetailsImageOneName = s3Service.uploadFile(editCountryDetailsDto.getImageOne());
-            countryDetails.setImageOne(countryDetailsImageOneName);
-        }
-        if(editCountryDetailsDto.getImageTwo() != null){
-            s3Service.deleteFile(countryDetails.getImageTwo());
-            String countryDetailsImageTwoName = s3Service.uploadFile(editCountryDetailsDto.getImageTwo());
-            countryDetails.setImageTwo(countryDetailsImageTwoName);
-        }
-        if(editCountryDetailsDto.getImageThree() != null){
-            s3Service.deleteFile(countryDetails.getImageThree());
-            String countryDetailsImageThreeName = s3Service.uploadFile(editCountryDetailsDto.getImageThree());
-            countryDetails.setImageThree(countryDetailsImageThreeName);
-        }
-        if(editCountryDetailsDto.getDescription() != null){
-            countryDetails.setDescription(editCountryDetailsDto.getDescription());
         }
     }
 }

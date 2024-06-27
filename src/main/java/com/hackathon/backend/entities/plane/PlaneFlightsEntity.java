@@ -27,26 +27,26 @@ public class PlaneFlightsEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "departure_id")
-    private CountryEntity departureCountry;
+    private AirPortEntity departureAirPort;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "destination_id")
-    private CountryEntity destinationCountry;
+    private AirPortEntity destinationAirPort;
 
-    private LocalDateTime departureTime;
+    private String departureTime;
 
-    private LocalDateTime arrivalTime;
+    private String arrivalTime;
 
 
     public PlaneFlightsEntity(int price, PlaneEntity plane,
-                              CountryEntity departureCountry,
-                              CountryEntity destinationCountry,
-                              LocalDateTime departureTime,
-                              LocalDateTime arrivalTime) {
+                              AirPortEntity departureAirPort,
+                              AirPortEntity destinationAirPort,
+                              String departureTime,
+                              String arrivalTime) {
         this.price = price;
         this.plane = plane;
-        this.departureCountry = departureCountry;
-        this.destinationCountry = destinationCountry;
+        this.departureAirPort = departureAirPort;
+        this.destinationAirPort = destinationAirPort;
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
     }

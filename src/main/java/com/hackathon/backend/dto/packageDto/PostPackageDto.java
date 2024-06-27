@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 public class PostPackageDto {
     private String packageName;
-    private float price;
+    private int price;
     private int rate;
     private MultipartFile mainImage;
     private MultipartFile imageOne;
@@ -18,7 +18,7 @@ public class PostPackageDto {
     private MultipartFile imageThree;
     private String description;
 
-    public PostPackageDto(String packageName, float price, int rate, MultipartFile mainImage,
+    public PostPackageDto(String packageName, int price, int rate, MultipartFile mainImage,
                           MultipartFile imageOne, MultipartFile imageTwo, MultipartFile imageThree,
                           String description) {
         this.packageName = packageName;

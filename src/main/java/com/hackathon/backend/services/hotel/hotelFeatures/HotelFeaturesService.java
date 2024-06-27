@@ -63,10 +63,10 @@ public class HotelFeaturesService {
     public ResponseEntity<?> editHotelFeature(int featureId,
                                               String hotelFeature){
         try{
-            HotelFeaturesEntity hotelFeatures = hotelFeaturesUtils.findById(featureId);
-            if(hotelFeature != null){
-                hotelFeatures.setHotelFeatures(hotelFeature);
+            if(hotelFeature == null){
+                return badRequestException("you sent an empty data to change");
             }
+            HotelFeaturesEntity hotelFeatures = hotelFeaturesUtils.findById(featureId);
             hotelFeaturesUtils.save(hotelFeatures);
             return ResponseEntity.ok("Hotel Feature edited successfully");
         }catch (Exception e){

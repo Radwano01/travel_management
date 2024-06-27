@@ -2,6 +2,7 @@ package com.hackathon.backend.entities.country;
 
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
+import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -37,12 +38,6 @@ public class CountryEntity {
 
     @OneToMany(mappedBy = "country", fetch = FetchType.LAZY)
     private List<PlaceEntity> places = new ArrayList<>();
-
-    @OneToMany(mappedBy = "departureCountry", fetch = FetchType.LAZY)
-    private List<PlaneFlightsEntity> departingFlights = new ArrayList<>();
-
-    @OneToMany(mappedBy = "destinationCountry", fetch = FetchType.LAZY)
-    private List<PlaneFlightsEntity> arrivingFlights = new ArrayList<>();
 
     public CountryEntity(String country,
                          String mainImage){

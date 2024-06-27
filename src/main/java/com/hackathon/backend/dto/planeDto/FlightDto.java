@@ -14,26 +14,32 @@ public class FlightDto {
 
     private long id;
     private String planeCompanyName;
-    private int price;
-    private String departureCountry;
-    private String destinationCountry;
+    private Integer price;
+    private String departureAirPort;
+    private String departureAirPortCode;
 
-    @JsonFormat(pattern = "dd/MM/yyyy hh:mm a")
-    private LocalDateTime departureTime;
+    private String destinationAirPort;
+    private String destinationAirPortCode;
 
-    @JsonFormat(pattern = "dd/MM/yyyy hh:mm a")
-    private LocalDateTime arrivalTime;
+    private String departureTime;
+    private String arrivalTime;
 
-    public FlightDto(long id, int price,
+    public FlightDto(long id,
                      String planeCompanyName,
-                     String departureCountry, String destinationCountry,
-                     LocalDateTime departureTime,
-                     LocalDateTime arrivalTime) {
+                     int price,
+                     String departureAirPort,
+                     String departureAirPortCode,
+                     String destinationAirPort,
+                     String destinationAirPortCode,
+                     String departureTime,
+                     String arrivalTime) {
         this.id = id;
-        this.price = price;
         this.planeCompanyName = planeCompanyName;
-        this.departureCountry = departureCountry;
-        this.destinationCountry = destinationCountry;
+        this.price = price;
+        this.departureAirPort = departureAirPort;
+        this.departureAirPortCode = departureAirPortCode;
+        this.destinationAirPort = destinationAirPort;
+        this.destinationAirPortCode = destinationAirPortCode;
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
     }

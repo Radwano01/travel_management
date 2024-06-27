@@ -9,6 +9,8 @@ import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
 import com.hackathon.backend.entities.hotel.RoomEntity;
+import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
+import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
 import com.hackathon.backend.repositories.hotel.hotelFeatures.HotelFeaturesRepository;
@@ -48,8 +50,6 @@ public class CountryService{
     private final RoomDetailsUtils roomDetailsUtils;
     private final HotelEvaluationUtils hotelEvaluationUtils;
     private final RoomUtils roomUtils;
-    private final HotelFeaturesUtils hotelFeaturesUtils;
-    private final RoomFeaturesUtils roomFeaturesUtils;
     private final PackageUtils packageUtils;
     private final PlaneFlightsUtils planeFlightsUtils;
     private final S3Service s3Service;
@@ -63,8 +63,6 @@ public class CountryService{
                           RoomDetailsUtils roomDetailsUtils,
                           HotelEvaluationUtils hotelEvaluationUtils,
                           RoomUtils roomUtils,
-                          HotelFeaturesUtils hotelFeaturesUtils,
-                          RoomFeaturesUtils roomFeaturesUtils,
                           PackageUtils packageUtils,
                           PlaneFlightsUtils planeFlightsUtils,
                           S3Service s3Service) {
@@ -76,8 +74,6 @@ public class CountryService{
         this.roomDetailsUtils = roomDetailsUtils;
         this.hotelEvaluationUtils = hotelEvaluationUtils;
         this.roomUtils = roomUtils;
-        this.hotelFeaturesUtils = hotelFeaturesUtils;
-        this.roomFeaturesUtils = roomFeaturesUtils;
         this.packageUtils = packageUtils;
         this.planeFlightsUtils = planeFlightsUtils;
         this.s3Service = s3Service;
@@ -134,8 +130,11 @@ public class CountryService{
     public ResponseEntity<?> editCountry(int countryId,
                                         EditCountryDto editCountryDto) {
         try {
+            if(!countryUtils.checkHelper(editCountryDto)) {
+                return badRequestException("you sent an empty data to change");
+            }
             CountryEntity country = countryUtils.findCountryById(countryId);
-            editHelper(country, editCountryDto);
+            countryUtils.editHelper(country, editCountryDto);
             countryUtils.save(country);
             return ResponseEntity.ok("Country edited successfully to: " + country.getCountry());
         }catch (EntityNotFoundException e){
@@ -150,72 +149,69 @@ public class CountryService{
         try {
             CountryEntity countryEntity = countryUtils.findCountryById(countryId);
 
-            for(PlaceEntity place:countryEntity.getPlaces()){
-                PlaceDetailsEntity placeDetails = place.getPlaceDetails();
-                if(placeDetails != null){
-                    placeDetailsUtils.delete(placeDetails);
+            if (countryEntity.getPlaces() != null) {
+                for (PlaceEntity place : countryEntity.getPlaces()) {
+                    PlaceDetailsEntity placeDetails = place.getPlaceDetails();
+                    if (placeDetails != null) {
+                        placeDetailsUtils.delete(placeDetails);
+                    }
+                    placeUtils.delete(place);
                 }
-                placeUtils.delete(place);
             }
 
-            for(HotelEntity hotel:countryEntity.getHotels()){
-                RoomDetailsEntity roomDetails = hotel.getRoomDetails();
-                if(roomDetails != null){
+            if (countryEntity.getHotels() != null) {
+                for (HotelEntity hotel : countryEntity.getHotels()) {
+                    RoomDetailsEntity roomDetails = hotel.getRoomDetails();
+
+                    if (roomDetails.getHotelFeatures() != null) {
+                        roomDetails.getHotelFeatures().clear();
+                    }
+
+                    if (roomDetails.getRoomFeatures() != null) {
+                        roomDetails.getRoomFeatures().clear();
+                    }
+
                     roomDetailsUtils.delete(roomDetails);
-                }
-                List<HotelEvaluationEntity> hotelEvaluation = hotel.getEvaluations();
-                if(hotelEvaluation != null){
-                    for (HotelEvaluationEntity hotelEvaluationEntity : hotelEvaluation) {
-                        hotelEvaluationUtils.delete(hotelEvaluationEntity);
+
+                    List<HotelEvaluationEntity> hotelEvaluations = hotel.getEvaluations();
+                    if (hotelEvaluations != null) {
+                        for (HotelEvaluationEntity hotelEvaluation : hotelEvaluations) {
+                            hotelEvaluationUtils.delete(hotelEvaluation);
+                        }
                     }
-                }
-                if(hotel.getRooms() != null){
-                    for(RoomEntity room:hotel.getRooms()){
-                        roomUtils.delete(room);
+                    if (hotel.getRooms() != null) {
+                        for (RoomEntity room : hotel.getRooms()) {
+                            roomUtils.delete(room);
+                        }
                     }
+                    hotelUtils.delete(hotel);
                 }
-                hotelUtils.delete(hotel);
             }
 
-            for(PackageEntity packageEntity:countryEntity.getPackages()){
-                packageUtils.delete(packageEntity);
-            }
-
-            for(PlaneFlightsEntity departure:countryEntity.getDepartingFlights()){
-                planeFlightsUtils.delete(departure);
-            }
-
-            for(PlaneFlightsEntity arrival:countryEntity.getArrivingFlights()){
-                planeFlightsUtils.delete(arrival);
+            if (countryEntity.getPackages() != null) {
+                for (PackageEntity packageEntity : countryEntity.getPackages()) {
+                    packageUtils.delete(packageEntity);
+                }
             }
 
             CountryDetailsEntity countryDetails = countryEntity.getCountryDetails();
-            String[] ls = new String[]{
-                countryEntity.getMainImage(),
-                countryDetails.getImageOne(),
-                countryDetails.getImageTwo(),
-                countryDetails.getImageThree()
-            };
-            s3Service.deleteFiles(ls);
-            countryDetailsUtils.delete(countryEntity.getCountryDetails());
+            if (countryDetails != null) {
+                String[] images = {
+                        countryEntity.getMainImage(),
+                        countryDetails.getImageOne(),
+                        countryDetails.getImageTwo(),
+                        countryDetails.getImageThree()
+                };
+                s3Service.deleteFiles(images);
+                countryDetailsUtils.delete(countryDetails);
+            }
+
             s3Service.deleteFile(countryEntity.getMainImage());
             countryUtils.delete(countryEntity);
+
             return ResponseEntity.ok("Country and country details deleted successfully");
         } catch (Exception e) {
             return serverErrorException(e);
-        }
-    }
-
-    private void editHelper(CountryEntity country,
-                            EditCountryDto editCountryDto) {
-        if (editCountryDto.getCountry() != null) {
-            boolean existsCountry = countryUtils.existsByCountry(editCountryDto.getCountry());
-            if(!existsCountry) country.setCountry(editCountryDto.getCountry());
-        }
-        if (editCountryDto.getMainImage() != null) {
-            s3Service.deleteFile(country.getMainImage());
-            String newMainImageName = s3Service.uploadFile(editCountryDto.getMainImage());
-            country.setMainImage(newMainImageName);
         }
     }
 }

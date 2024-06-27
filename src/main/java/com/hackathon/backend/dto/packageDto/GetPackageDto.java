@@ -15,8 +15,8 @@ public class GetPackageDto {
 
     private int id;
     private String packageName;
-    private float price;
-    private float rate;
+    private int price;
+    private int rate;
     private String mainImage;
 
     private GetPackageDetailsDto packageDetails;
@@ -24,7 +24,7 @@ public class GetPackageDto {
     private List<BenefitEntity> benefits;
 
     public GetPackageDto(int id, String packageName,
-                         float price, float rate,
+                         int price, int rate,
                          String mainImage,
                          GetPackageDetailsDto getPackageDetailsDto,
                          List<RoadmapEntity> roadmaps,

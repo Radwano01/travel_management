@@ -1,5 +1,6 @@
 package com.hackathon.backend.services.plane;
 
+import com.hackathon.backend.dto.planeDto.EditPlaneSeatDto;
 import com.hackathon.backend.dto.planeDto.PlaneSeatDto;
 import com.hackathon.backend.dto.planeDto.ValidSeatDto;
 import com.hackathon.backend.entities.plane.PlaneEntity;
@@ -80,10 +81,13 @@ public class PlaneSeatsService {
 
     @Transactional
     public ResponseEntity<?> editSeat(long seatId,
-                                      PlaneSeatDto planeSeatDto){
+                                      EditPlaneSeatDto editPlaneSeatDto){
         try{
+            if(!planeSeatsUtils.checkHelper(editPlaneSeatDto)){
+                return badRequestException("you sent an empty data to change");
+            }
             PlaneSeatsEntity planeSeats = planeSeatsUtils.findById(seatId);
-            editHelper(planeSeats, planeSeatDto);
+            planeSeatsUtils.editHelper(planeSeats, editPlaneSeatDto);
             planeSeatsUtils.save(planeSeats);
             return ResponseEntity.ok("Plane seat updated Successfully");
         }catch (EntityNotFoundException e){
@@ -107,23 +111,6 @@ public class PlaneSeatsService {
             return notFoundException(e);
         }catch (Exception e){
             return serverErrorException(e);
-        }
-    }
-
-    private void editHelper(PlaneSeatsEntity planeSeats,
-                            PlaneSeatDto planeSeatDto) {
-        if(planeSeats.getPlane().getNumSeats() > planeSeatDto.getSeatNumber()){
-            planeSeats.setSeatNumber(planeSeatDto.getSeatNumber());
-        }
-        switch (planeSeatDto.getSeatClass()){
-            case 'A':
-            case 'B':
-            case 'C':
-            case 'D':
-                planeSeats.setSeatClass(planeSeatDto.getSeatClass());
-                break;
-            default:
-                break;
         }
     }
 }

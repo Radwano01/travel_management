@@ -13,8 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
-import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
+import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class PlaceDetailsService {
@@ -55,8 +54,11 @@ public class PlaceDetailsService {
     public ResponseEntity<?> editPlaceDetails(int placeId,
                                               EditPlaceDetailsDto editPlaceDetailsDto) {
         try{
+            if(!placeDetailsUtils.checkHelper(editPlaceDetailsDto)){
+                return badRequestException("you sent an empty data to change");
+            }
             PlaceEntity place = placeUtils.findById(placeId);
-            editHelper(place.getPlaceDetails(), editPlaceDetailsDto);
+            placeDetailsUtils.editHelper(place.getPlaceDetails(), editPlaceDetailsDto);
             placeDetailsUtils.save(place.getPlaceDetails());
             placeUtils.save(place);
             return ResponseEntity.ok("Place details edited successfully");
@@ -64,25 +66,6 @@ public class PlaceDetailsService {
             return notFoundException(e);
         }catch (Exception e){
             return serverErrorException(e);
-        }
-    }
-
-    private void editHelper(PlaceDetailsEntity placeDetails,
-                            EditPlaceDetailsDto editPlaceDetailsDto){
-        if(editPlaceDetailsDto.getImageOne() != null){
-            String placeDetailsImageOneName = s3Service.uploadFile(editPlaceDetailsDto.getImageOne());
-            placeDetails.setImageOne(placeDetailsImageOneName);
-        }
-        if(editPlaceDetailsDto.getImageTwo() != null){
-            String placeDetailsImageTwoName = s3Service.uploadFile(editPlaceDetailsDto.getImageTwo());
-            placeDetails.setImageTwo(placeDetailsImageTwoName);
-        }
-        if(editPlaceDetailsDto.getImageThree() != null){
-            String placeDetailsImageThreeName = s3Service.uploadFile(editPlaceDetailsDto.getImageThree());
-            placeDetails.setImageThree(placeDetailsImageThreeName);
-        }
-        if(editPlaceDetailsDto.getDescription() != null){
-            placeDetails.setDescription(editPlaceDetailsDto.getDescription());
         }
     }
 }

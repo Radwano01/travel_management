@@ -1,11 +1,11 @@
 package com.hackathon.backend.plane.services;
 
 import com.hackathon.backend.dto.planeDto.FlightDto;
-import com.hackathon.backend.entities.country.CountryEntity;
+import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
 import com.hackathon.backend.services.plane.PlaneFlightsService;
-import com.hackathon.backend.utilities.country.CountryUtils;
+import com.hackathon.backend.utilities.plane.AirPortsUtils;
 import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
 import com.hackathon.backend.utilities.plane.PlaneUtils;
 import org.junit.jupiter.api.Test;
@@ -16,13 +16,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PlaneFlightsServiceTest {
@@ -34,7 +32,7 @@ class PlaneFlightsServiceTest {
     PlaneUtils planeUtils;
 
     @Mock
-    CountryUtils countryUtils;
+    AirPortsUtils airPortsUtils;
 
     @InjectMocks
     PlaneFlightsService planeFlightsService;
@@ -43,81 +41,78 @@ class PlaneFlightsServiceTest {
     void addFlight() {
         //given
         long planeId = 1;
-        int departureCountryId = 1;
-        int destinationCountryId = 2;
+        long departureAirPortId = 1;
+        long destinationAirPortId = 2;
 
         PlaneEntity plane = new PlaneEntity();
         plane.setId(planeId);
 
-        CountryEntity departureCountry = new CountryEntity();
-        departureCountry.setId(departureCountryId);
+        AirPortEntity departureAirPort = new AirPortEntity();
+        departureAirPort.setId(departureAirPortId);
 
-        CountryEntity destinationCountry = new CountryEntity();
-        destinationCountry.setId(destinationCountryId);
+        AirPortEntity destinationAirPort = new AirPortEntity();
+        destinationAirPort.setId(destinationAirPortId);
 
         FlightDto flightDto = new FlightDto();
         flightDto.setPlaneCompanyName("testPlane");
         flightDto.setPrice(100);
-        flightDto.setDepartureCountry("testCountry1");
-        flightDto.setDestinationCountry("testCountry2");
-        flightDto.setDepartureTime(LocalDateTime.now());
-        flightDto.setArrivalTime(LocalDateTime.now().plusHours(2));
-
+        flightDto.setDepartureAirPort("departureAirport");
+        flightDto.setDestinationAirPort("destinationAirport");
+        flightDto.setDepartureTime("2024/10/01T20:00:00");
+        flightDto.setArrivalTime("2024/10/01T22:00:00");
 
         //behavior
         when(planeUtils.findPlaneById(planeId)).thenReturn(plane);
-        when(countryUtils.findCountryById(departureCountryId)).thenReturn(departureCountry);
-        when(countryUtils.findCountryById(destinationCountryId)).thenReturn(destinationCountry);
+        when(airPortsUtils.findById(departureAirPortId)).thenReturn(departureAirPort);
+        when(airPortsUtils.findById(destinationAirPortId)).thenReturn(destinationAirPort);
 
         //when
         ResponseEntity<?> response = planeFlightsService.addFlight(
-                planeId, departureCountryId,
-                destinationCountryId, flightDto
+                planeId, departureAirPortId, destinationAirPortId, flightDto
         );
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(planeUtils).findPlaneById(planeId);
-        verify(countryUtils).findCountryById(departureCountryId);
-        verify(countryUtils).findCountryById(destinationCountryId);
+        verify(airPortsUtils).findById(departureAirPortId);
+        verify(airPortsUtils).findById(destinationAirPortId);
     }
 
     @Test
     void getFlights() {
         //given
-        int departureCountryId = 1;
-        int destinationCountryId = 2;
+        int departureAirPortId = 1;
+        int destinationAirPortId = 2;
 
-        CountryEntity country1 = new CountryEntity();
-        country1.setId(departureCountryId);
-        country1.setCountry("testCountry1");
+        AirPortEntity departureAirPort = new AirPortEntity();
+        departureAirPort.setId(departureAirPortId);
+        departureAirPort.setAirPortName("departureAirport");
 
-        CountryEntity country2 = new CountryEntity();
-        country2.setId(destinationCountryId);
-        country2.setCountry("testCountry2");
+        AirPortEntity destinationAirPort = new AirPortEntity();
+        destinationAirPort.setId(destinationAirPortId);
+        destinationAirPort.setAirPortName("destinationAirport");
 
         PlaneEntity plane = new PlaneEntity();
         plane.setPlaneCompanyName("testPlane");
-        plane.setNumSeats(50);
 
         PlaneFlightsEntity flight1 = new PlaneFlightsEntity();
         flight1.setId(1);
         flight1.setPrice(100);
-        flight1.setDepartureTime(LocalDateTime.now());
-        flight1.setArrivalTime(LocalDateTime.now().plusHours(2));
+        flight1.setDepartureAirPort(departureAirPort);
+        flight1.setDestinationAirPort(destinationAirPort);
+        flight1.setDepartureTime("2024/10/01T20:00:00");
+        flight1.setArrivalTime("2024/10/01T22:00:00");
         flight1.setPlane(plane);
-        flight1.setDepartureCountry(country1);
-        flight1.setDestinationCountry(country2);
 
         List<PlaneFlightsEntity> planeFlightsList = new ArrayList<>();
         planeFlightsList.add(flight1);
 
         //behavior
-        when(planeFlightsUtils.findAllByDepartureCountryIdAndDestinationCountryId(departureCountryId, destinationCountryId))
+        when(planeFlightsUtils.findAllByDeparturePlaceIdAndDestinationPlaceId(departureAirPortId, destinationAirPortId))
                 .thenReturn(planeFlightsList);
 
         //when
-        ResponseEntity<?> response = planeFlightsService.getFlights(departureCountryId, destinationCountryId);
+        ResponseEntity<?> response = planeFlightsService.getFlights(departureAirPortId, destinationAirPortId);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -126,51 +121,35 @@ class PlaneFlightsServiceTest {
         assertEquals(flight1.getId(), flights.get(0).getId());
         assertEquals(flight1.getPrice(), flights.get(0).getPrice());
         assertEquals(flight1.getPlane().getPlaneCompanyName(), flights.get(0).getPlaneCompanyName());
-        assertEquals(flight1.getDepartureCountry().getCountry(), flights.get(0).getDepartureCountry());
-        assertEquals(flight1.getDestinationCountry().getCountry(), flights.get(0).getDestinationCountry());
+        assertEquals(flight1.getDepartureAirPort().getAirPortName(), flights.get(0).getDepartureAirPort());
+        assertEquals(flight1.getDestinationAirPort().getAirPortName(), flights.get(0).getDestinationAirPort());
     }
 
     @Test
     void editFlight() {
         //given
         long flightId = 1L;
-        int departureCountryId = 1;
-        int destinationCountryId = 2;
-
-        CountryEntity country1 = new CountryEntity();
-        country1.setId(departureCountryId);
-        country1.setCountry("testCountry1");
-
-        CountryEntity country2 = new CountryEntity();
-        country2.setId(destinationCountryId);
-        country2.setCountry("testCountry2");
 
         PlaneFlightsEntity flight1 = new PlaneFlightsEntity();
         flight1.setId(1);
         flight1.setPrice(100);
-        flight1.setDepartureTime(LocalDateTime.now());
-        flight1.setArrivalTime(LocalDateTime.now().plusHours(2));
-        flight1.setDepartureCountry(country1);
-        flight1.setDestinationCountry(country2);
+        flight1.setDepartureTime("2024/10/01T20:00:00");
+        flight1.setArrivalTime("2024/10/01T22:00:00");
 
         FlightDto flightDto = new FlightDto();
         flightDto.setPrice(150);
-        flightDto.setDepartureCountry("testCountry1");
-        flightDto.setDestinationCountry("testCountry2");
-        flightDto.setDepartureTime(LocalDateTime.now());
-        flightDto.setArrivalTime(LocalDateTime.now().plusHours(2));
+        flightDto.setDepartureTime("2024/10/01T20:00:00");
+        flightDto.setArrivalTime("2024/10/01T22:00:00");
 
         //behavior
         when(planeFlightsUtils.findById(flightId)).thenReturn(flight1);
 
         //when
-        ResponseEntity<?> response = planeFlightsService.editFlight(flightId, departureCountryId, destinationCountryId, flightDto);
+        ResponseEntity<?> response = planeFlightsService.editFlight(flightId, flightDto);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(flightDto.getPrice(), flight1.getPrice());
-        assertEquals(flightDto.getDepartureCountry(), flight1.getDepartureCountry().getCountry());
-        assertEquals(flightDto.getDestinationCountry(), flight1.getDestinationCountry().getCountry());
         assertEquals(flightDto.getDepartureTime(), flight1.getDepartureTime());
         assertEquals(flightDto.getArrivalTime(), flight1.getArrivalTime());
         verify(planeFlightsUtils).findById(flightId);

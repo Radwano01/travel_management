@@ -10,13 +10,13 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 public class EditPackageDto {
     private String packageName;
-    private float price;
-    private int rate;
+    private Integer price;
+    private Integer rate;
     private MultipartFile mainImage;
 
     public EditPackageDto(String packageName,
-                          float price,
-                          int rate,
+                          Integer price,
+                          Integer rate,
                           MultipartFile mainImage) {
         this.packageName = packageName;
         this.price = price;

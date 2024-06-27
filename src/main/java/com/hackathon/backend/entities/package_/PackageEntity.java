@@ -22,7 +22,7 @@ public class PackageEntity{
     private int id;
 
     private String packageName;
-    private float price;
+    private int price;
     private String mainImage;
     private int rate;
 
@@ -38,7 +38,7 @@ public class PackageEntity{
 
 
     public PackageEntity(String packageName,
-                         float price,
+                         int price,
                          String mainImage,
                          int rate,
                          CountryEntity country){
