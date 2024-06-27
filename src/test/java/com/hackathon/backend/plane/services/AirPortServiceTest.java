@@ -88,13 +88,13 @@ public class AirPortServiceTest {
     @Test
     public void deleteAirPort() {
         //given
-        doNothing().when(airPortsUtils).delete(anyLong());
+        doNothing().when(airPortsUtils).deleteById(anyLong());
 
         //when
         ResponseEntity<?> response = airPortService.deleteAirPort(1L);
 
         //then
         assertEquals(ResponseEntity.ok("AirPort deleted successfully"), response);
-        verify(airPortsUtils, times(1)).delete(anyLong());
+        verify(airPortsUtils, times(1)).deleteById(anyLong());
     }
 }
