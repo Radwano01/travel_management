@@ -17,27 +17,29 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CountryDetailsServiceTest {
 
     @Mock
-    CountryUtils countryUtils;
+    private CountryUtils countryUtils;
 
     @Mock
-    CountryDetailsUtils countryDetailsUtils;
+    private CountryDetailsUtils countryDetailsUtils;
 
     @Mock
-    S3Service s3Service;
+    private S3Service s3Service;
 
     @InjectMocks
-    CountryDetailsService countryDetailsService;
+    private CountryDetailsService countryDetailsService;
 
     @Test
     void getSingleCountryDetails() {
-        //given
+        // given
         int countryId = 1;
         CountryEntity country = new CountryEntity();
         country.setId(countryId);
@@ -47,24 +49,23 @@ class CountryDetailsServiceTest {
                 "testImageThree",
                 "testDesc",
                 country
-
         );
         country.setCountryDetails(countryDetails);
 
-        //behavior
+        // behavior
         when(countryUtils.findCountryById(countryId)).thenReturn(country);
 
-        //when
+        // when
         ResponseEntity<?> response = countryDetailsService.getSingleCountryDetails(countryId);
         GetCountryDetailsDto getCountryDetailsDto = (GetCountryDetailsDto) response.getBody();
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assert getCountryDetailsDto != null;
-        assertEquals(country.getCountryDetails().getImageOne(), getCountryDetailsDto.getImageOne());
-        assertEquals(country.getCountryDetails().getImageTwo(), getCountryDetailsDto.getImageTwo());
-        assertEquals(country.getCountryDetails().getImageThree(), getCountryDetailsDto.getImageThree());
-        assertEquals(country.getCountryDetails().getDescription(), getCountryDetailsDto.getDescription());
+        assertEquals(countryDetails.getImageOne(), getCountryDetailsDto.getImageOne());
+        assertEquals(countryDetails.getImageTwo(), getCountryDetailsDto.getImageTwo());
+        assertEquals(countryDetails.getImageThree(), getCountryDetailsDto.getImageThree());
+        assertEquals(countryDetails.getDescription(), getCountryDetailsDto.getDescription());
         assertEquals(country.getCountry(), getCountryDetailsDto.getCountry());
         assertEquals(country.getMainImage(), getCountryDetailsDto.getCountryMainImage());
     }
@@ -72,42 +73,26 @@ class CountryDetailsServiceTest {
     @Test
     void editCountryDetails() {
         //given
-        int countryId = 1;
+        EditCountryDetailsDto dto = new EditCountryDetailsDto();
+        dto.setDescription("New Description");
+
+        CountryDetailsEntity countryDetails = new CountryDetailsEntity();
         CountryEntity country = new CountryEntity();
-        country.setId(countryId);
-
-        CountryDetailsEntity countryDetails = new CountryDetailsEntity(
-                "testImageOne",
-                "testImageTwo",
-                "testImageThree",
-                "testDesc",
-                country
-
-        );
         country.setCountryDetails(countryDetails);
 
-
-        EditCountryDetailsDto editCountryDetailsDto = new EditCountryDetailsDto(
-                new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", new byte[0]),
-                new MockMultipartFile("imageTwo", "imageTwo.jpg", "image/jpeg", new byte[0]),
-                new MockMultipartFile("imageThree", "imageThree.jpg", "image/jpeg", new byte[0]),
-                "testDesc1"
-        );
-
         //behavior
-        when(countryUtils.findCountryById(countryId)).thenReturn(country);
-        when(s3Service.uploadFile(editCountryDetailsDto.getImageOne())).thenReturn("imageOne");
-        when(s3Service.uploadFile(editCountryDetailsDto.getImageTwo())).thenReturn("imageTwo");
-        when(s3Service.uploadFile(editCountryDetailsDto.getImageThree())).thenReturn("imageThree");
+        when(countryDetailsUtils.checkHelper(dto)).thenReturn(true);
+        when(countryUtils.findCountryById(1)).thenReturn(country);
 
         //when
-        ResponseEntity<?> response = countryDetailsService.editCountryDetails(countryId, editCountryDetailsDto);
+        ResponseEntity<?> response = countryDetailsService.editCountryDetails(1, dto);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("imageOne", countryDetails.getImageOne());
-        assertEquals("imageTwo", countryDetails.getImageTwo());
-        assertEquals("imageThree", countryDetails.getImageThree());
-        assertEquals("testDesc1", countryDetails.getDescription());
+        verify(countryDetailsUtils).checkHelper(dto);
+        verify(countryUtils).findCountryById(1);
+        verify(countryDetailsUtils).editHelper(countryDetails, dto);
+        verify(countryUtils).save(country);
+        verify(countryDetailsUtils).save(countryDetails);
     }
 }

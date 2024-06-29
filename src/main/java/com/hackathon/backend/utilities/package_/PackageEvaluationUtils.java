@@ -42,7 +42,7 @@ public class PackageEvaluationUtils {
         if (editPackageEvaluationDto.getComment() != null) {
             packageEvaluation.setComment(editPackageEvaluationDto.getComment());
         }
-        if (editPackageEvaluationDto.getRate() > 0) {
+        if (editPackageEvaluationDto.getRate() >= 0 && editPackageEvaluationDto.getRate() <= 5) {
             packageEvaluation.setRate(editPackageEvaluationDto.getRate());
         }
     }

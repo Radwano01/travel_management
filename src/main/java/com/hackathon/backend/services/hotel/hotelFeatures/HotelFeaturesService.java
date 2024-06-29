@@ -67,9 +67,12 @@ public class HotelFeaturesService {
                 return badRequestException("you sent an empty data to change");
             }
             HotelFeaturesEntity hotelFeatures = hotelFeaturesUtils.findById(featureId);
+            hotelFeatures.setHotelFeatures(hotelFeature);
             hotelFeaturesUtils.save(hotelFeatures);
             return ResponseEntity.ok("Hotel Feature edited successfully");
-        }catch (Exception e){
+        }catch (EntityNotFoundException e){
+            return notFoundException(e);
+        } catch (Exception e){
             return serverErrorException(e);
         }
     }

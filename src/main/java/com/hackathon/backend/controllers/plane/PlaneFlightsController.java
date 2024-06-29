@@ -1,5 +1,6 @@
 package com.hackathon.backend.controllers.plane;
 
+import com.hackathon.backend.dto.planeDto.EditFlightDto;
 import com.hackathon.backend.dto.planeDto.FlightDto;
 import com.hackathon.backend.services.plane.PlaneFlightsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +34,10 @@ public class PlaneFlightsController {
 
     @PutMapping(path = "${EDIT_FLIGHT_PATH}")
     public ResponseEntity<?> editFlight(@PathVariable("flightId") long flightId,
-                                        @RequestBody FlightDto flightDto){
+                                        @RequestBody EditFlightDto editFlightDto){
         return planeFlightsService.editFlight(
                 flightId,
-                flightDto
+                editFlightDto
         );
     }
 

@@ -10,12 +10,12 @@ import lombok.Setter;
 public class PackageEvaluationDto {
     private long id;
     private String comment;
-    private float rate;
+    private int rate;
     private String username;
     private String userImage;
 
     public PackageEvaluationDto(long id, String comment,
-                              float rate,String username,
+                              int rate,String username,
                               String image) {
         this.id = id;
         this.comment = comment;

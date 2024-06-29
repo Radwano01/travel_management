@@ -20,15 +20,12 @@ public class CountryDetailsService {
 
     private final CountryUtils countryUtils;
     private final CountryDetailsUtils countryDetailsUtils;
-    private final S3Service s3Service;
 
     @Autowired
     public CountryDetailsService(CountryUtils countryUtils,
-                                 CountryDetailsUtils countryDetailsUtils,
-                                 S3Service s3Service) {
+                                 CountryDetailsUtils countryDetailsUtils) {
         this.countryUtils = countryUtils;
         this.countryDetailsUtils = countryDetailsUtils;
-        this.s3Service = s3Service;
     }
 
     public ResponseEntity<?> getSingleCountryDetails(int countryId) {

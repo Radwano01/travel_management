@@ -41,7 +41,7 @@ class HotelEvaluationRepositoryTest {
         evaluation.setHotel(hotel);
         evaluation.setUser(user);
         evaluation.setComment("testComment");
-        evaluation.setRate(2.40f);
+        evaluation.setRate(2);
 
         hotel.getEvaluations().add(evaluation);
 

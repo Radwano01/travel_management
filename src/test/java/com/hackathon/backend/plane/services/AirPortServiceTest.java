@@ -1,6 +1,7 @@
 package com.hackathon.backend.plane.services;
 
-import com.hackathon.backend.dto.planeDto.PlaneAirPortDto;
+import com.hackathon.backend.dto.planeDto.EditPlaneDto;
+import com.hackathon.backend.dto.planeDto.AirPortDto;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 
@@ -32,14 +33,14 @@ public class AirPortServiceTest {
     @InjectMocks
     AirPortService airPortService;
 
-    PlaneAirPortDto planeAirPortDto;
+    AirPortDto airPortDto;
     AirPortEntity airPortEntity;
 
     @BeforeEach
     public void setUp() {
-        planeAirPortDto = new PlaneAirPortDto();
-        planeAirPortDto.setAirPortName("Test Airport");
-        planeAirPortDto.setAirPortCode("TST");
+        airPortDto = new AirPortDto();
+        airPortDto.setAirPortName("Test Airport");
+        airPortDto.setAirPortCode("TST");
 
         PlaceEntity placeEntity = new PlaceEntity();
         placeEntity.setId(1);
@@ -66,7 +67,7 @@ public class AirPortServiceTest {
         when(airPortsUtils.existsAirPortByAirPort(anyString())).thenReturn(false);
 
         //when
-        ResponseEntity<?> response = airPortService.createAirPort(1, planeAirPortDto);
+        ResponseEntity<?> response = airPortService.createAirPort(1, airPortDto);
 
         //then
         assertEquals(ResponseEntity.ok("AirPort created successfully"), response);
@@ -77,9 +78,10 @@ public class AirPortServiceTest {
     public void editAirPort() {
         //behavior
         when(airPortsUtils.findById(anyLong())).thenReturn(airPortEntity);
+        when(airPortsUtils.checkHelper(any(AirPortDto.class))).thenReturn(true);
 
         //when
-        ResponseEntity<?> response = airPortService.editAirPort(1L, planeAirPortDto);
+        ResponseEntity<?> response = airPortService.editAirPort(1L, airPortDto);
 
         //then
         assertEquals(ResponseEntity.ok("AirPort edited successfully"), response);

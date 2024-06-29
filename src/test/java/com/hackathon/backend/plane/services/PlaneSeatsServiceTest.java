@@ -117,6 +117,7 @@ class PlaneSeatsServiceTest {
 
         //behavior
         when(planeSeatsUtils.findById(seatId)).thenReturn(planeSeat);
+        when(planeSeatsUtils.checkHelper(editPlaneSeatDto)).thenReturn(true);
 
         //when
         ResponseEntity<?> response = planeSeatsService.editSeat(seatId, editPlaneSeatDto);

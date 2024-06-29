@@ -119,19 +119,15 @@ public class HotelService {
 
     @Transactional
     public ResponseEntity<?> editHotel(long hotelId,
-                                       int countryId,
                                        EditHotelDto editHotelDto){
         try{
             if(!hotelUtils.checkHelper(editHotelDto)){
                 return badRequestException("you sent an empty data to change");
             }
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
-            CountryEntity country = countryUtils.findCountryById(countryId);
-            hotel.setCountry(country);
             hotelUtils.editHelper(hotel, editHotelDto);
             hotelUtils.save(hotel);
-            countryUtils.save(country);
-            return ResponseEntity.ok("Hotel updated Successfully: "+hotel.getHotelName());
+            return ResponseEntity.ok("Hotel updated Successfully to: "+hotel.getHotelName());
         }catch (EntityNotFoundException e) {
             return notFoundException(e);
         } catch (Exception e){

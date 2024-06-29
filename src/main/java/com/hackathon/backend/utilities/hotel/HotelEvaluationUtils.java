@@ -48,8 +48,8 @@ public class HotelEvaluationUtils {
             hotelEvaluation.setComment(editHotelEvaluationDto.getComment());
         }
         if(editHotelEvaluationDto.getRate() != null &&
-                editHotelEvaluationDto.getRate() >= 0f &&
-                editHotelEvaluationDto.getRate() <= 5f){
+                editHotelEvaluationDto.getRate() >= 0 &&
+                editHotelEvaluationDto.getRate() <= 5){
             hotelEvaluation.setRate(editHotelEvaluationDto.getRate());
         }
     }

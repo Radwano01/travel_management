@@ -1,5 +1,6 @@
 package com.hackathon.backend.plane.services;
 
+import com.hackathon.backend.dto.planeDto.EditFlightDto;
 import com.hackathon.backend.dto.planeDto.FlightDto;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneEntity;
@@ -127,31 +128,43 @@ class PlaneFlightsServiceTest {
 
     @Test
     void editFlight() {
-        //given
+        // given
         long flightId = 1L;
 
         PlaneFlightsEntity flight1 = new PlaneFlightsEntity();
-        flight1.setId(1);
+        flight1.setId(flightId);
         flight1.setPrice(100);
         flight1.setDepartureTime("2024/10/01T20:00:00");
         flight1.setArrivalTime("2024/10/01T22:00:00");
 
-        FlightDto flightDto = new FlightDto();
-        flightDto.setPrice(150);
-        flightDto.setDepartureTime("2024/10/01T20:00:00");
-        flightDto.setArrivalTime("2024/10/01T22:00:00");
+        EditFlightDto editFlightDto = new EditFlightDto();
+        editFlightDto.setPrice(150);
+        editFlightDto.setDepartureTime("2024/10/01T21:00:00");
+        editFlightDto.setArrivalTime("2024/10/01T23:00:00");
 
-        //behavior
+        // behavior
         when(planeFlightsUtils.findById(flightId)).thenReturn(flight1);
+        when(planeFlightsUtils.checkHelper(any(EditFlightDto.class))).thenReturn(true);
 
-        //when
-        ResponseEntity<?> response = planeFlightsService.editFlight(flightId, flightDto);
+        doAnswer(invocation -> {
+            PlaneFlightsEntity planeFlights = invocation.getArgument(0);
+            EditFlightDto dto = invocation.getArgument(1);
 
-        //then
+            planeFlights.setPrice(dto.getPrice());
+            planeFlights.setDepartureTime(dto.getDepartureTime());
+            planeFlights.setArrivalTime(dto.getArrivalTime());
+
+            return null;
+        }).when(planeFlightsUtils).editHelper(any(PlaneFlightsEntity.class), any(EditFlightDto.class));
+
+        // when
+        ResponseEntity<?> response = planeFlightsService.editFlight(flightId, editFlightDto);
+
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(flightDto.getPrice(), flight1.getPrice());
-        assertEquals(flightDto.getDepartureTime(), flight1.getDepartureTime());
-        assertEquals(flightDto.getArrivalTime(), flight1.getArrivalTime());
+        assertEquals(editFlightDto.getPrice(), flight1.getPrice());
+        assertEquals(editFlightDto.getDepartureTime(), flight1.getDepartureTime());
+        assertEquals(editFlightDto.getArrivalTime(), flight1.getArrivalTime());
         verify(planeFlightsUtils).findById(flightId);
         verify(planeFlightsUtils).save(flight1);
     }

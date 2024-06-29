@@ -1,5 +1,6 @@
 package com.hackathon.backend.utilities.plane;
 
+import com.hackathon.backend.dto.planeDto.EditFlightDto;
 import com.hackathon.backend.dto.planeDto.FlightDto;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
@@ -52,32 +53,32 @@ public class PlaneFlightsUtils {
         planeFlightsRepository.delete(flight);
     }
 
-    public boolean checkHelper(FlightDto flightDto){
-        return  flightDto.getPrice() != null ||
-                flightDto.getDepartureTime() != null ||
-                flightDto.getArrivalTime() != null ||
-                flightDto.getDepartureAirPort() != null ||
-                flightDto.getDestinationAirPort() != null;
+    public boolean checkHelper(EditFlightDto editFlightDto){
+        return  editFlightDto.getPrice() != null ||
+                editFlightDto.getDepartureTime() != null ||
+                editFlightDto.getArrivalTime() != null ||
+                editFlightDto.getDepartureAirPort() != null ||
+                editFlightDto.getDestinationAirPort() != null;
     }
 
     public void editHelper(PlaneFlightsEntity planeFlights,
-                           FlightDto flightDto) {
-        if (flightDto.getPrice() != null && flightDto.getPrice() > 0) {
-            planeFlights.setPrice(flightDto.getPrice());
+                           EditFlightDto editFlightDto) {
+        if (editFlightDto.getPrice() != null && editFlightDto.getPrice() > 0) {
+            planeFlights.setPrice(editFlightDto.getPrice());
         }
-        if (flightDto.getDepartureTime() != null) {
-            planeFlights.setDepartureTime(flightDto.getDepartureTime());
+        if (editFlightDto.getDepartureTime() != null) {
+            planeFlights.setDepartureTime(editFlightDto.getDepartureTime());
         }
-        if (flightDto.getArrivalTime() != null) {
-            planeFlights.setArrivalTime(flightDto.getArrivalTime());
+        if (editFlightDto.getArrivalTime() != null) {
+            planeFlights.setArrivalTime(editFlightDto.getArrivalTime());
         }
-        if (flightDto.getDepartureAirPort() != null) {
-            AirPortEntity airPortEntity = airPortsUtils.findAirPortByAirPort(flightDto.getDepartureAirPort());
+        if (editFlightDto.getDepartureAirPort() != null) {
+            AirPortEntity airPortEntity = airPortsUtils.findAirPortByAirPort(editFlightDto.getDepartureAirPort());
             planeFlights.setDepartureAirPort(airPortEntity);
         }
 
-        if (flightDto.getDestinationAirPort() != null) {
-            AirPortEntity airPortEntity = airPortsUtils.findAirPortByAirPort(flightDto.getDestinationAirPort());
+        if (editFlightDto.getDestinationAirPort() != null) {
+            AirPortEntity airPortEntity = airPortsUtils.findAirPortByAirPort(editFlightDto.getDestinationAirPort());
             planeFlights.setDestinationAirPort(airPortEntity);
         }
     }

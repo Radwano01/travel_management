@@ -9,10 +9,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class EditPackageEvaluationDto {
     private String comment;
-    private Float rate;
+    private Integer rate;
 
     public EditPackageEvaluationDto(String comment,
-                                Float rate) {
+                                Integer rate) {
         this.comment = comment;
         this.rate = rate;
     }

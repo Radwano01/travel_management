@@ -1,5 +1,8 @@
 package com.hackathon.backend.hotel.services.features;
 
+import com.hackathon.backend.dto.hotelDto.EditHotelDto;
+import com.hackathon.backend.dto.planeDto.EditPlaneDto;
+import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
 import com.hackathon.backend.services.hotel.hotelFeatures.HotelFeaturesService;
@@ -17,8 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class HotelFeaturesServiceTest {

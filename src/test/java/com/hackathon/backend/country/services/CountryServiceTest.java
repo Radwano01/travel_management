@@ -116,29 +116,33 @@ class CountryServiceTest {
 
     @Test
     void editCountry() {
-        //given
-        int countryId = 1;
+        // given
+        EditCountryDto dto = new EditCountryDto();
+        dto.setCountry("New Country");
+
         CountryEntity country = new CountryEntity();
-        country.setId(countryId);
-        country.setCountry("testCountry");
-        country.setMainImage("testImage");
 
-        EditCountryDto editCountryDto = new EditCountryDto();
-        editCountryDto.setCountry("testCountry1");
-        editCountryDto.setMainImage(new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]));
+        // behavior
+        when(countryUtils.checkHelper(dto)).thenReturn(true);
+        when(countryUtils.findCountryById(1)).thenReturn(country);
+        when(countryUtils.existsByCountry("New Country")).thenReturn(false);
 
-        //behavior
-        when(countryUtils.findCountryById(countryId)).thenReturn(country);
-        when(s3Service.uploadFile(editCountryDto.getMainImage())).thenReturn("newMainImage");
+        if (dto.getCountry() != null && !countryUtils.existsByCountry(dto.getCountry())) {
+            country.setCountry(dto.getCountry());
+        }
 
-        //when
-        ResponseEntity<?> response = countryService.editCountry(countryId, editCountryDto);
+        // when
+        ResponseEntity<?> response = countryService.editCountry(1, dto);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(editCountryDto.getCountry(), country.getCountry());
-        assertEquals("newMainImage", country.getMainImage());
+        assertEquals("New Country", country.getCountry());
+        verify(countryUtils).checkHelper(dto);
+        verify(countryUtils).findCountryById(1);
+        verify(countryUtils).editHelper(country, dto);
+        verify(countryUtils).save(country);
     }
+
 
     @Test
     void deleteCountry() {

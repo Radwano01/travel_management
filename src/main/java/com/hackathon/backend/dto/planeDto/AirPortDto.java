@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PlaneAirPortDto {
+public class AirPortDto {
     private String airPortName;
     private String airPortCode;
 }

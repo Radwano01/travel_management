@@ -23,8 +23,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PackageEvaluationServiceTest {
@@ -49,7 +48,7 @@ class PackageEvaluationServiceTest {
 
         PackageEvaluationDto packageEvaluationDto = new PackageEvaluationDto();
         packageEvaluationDto.setComment("testComment");
-        packageEvaluationDto.setRate(4.5f);
+        packageEvaluationDto.setRate(4);
 
         PackageEntity packageEntity = new PackageEntity();
         packageEntity.setId(packageId);
@@ -80,7 +79,7 @@ class PackageEvaluationServiceTest {
 
         PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity();
         packageEvaluation.setComment("testComment");
-        packageEvaluation.setRate(4.0f);
+        packageEvaluation.setRate(4);
         packageEvaluation.setUser(user);
 
         PackageEntity packageEntity = new PackageEntity();
@@ -106,21 +105,34 @@ class PackageEvaluationServiceTest {
 
     @Test
     void editComment() {
-        //given
+        // given
         long commentId = 1L;
         EditPackageEvaluationDto editPackageEvaluationDto = new EditPackageEvaluationDto();
         editPackageEvaluationDto.setComment("testComment");
-        editPackageEvaluationDto.setRate(2.50f);
-        PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity("testComment1", 3.5f,
+        editPackageEvaluationDto.setRate(2);
+
+        PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity("testComment1", 3,
                 new UserEntity(), new PackageEntity());
+        packageEvaluation.setId(commentId);
 
-        //behavior
+        // behavior
         when(packageEvaluationUtils.findById(commentId)).thenReturn(packageEvaluation);
+        when(packageEvaluationUtils.checkHelper(editPackageEvaluationDto)).thenReturn(true);
 
-        //when
+        doAnswer(invocation -> {
+            PackageEvaluationEntity entity = invocation.getArgument(0);
+            EditPackageEvaluationDto dto = invocation.getArgument(1);
+
+            entity.setComment(dto.getComment());
+            entity.setRate(dto.getRate());
+
+            return null;
+        }).when(packageEvaluationUtils).editHelper(any(PackageEvaluationEntity.class), any(EditPackageEvaluationDto.class));
+
+        // when
         ResponseEntity<?> response = packageEvaluationService.editComment(commentId, editPackageEvaluationDto);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(editPackageEvaluationDto.getComment(), packageEvaluation.getComment());
         assertEquals(editPackageEvaluationDto.getRate(), packageEvaluation.getRate());
@@ -140,7 +152,7 @@ class PackageEvaluationServiceTest {
         UserEntity user = new UserEntity();
         user.setId(userId);
 
-        PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity("testComment", 4.0f, user, packageEntity);
+        PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity("testComment", 4, user, packageEntity);
 
         //behavior
         when(packageUtils.findById(packageId)).thenReturn(packageEntity);

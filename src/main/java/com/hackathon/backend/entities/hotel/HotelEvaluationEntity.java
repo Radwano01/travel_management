@@ -18,7 +18,7 @@ public class HotelEvaluationEntity {
     private long id;
 
     private String comment;
-    private float rate;
+    private int rate;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
@@ -28,7 +28,7 @@ public class HotelEvaluationEntity {
     @JoinColumn(name = "hotel_id")
     private HotelEntity hotel;
 
-    public HotelEvaluationEntity(String comment, float rate,
+    public HotelEvaluationEntity(String comment, int rate,
                                  HotelEntity hotel, UserEntity user) {
         this.comment = comment;
         this.rate = rate;

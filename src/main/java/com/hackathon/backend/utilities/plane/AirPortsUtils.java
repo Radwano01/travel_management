@@ -1,6 +1,6 @@
 package com.hackathon.backend.utilities.plane;
 
-import com.hackathon.backend.dto.planeDto.PlaneAirPortDto;
+import com.hackathon.backend.dto.planeDto.AirPortDto;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.repositories.plane.AirPortRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -44,17 +44,17 @@ public class AirPortsUtils {
         airPortRepository.deleteAll();
     }
 
-    public boolean checkHelper(PlaneAirPortDto planeAirPortDto) {
-        return planeAirPortDto.getAirPortName() != null || planeAirPortDto.getAirPortCode() != null;
+    public boolean checkHelper(AirPortDto airPortDto) {
+        return airPortDto.getAirPortName() != null || airPortDto.getAirPortCode() != null;
     }
 
-    public void editHelper(AirPortEntity airPortEntity, PlaneAirPortDto planeAirPortDto) {
-        if (planeAirPortDto.getAirPortName() != null) {
-            airPortEntity.setAirPortName(planeAirPortDto.getAirPortName());
+    public void editHelper(AirPortEntity airPortEntity, AirPortDto airPortDto) {
+        if (airPortDto.getAirPortName() != null) {
+            airPortEntity.setAirPortName(airPortDto.getAirPortName());
         }
 
-        if (planeAirPortDto.getAirPortCode() != null) {
-            airPortEntity.setAirPortCode(planeAirPortDto.getAirPortCode());
+        if (airPortDto.getAirPortCode() != null) {
+            airPortEntity.setAirPortCode(airPortDto.getAirPortCode());
         }
     }
 }

@@ -14,7 +14,7 @@ public class FlightDto {
 
     private long id;
     private String planeCompanyName;
-    private Integer price;
+    private int price;
     private String departureAirPort;
     private String departureAirPortCode;
 

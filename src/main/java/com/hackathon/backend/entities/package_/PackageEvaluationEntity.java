@@ -18,7 +18,7 @@ public class PackageEvaluationEntity {
     private long id;
 
     private String comment;
-    private float rate;
+    private int rate;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
@@ -28,7 +28,7 @@ public class PackageEvaluationEntity {
     @JoinColumn(name = "package_id")
     private PackageEntity packageEntity;
 
-    public PackageEvaluationEntity(String comment, float rate,
+    public PackageEvaluationEntity(String comment, int rate,
                                    UserEntity user,
                                    PackageEntity packageEntity){
         this.comment = comment;

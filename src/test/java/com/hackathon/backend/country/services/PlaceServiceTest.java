@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -120,32 +121,29 @@ class PlaceServiceTest {
     @Test
     void editPlace() {
         //given
-        int countryId = 1;
-        int placeId = 1;
-        EditPlaceDto editPlaceDto = new EditPlaceDto(
-                "testPlace",
-                new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0])
-        );
+        EditPlaceDto dto = new EditPlaceDto();
+        dto.setPlace("New Place");
 
         PlaceEntity place = new PlaceEntity();
-        place.setId(placeId);
+        place.setId(1);
 
         CountryEntity country = new CountryEntity();
-        country.setId(countryId);
-        country.getPlaces().add(place);
+        country.setPlaces(Collections.singletonList(place));
 
         //behavior
-        when(countryUtils.findCountryById(countryId)).thenReturn(country);
-        when(s3Service.uploadFile(editPlaceDto.getMainImage())).thenReturn("mainImage");
+        when(placeUtils.checkHelper(dto)).thenReturn(true);
+        when(countryUtils.findCountryById(1)).thenReturn(country);
 
         //when
-        ResponseEntity<?> response = placeService.editPlace(countryId, placeId, editPlaceDto);
+        ResponseEntity<?> response = placeService.editPlace(1, 1, dto);
 
         //then
-        assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("testPlace", place.getPlace());
-        assertEquals("mainImage", place.getMainImage());
+        verify(placeUtils).checkHelper(dto);
+        verify(countryUtils).findCountryById(1);
+        verify(placeUtils).editHelper(place, dto);
+        verify(placeUtils).save(place);
+        verify(countryUtils).save(country);
     }
 
     @Test

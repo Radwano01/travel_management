@@ -58,7 +58,7 @@ public class RoadmapService{
     public ResponseEntity<?> editRoadmap(int roadmapId,
                                          String roadmap){
         try{
-            if(roadmap != null){
+            if(roadmap == null){
                 return badRequestException("you sent an empty data to change");
             }
             RoadmapEntity roadmapEntity = roadmapUtils.findById(roadmapId);

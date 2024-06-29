@@ -21,6 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -84,7 +86,7 @@ class PackageDetailsServiceTest {
 
     @Test
     void editPackageDetails() {
-        //given
+        // given
         int packageDetailsId = 1;
         EditPackageDetailsDto editPackageDetailsDto = new EditPackageDetailsDto(
                 new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", new byte[0]),
@@ -100,18 +102,29 @@ class PackageDetailsServiceTest {
         packageDetailsEntity.setImageThree("testImageThree");
         packageDetailsEntity.setDescription("testDesc");
 
-
-        //behavior
+        // behavior
         when(packageDetailsUtils.findById(packageDetailsId)).thenReturn(packageDetailsEntity);
+        when(packageDetailsUtils.checkHelper(editPackageDetailsDto)).thenReturn(true);
         when(s3Service.uploadFile(editPackageDetailsDto.getImageOne())).thenReturn("imageOne");
         when(s3Service.uploadFile(editPackageDetailsDto.getImageTwo())).thenReturn("imageTwo");
         when(s3Service.uploadFile(editPackageDetailsDto.getImageThree())).thenReturn("imageThree");
 
+        doAnswer(invocation -> {
+            PackageDetailsEntity entity = invocation.getArgument(0);
+            EditPackageDetailsDto dto = invocation.getArgument(1);
 
-        //when
+            entity.setImageOne(s3Service.uploadFile(dto.getImageOne()));
+            entity.setImageTwo(s3Service.uploadFile(dto.getImageTwo()));
+            entity.setImageThree(s3Service.uploadFile(dto.getImageThree()));
+            entity.setDescription(dto.getDescription());
+
+            return null;
+        }).when(packageDetailsUtils).editHelper(any(PackageDetailsEntity.class), any(EditPackageDetailsDto.class));
+
+        // when
         ResponseEntity<?> response = packageDetailsService.editPackageDetails(packageDetailsId, editPackageDetailsDto);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("imageOne", packageDetailsEntity.getImageOne());
         assertEquals("imageTwo", packageDetailsEntity.getImageTwo());

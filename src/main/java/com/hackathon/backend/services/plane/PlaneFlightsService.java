@@ -1,5 +1,6 @@
 package com.hackathon.backend.services.plane;
 
+import com.hackathon.backend.dto.planeDto.EditFlightDto;
 import com.hackathon.backend.dto.planeDto.FlightDto;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneEntity;
@@ -86,13 +87,13 @@ public class PlaneFlightsService {
 
     @Transactional
     public ResponseEntity<?> editFlight(long flightId,
-                                        FlightDto flightDto) {
+                                        EditFlightDto editFlightDto) {
         try {
-            if(!planeFlightsUtils.checkHelper(flightDto)){
+            if(!planeFlightsUtils.checkHelper(editFlightDto)){
                 return badRequestException("you sent an empty data to change");
             }
             PlaneFlightsEntity planeFlights = planeFlightsUtils.findById(flightId);
-            planeFlightsUtils.editHelper(planeFlights, flightDto);
+            planeFlightsUtils.editHelper(planeFlights, editFlightDto);
             planeFlightsUtils.save(planeFlights);
             return ResponseEntity.ok("Flight edit successfully");
         } catch (EntityNotFoundException e) {

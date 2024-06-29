@@ -18,8 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PlaneServiceTest {
@@ -52,7 +52,7 @@ class PlaneServiceTest {
 
     @Test
     void editPlane() {
-        //given
+        // given
         long planeId = 1;
 
         PlaneEntity plane = new PlaneEntity();
@@ -64,13 +64,24 @@ class PlaneServiceTest {
         editPlaneDto.setPlaneCompanyName("testPlane1");
         editPlaneDto.setNumSeats(101);
 
-        //behavior
+        // behavior
         when(planeUtils.findPlaneById(planeId)).thenReturn(plane);
+        when(planeUtils.checkHelper(any(EditPlaneDto.class))).thenReturn(true);
 
-        //when
+        doAnswer(invocation -> {
+            PlaneEntity planeEntity = invocation.getArgument(0);
+            EditPlaneDto dto = invocation.getArgument(1);
+
+            planeEntity.setPlaneCompanyName(dto.getPlaneCompanyName());
+            planeEntity.setNumSeats(dto.getNumSeats());
+
+            return null;
+        }).when(planeUtils).editHelper(any(PlaneEntity.class), any(EditPlaneDto.class));
+
+        // when
         ResponseEntity<?> response = planeService.editPlane(planeId, editPlaneDto);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(editPlaneDto.getPlaneCompanyName(), plane.getPlaneCompanyName());
         assertEquals(editPlaneDto.getNumSeats(), plane.getNumSeats());

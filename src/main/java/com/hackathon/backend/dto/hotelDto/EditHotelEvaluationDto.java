@@ -10,11 +10,5 @@ import lombok.Setter;
 public class EditHotelEvaluationDto {
 
     private String comment;
-    private Float rate;
-
-    public EditHotelEvaluationDto(String comment,
-                                  Float rate) {
-        this.comment = comment;
-        this.rate = rate;
-    }
+    private Integer rate;
 }

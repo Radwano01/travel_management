@@ -57,14 +57,14 @@ public class HotelController {
 
     @PutMapping(path = "${EDIT_HOTEL_PATH}")
     public ResponseEntity<?> editHotel(@PathVariable("hotelId") long hotelId,
-                                       @PathVariable("countryId") int countryId,
                                        @RequestParam(name = "hotelName", required = false) String hotelName,
                                        @RequestParam(name = "mainImage", required = false) MultipartFile mainImage,
                                        @RequestParam(name = "description", required = false) String description,
                                        @RequestParam(name = "hotelRoomsCount", required = false) Integer hotelRoomsCount,
                                        @RequestParam(name = "address", required = false) String address,
                                        @RequestParam(name = "price", required = false) Integer price,
-                                       @RequestParam(name = "rate", required = false) Integer rate){
+                                       @RequestParam(name = "rate", required = false) Integer rate,
+                                       @RequestParam(name = "countryId", required = false) Integer countryId){
         EditHotelDto editHotelDto = new EditHotelDto(
                 hotelName,
                 mainImage,
@@ -72,9 +72,10 @@ public class HotelController {
                 hotelRoomsCount,
                 address,
                 price,
-                rate
+                rate,
+                countryId
         );
-        return hotelService.editHotel(hotelId, countryId, editHotelDto);
+        return hotelService.editHotel(hotelId, editHotelDto);
     }
 
     @DeleteMapping(path = "${DELETE_HOTEL_PATH}")

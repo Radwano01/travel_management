@@ -2,6 +2,7 @@ package com.hackathon.backend.utilities.hotel;
 
 import com.hackathon.backend.dto.hotelDto.EditHotelDto;
 import com.hackathon.backend.dto.hotelDto.GetHotelDto;
+import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.repositories.hotel.HotelRepository;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
@@ -18,12 +19,15 @@ public class HotelUtils {
 
     private final HotelRepository hotelRepository;
     private final S3Service s3Service;
+    private final CountryUtils countryUtils;
 
     @Autowired
     public HotelUtils(HotelRepository hotelRepository,
-                      S3Service s3Service) {
+                      S3Service s3Service,
+                      CountryUtils countryUtils) {
         this.hotelRepository = hotelRepository;
         this.s3Service = s3Service;
+        this.countryUtils = countryUtils;
     }
 
     public HotelEntity findHotelById(@NonNull long hotelId){
@@ -53,8 +57,7 @@ public class HotelUtils {
                 editHotelDto.getRate() != null;
     }
 
-    public void editHelper(HotelEntity hotel,
-                            EditHotelDto editHotelDto) {
+    public void editHelper(HotelEntity hotel, EditHotelDto editHotelDto) {
         if (editHotelDto.getHotelName() != null) {
             hotel.setHotelName(editHotelDto.getHotelName());
         }
@@ -72,11 +75,12 @@ public class HotelUtils {
         if (editHotelDto.getAddress() != null) {
             hotel.setAddress(editHotelDto.getAddress());
         }
-        if (editHotelDto.getPrice() != null && editHotelDto.getPrice() > 0) {
-            hotel.setAddress(editHotelDto.getAddress());
-        }
-        if (editHotelDto.getRate() != null && editHotelDto.getRate()  > 0 && editHotelDto.getRate() <= 5) {
+        if (editHotelDto.getRate() != null && editHotelDto.getRate() > 0 && editHotelDto.getRate() <= 5) {
             hotel.setRate(editHotelDto.getRate());
+        }
+        if (editHotelDto.getCountryId() != null) {
+            CountryEntity country = countryUtils.findCountryById(editHotelDto.getCountryId());
+            hotel.setCountry(country);
         }
     }
 }

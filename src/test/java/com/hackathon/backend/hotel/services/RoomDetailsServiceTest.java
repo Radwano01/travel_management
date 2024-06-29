@@ -19,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,7 +74,7 @@ class RoomDetailsServiceTest {
 
     @Test
     void editRoomDetails() {
-        //given
+        // given
         long hotelId = 1L;
         EditRoomDetailsDto editRoomDetailsDto = new EditRoomDetailsDto(
                 new MockMultipartFile("imageOne", "mainImage.jpg", "image/jpeg", new byte[0]),
@@ -88,17 +90,32 @@ class RoomDetailsServiceTest {
         RoomDetailsEntity roomDetails = new RoomDetailsEntity();
         hotel.setRoomDetails(roomDetails);
 
-        //behavior
+        // behavior
         when(hotelUtils.findHotelById(hotelId)).thenReturn(hotel);
+        when(roomDetailsUtils.checkHelper(editRoomDetailsDto)).thenReturn(true);
         when(s3Service.uploadFile(editRoomDetailsDto.getImageOne())).thenReturn("imageOne");
         when(s3Service.uploadFile(editRoomDetailsDto.getImageTwo())).thenReturn("imageTwo");
         when(s3Service.uploadFile(editRoomDetailsDto.getImageThree())).thenReturn("imageThree");
         when(s3Service.uploadFile(editRoomDetailsDto.getImageFour())).thenReturn("imageFour");
 
-        //when
+        doAnswer(invocation -> {
+            RoomDetailsEntity roomDetailsEntity = invocation.getArgument(0);
+            EditRoomDetailsDto dto = invocation.getArgument(1);
+
+            roomDetailsEntity.setImageOne(s3Service.uploadFile(dto.getImageOne()));
+            roomDetailsEntity.setImageTwo(s3Service.uploadFile(dto.getImageTwo()));
+            roomDetailsEntity.setImageThree(s3Service.uploadFile(dto.getImageThree()));
+            roomDetailsEntity.setImageFour(s3Service.uploadFile(dto.getImageFour()));
+            roomDetailsEntity.setDescription(dto.getDescription());
+            roomDetailsEntity.setPrice(dto.getPrice());
+
+            return null;
+        }).when(roomDetailsUtils).editHelper(any(RoomDetailsEntity.class), any(EditRoomDetailsDto.class));
+
+        // when
         ResponseEntity<?> response = roomDetailsService.editRoomDetails(hotelId, editRoomDetailsDto);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("imageOne", roomDetails.getImageOne());
         assertEquals("imageTwo", roomDetails.getImageTwo());

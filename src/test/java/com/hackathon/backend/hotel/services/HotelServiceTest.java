@@ -138,43 +138,33 @@ class HotelServiceTest {
 
     @Test
     void editHotel() {
-        //given
+        // given
         long hotelId = 1L;
-        int countryId = 1;
-        EditHotelDto getHotelDto = new EditHotelDto();
-        getHotelDto.setHotelName("testHotel");
-        new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]);
-        getHotelDto.setDescription("testDescription");
-        getHotelDto.setHotelRoomsCount(80);
-        getHotelDto.setAddress("testAddress");
-        getHotelDto.setRate(3);
+        EditHotelDto editHotelDto = new EditHotelDto();
+        editHotelDto.setHotelName("new");
 
-        HotelEntity hotel = new HotelEntity();
-        hotel.setHotelName("testHotel");
-        hotel.setMainImage("testImage");
-        hotel.setDescription("testDesc");
-        hotel.setHotelRoomsCount(80);
-        hotel.setAddress("testAddress");
-        hotel.setRate(3);
+        HotelEntity mockHotel = new HotelEntity();
+        mockHotel.setHotelName("old");
 
-        //behavior
-        CountryEntity country = new CountryEntity();
-        when(hotelUtils.findHotelById(hotelId)).thenReturn(hotel);
-        when(countryUtils.findCountryById(countryId)).thenReturn(country);
+        // behavior
+        when(hotelUtils.checkHelper(editHotelDto)).thenReturn(true);
+        when(hotelUtils.findHotelById(hotelId)).thenReturn(mockHotel);
 
-        //when
-        ResponseEntity<?> response = hotelService.editHotel(hotelId, countryId, getHotelDto);
+        doAnswer(invocation -> {
+            HotelEntity hotelEntity = invocation.getArgument(0);
+            EditHotelDto dto = invocation.getArgument(1);
 
-        //then
+            hotelEntity.setHotelName(dto.getHotelName());
+
+            return null;
+        }).when(hotelUtils).editHelper(any(HotelEntity.class), any(EditHotelDto.class));
+
+        // when
+        ResponseEntity<?> response = hotelService.editHotel(hotelId, editHotelDto);
+
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-
-
-        assertEquals("testHotel", hotel.getHotelName());
-        assertEquals("testImage", hotel.getMainImage());
-        assertEquals("testDescription", hotel.getDescription());
-        assertEquals(80, hotel.getHotelRoomsCount());
-        assertEquals("testAddress", hotel.getAddress());
-        assertEquals(3, hotel.getRate());
+        assertEquals("new", mockHotel.getHotelName());
     }
 
     @Test

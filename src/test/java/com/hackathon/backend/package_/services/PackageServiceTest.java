@@ -114,7 +114,7 @@ class PackageServiceTest {
 
     @Test
     void editPackage() {
-        //given
+        // given
         int packageId = 1;
 
         PackageEntity packageEntity = new PackageEntity();
@@ -129,23 +129,34 @@ class PackageServiceTest {
                 100,
                 1,
                 new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0])
-
         );
 
-        //behavior
+        // behavior
         when(packageUtils.findById(packageId)).thenReturn(packageEntity);
+        when(packageUtils.checkHelper(editPackageDto)).thenReturn(true);
         when(s3Service.uploadFile(editPackageDto.getMainImage())).thenReturn("mainImage");
 
-        //when
+        doAnswer(invocation -> {
+            PackageEntity entity = invocation.getArgument(0);
+            EditPackageDto dto = invocation.getArgument(1);
+
+            entity.setPackageName(dto.getPackageName());
+            entity.setPrice(dto.getPrice());
+            entity.setRate(dto.getRate());
+            entity.setMainImage(s3Service.uploadFile(dto.getMainImage()));
+
+            return null;
+        }).when(packageUtils).editHelper(any(PackageEntity.class), any(EditPackageDto.class));
+
+        // when
         ResponseEntity<?> response = packageService.editPackage(packageId, editPackageDto);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("testPackage1", packageEntity.getPackageName());
         assertEquals("mainImage", packageEntity.getMainImage());
         assertEquals(100, packageEntity.getPrice());
         assertEquals(1, packageEntity.getRate());
-
     }
 
     @Test

@@ -72,6 +72,8 @@ public class RoomFeaturesService {
             roomFeatures.setRoomFeatures(roomFeature);
             roomFeaturesUtils.save(roomFeatures);
             return ResponseEntity.ok("Room Feature edited successfully");
+        }catch (EntityNotFoundException e){
+            return notFoundException(e);
         }catch (Exception e){
             return serverErrorException(e);
         }

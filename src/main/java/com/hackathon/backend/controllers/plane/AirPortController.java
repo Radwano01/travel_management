@@ -1,6 +1,6 @@
 package com.hackathon.backend.controllers.plane;
 
-import com.hackathon.backend.dto.planeDto.PlaneAirPortDto;
+import com.hackathon.backend.dto.planeDto.AirPortDto;
 import com.hackathon.backend.services.plane.AirPortService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,14 +19,14 @@ public class AirPortController {
 
     @PostMapping(path = "${CREATE_AIRPORT_PATH}")
     public ResponseEntity<?> createAirPort(@PathVariable("placeId") int placeId,
-                                           @RequestBody PlaneAirPortDto planeAirPortDto){
-        return airPortService.createAirPort(placeId, planeAirPortDto);
+                                           @RequestBody AirPortDto airPortDto){
+        return airPortService.createAirPort(placeId, airPortDto);
     }
 
     @PutMapping(path = "${EDIT_AIRPORT_PATH}")
     public ResponseEntity<?> editAirPort(@PathVariable("airPortId") long airPortId,
-                                         @RequestBody PlaneAirPortDto planeAirPortDto){
-        return airPortService.editAirPort(airPortId, planeAirPortDto);
+                                         @RequestBody AirPortDto airPortDto){
+        return airPortService.editAirPort(airPortId, airPortDto);
     }
 
     @DeleteMapping(path = "${DELETE_AIRPORT_PATH}")

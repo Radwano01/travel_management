@@ -21,8 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class HotelEvaluationServiceTest {
@@ -46,7 +45,7 @@ class HotelEvaluationServiceTest {
         long userId = 1L;
         HotelEvaluationDto hotelEvaluationDto = new HotelEvaluationDto();
         hotelEvaluationDto.setComment("testComment");
-        hotelEvaluationDto.setRate(4.5f);
+        hotelEvaluationDto.setRate(4);
 
         HotelEntity hotel = new HotelEntity();
         hotel.setId(hotelId);
@@ -78,7 +77,7 @@ class HotelEvaluationServiceTest {
 
         HotelEvaluationEntity hotelEvaluation = new HotelEvaluationEntity();
         hotelEvaluation.setComment("testComment");
-        hotelEvaluation.setRate(4.0f);
+        hotelEvaluation.setRate(4);
         hotelEvaluation.setUser(user);
 
         HotelEntity hotel = new HotelEntity();
@@ -86,6 +85,10 @@ class HotelEvaluationServiceTest {
         hotel.getEvaluations().add(hotelEvaluation);
 
         hotelEvaluation.setHotel(hotel);
+
+        EditHotelEvaluationDto hotelEvaluationDto = new EditHotelEvaluationDto();
+        hotelEvaluationDto.setComment("test 1");
+        hotelEvaluationDto.setRate(1);
 
         //behavior
         when(hotelUtils.findHotelById(hotelId)).thenReturn(hotel);
@@ -104,21 +107,31 @@ class HotelEvaluationServiceTest {
 
     @Test
     void editComment() {
-        //given
+        // given
         long commentId = 1L;
         EditHotelEvaluationDto editHotelEvaluationDto = new EditHotelEvaluationDto();
         editHotelEvaluationDto.setComment("testComment");
-        editHotelEvaluationDto.setRate(2.5f);
-        HotelEvaluationEntity hotelEvaluation = new HotelEvaluationEntity("testComment1", 3.5f,
+        editHotelEvaluationDto.setRate(2);
+
+        HotelEvaluationEntity hotelEvaluation = new HotelEvaluationEntity("testComment1", 3,
                 new HotelEntity(), new UserEntity());
+        hotelEvaluation.setId(commentId);
 
-        //behavior
+        // behavior
         when(hotelEvaluationUtils.findById(commentId)).thenReturn(hotelEvaluation);
+        when(hotelEvaluationUtils.checkHelper(editHotelEvaluationDto)).thenReturn(true);
 
-        //when
+        doAnswer(invocation -> {
+            HotelEvaluationEntity savedHotelEvaluation = invocation.getArgument(0);
+            savedHotelEvaluation.setComment(editHotelEvaluationDto.getComment());
+            savedHotelEvaluation.setRate(editHotelEvaluationDto.getRate());
+            return null;
+        }).when(hotelEvaluationUtils).save(any(HotelEvaluationEntity.class));
+
+        // when
         ResponseEntity<?> response = hotelEvaluationService.editComment(commentId, editHotelEvaluationDto);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(editHotelEvaluationDto.getComment(), hotelEvaluation.getComment());
         assertEquals(editHotelEvaluationDto.getRate(), hotelEvaluation.getRate());
@@ -138,7 +151,7 @@ class HotelEvaluationServiceTest {
         UserEntity user = new UserEntity();
         user.setId(userId);
 
-        HotelEvaluationEntity hotelEvaluation = new HotelEvaluationEntity("testComment", 4.0f, hotel, user);
+        HotelEvaluationEntity hotelEvaluation = new HotelEvaluationEntity("testComment", 4, hotel, user);
 
         //behavior
         when(hotelUtils.findHotelById(hotelId)).thenReturn(hotel);
