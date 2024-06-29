@@ -18,7 +18,7 @@ public class CountryController {
     }
 
     @PostMapping(path = "${CREATE_COUNTRY_PATH}")
-    public ResponseEntity<?> createCountry(@RequestParam("country") String countryName,
+    public ResponseEntity<String> createCountry(@RequestParam("country") String countryName,
                                            @RequestParam("mainImage") MultipartFile mainImage,
                                            @RequestParam("imageOne") MultipartFile imageOne,
                                            @RequestParam("imageTwo") MultipartFile imageTwo,
@@ -41,13 +41,9 @@ public class CountryController {
         return countryService.getCountry();
     }
 
-//    @GetMapping(path = "${GET_COUNTRIES_NAMES_PATH}")
-//    public ResponseEntity<?> getCountriesNames(){
-//        return countryService.getCountries();
-//    }
 
     @PutMapping(path = "${EDIT_COUNTRY_PATH}")
-    public ResponseEntity<?> editCountry(@PathVariable("countryId") int countryId,
+    public ResponseEntity<String> editCountry(@PathVariable("countryId") int countryId,
                                          @RequestParam(name = "country", required = false) String country,
                                          @RequestParam(name = "mainImage", required = false) MultipartFile mainImage){
         EditCountryDto editCountryDto = new EditCountryDto(
@@ -58,7 +54,7 @@ public class CountryController {
     }
 
     @DeleteMapping(path = "${DELETE_COUNTRY_PATH}")
-    public ResponseEntity<?> deleteCountry(@PathVariable("countryId") int countryId){
+    public ResponseEntity<String> deleteCountry(@PathVariable("countryId") int countryId){
         return countryService.deleteCountry(countryId);
     }
 }

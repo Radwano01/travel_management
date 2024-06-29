@@ -18,19 +18,19 @@ public class AirPortController {
     }
 
     @PostMapping(path = "${CREATE_AIRPORT_PATH}")
-    public ResponseEntity<?> createAirPort(@PathVariable("placeId") int placeId,
+    public ResponseEntity<String> createAirPort(@PathVariable("placeId") int placeId,
                                            @RequestBody AirPortDto airPortDto){
         return airPortService.createAirPort(placeId, airPortDto);
     }
 
     @PutMapping(path = "${EDIT_AIRPORT_PATH}")
-    public ResponseEntity<?> editAirPort(@PathVariable("airPortId") long airPortId,
+    public ResponseEntity<String> editAirPort(@PathVariable("airPortId") long airPortId,
                                          @RequestBody AirPortDto airPortDto){
         return airPortService.editAirPort(airPortId, airPortDto);
     }
 
     @DeleteMapping(path = "${DELETE_AIRPORT_PATH}")
-    public ResponseEntity<?> deleteAirPort(@PathVariable("airPortId") long airPortId){
+    public ResponseEntity<String> deleteAirPort(@PathVariable("airPortId") long airPortId){
         return airPortService.deleteAirPort(airPortId);
     }
 }

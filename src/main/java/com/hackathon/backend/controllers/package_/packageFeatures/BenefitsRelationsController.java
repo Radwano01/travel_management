@@ -18,13 +18,13 @@ public class BenefitsRelationsController {
 
 
     @PostMapping(path = "${PACKAGE_BENEFIT_RELATIONS_PATH}")
-    public ResponseEntity<?> addPackageRoadmap(@PathVariable("packageId") int packageId,
+    public ResponseEntity<String> addPackageRoadmap(@PathVariable("packageId") int packageId,
                                                @PathVariable("benefitId") int benefitId){
         return packageBenefitsRelationsService.addPackageBenefit(packageId,benefitId);
     }
 
     @DeleteMapping(path = "${PACKAGE_BENEFIT_RELATIONS_PATH}")
-    public ResponseEntity<?> removePackageRoadmap(@PathVariable("packageId") int packageId,
+    public ResponseEntity<String> removePackageRoadmap(@PathVariable("packageId") int packageId,
                                                   @PathVariable("benefitId") int benefitId){
         return packageBenefitsRelationsService.removePackageBenefit(packageId,benefitId);
     }

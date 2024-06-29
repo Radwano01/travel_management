@@ -6,7 +6,7 @@ import com.hackathon.backend.entities.hotel.RoomBookingEntity;
 import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.hotel.RoomBookingRepository;
-import com.hackathon.backend.utilities.UserUtils;
+import com.hackathon.backend.utilities.user.UserUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
@@ -47,7 +47,7 @@ public class RoomBookingService {
     }
 
     @Transactional
-    public ResponseEntity<?> payment(long userId,
+    public ResponseEntity<String> payment(long userId,
                                      long hotelId,
                                      String paymentIntentCode,
                                      RoomPaymentDto roomPaymentDto){

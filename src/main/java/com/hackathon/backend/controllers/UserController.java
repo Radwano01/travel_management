@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.concurrent.CompletableFuture;
+
 @RestController
 @RequestMapping(path = "${BASE_API}")
 public class UserController {
@@ -21,34 +23,34 @@ public class UserController {
     }
 
     @PostMapping(path="${USER_REGISTER_PATH}")
-    public ResponseEntity<?> registerUserDetails(@RequestBody RegisterUserDto registerUserDto){
+    public CompletableFuture<ResponseEntity<?>> registerUserDetails(@RequestBody RegisterUserDto registerUserDto){
         return userService.registerUser(registerUserDto);
     }
 
     @PostMapping(path = "${USER_VERIFICATION_PATH}")
-    public ResponseEntity<?> verifyUserDetails(@PathVariable("email") String email,
+    public CompletableFuture<ResponseEntity<?>> verifyUserDetails(@PathVariable("email") String email,
                                                @PathVariable("token") String token){
         return userService.verifyUser(email);
     }
 
     @PostMapping(path = "${USER_SEND_VERIFICATION_PATH}")
-    public ResponseEntity<?> sendVerificationLink(@PathVariable("userId") long userId,
+    public CompletableFuture<ResponseEntity<?>> sendVerificationLink(@PathVariable("userId") long userId,
                                                   @PathVariable("token") String token){
         return userService.sendVerificationLink(userId, token);
     }
 
     @PostMapping(path="${USER_LOGIN_PATH}")
-    public ResponseEntity<?> loginUser(@RequestBody LoginUserDto loginUserDto) {
+    public CompletableFuture<ResponseEntity<?>> loginUser(@RequestBody LoginUserDto loginUserDto) {
         return userService.loginUser(loginUserDto);
     }
 
     @DeleteMapping(path="${USER_DELETE_PATH}")
-    public ResponseEntity<?> removeUserDetails(@PathVariable("userId") long userId){
+    public CompletableFuture<ResponseEntity<?>> removeUserDetails(@PathVariable("userId") long userId){
         return userService.deleteUser(userId);
     }
 
     @PutMapping(path="${USER_EDIT_PATH}")
-    public ResponseEntity<?> editUserDetails(@PathVariable("userId") long userId,
+    public CompletableFuture<ResponseEntity<?>> editUserDetails(@PathVariable("userId") long userId,
                                              @RequestParam(name = "password", required = false) String password,
                                              @RequestParam(name = "image", required = false) MultipartFile image){
         EditUserDto editUserDto = new EditUserDto(

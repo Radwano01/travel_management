@@ -19,7 +19,7 @@ public class PlaneSeatsController {
     }
 
     @PostMapping(path = "${ADD_PLANE_SEAT_PATH}")
-    public ResponseEntity<?> addSeat(@PathVariable("planeId") long planeId,
+    public ResponseEntity<String> addSeat(@PathVariable("planeId") long planeId,
                                         @RequestBody PlaneSeatDto planeSeatDto){
         return planeSeatsService.addSeat(planeId,planeSeatDto);
     }
@@ -30,13 +30,13 @@ public class PlaneSeatsController {
     }
 
     @PutMapping(path = "${EDIT_PLANE_SEAT_PATH}")
-    public ResponseEntity<?> editPlaneSeat(@PathVariable("seatId") long seatId,
+    public ResponseEntity<String> editPlaneSeat(@PathVariable("seatId") long seatId,
                                       @RequestBody EditPlaneSeatDto editPlaneSeatDto){
         return planeSeatsService.editSeat(seatId, editPlaneSeatDto);
     }
 
     @DeleteMapping(path = "${DELETE_PLANE_SEAT_PATH}")
-    public ResponseEntity<?> deletePlaneSeat(@PathVariable("planeId") long planeId,
+    public ResponseEntity<String> deletePlaneSeat(@PathVariable("planeId") long planeId,
                                         @PathVariable("seatId") long seatId){
         return planeSeatsService.deleteSeat(planeId,seatId);
     }

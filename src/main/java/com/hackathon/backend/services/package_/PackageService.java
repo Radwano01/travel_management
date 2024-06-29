@@ -53,7 +53,7 @@ public class PackageService {
         this.s3Service = s3Service;
     }
 
-    public ResponseEntity<?> createPackage(int countryId,
+    public ResponseEntity<String> createPackage(int countryId,
                                            @NonNull PostPackageDto postPackageDto){
         try{
             CountryEntity country = countryUtils.findCountryById(countryId);
@@ -108,7 +108,7 @@ public class PackageService {
     }
 
     @Transactional
-    public ResponseEntity<?> editPackage(int packageId,
+    public ResponseEntity<String> editPackage(int packageId,
                                          EditPackageDto editPackageDto){
         try{
             if(!packageUtils.checkHelper(editPackageDto)){
@@ -126,7 +126,7 @@ public class PackageService {
     }
 
     @Transactional
-    public ResponseEntity<?> deletePackage(int packageId){
+    public ResponseEntity<String> deletePackage(int packageId){
         try{
             PackageEntity packageEntity = packageUtils.findById(packageId);
             PackageDetailsEntity packageDetails = packageEntity.getPackageDetails();

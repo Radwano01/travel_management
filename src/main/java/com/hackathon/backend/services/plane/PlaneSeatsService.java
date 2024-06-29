@@ -10,7 +10,6 @@ import com.hackathon.backend.utilities.plane.PlaneUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,7 @@ public class PlaneSeatsService {
     }
 
     @Transactional
-    public ResponseEntity<?> addSeat(long planeId,
+    public ResponseEntity<String> addSeat(long planeId,
                                      @NonNull PlaneSeatDto planeSeatDto) {
         try{
             PlaneEntity plane = planeUtils.findPlaneById(planeId);
@@ -80,7 +79,7 @@ public class PlaneSeatsService {
     }
 
     @Transactional
-    public ResponseEntity<?> editSeat(long seatId,
+    public ResponseEntity<String> editSeat(long seatId,
                                       EditPlaneSeatDto editPlaneSeatDto){
         try{
             if(!planeSeatsUtils.checkHelper(editPlaneSeatDto)){
@@ -98,7 +97,7 @@ public class PlaneSeatsService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteSeat(long planeId,
+    public ResponseEntity<String> deleteSeat(long planeId,
                                         long seatId) {
         try{
             PlaneEntity plane = planeUtils.findPlaneById(planeId);

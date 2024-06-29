@@ -62,7 +62,7 @@ public class PackageDetailsService {
     }
 
     @Transactional
-    public ResponseEntity<?> editPackageDetails(int packageDetailsId,
+    public ResponseEntity<String> editPackageDetails(int packageDetailsId,
                                                 EditPackageDetailsDto editPackageDetailsDto) {
         try{
             if(!packageDetailsUtils.checkHelper(editPackageDetailsDto)){

@@ -5,7 +5,7 @@ import com.hackathon.backend.dto.packageDto.PackageEvaluationDto;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
 import com.hackathon.backend.entities.user.UserEntity;
-import com.hackathon.backend.utilities.UserUtils;
+import com.hackathon.backend.utilities.user.UserUtils;
 import com.hackathon.backend.utilities.package_.PackageEvaluationUtils;
 import com.hackathon.backend.utilities.package_.PackageUtils;
 import io.micrometer.common.lang.NonNull;
@@ -38,7 +38,7 @@ public class PackageEvaluationService {
     }
 
     @Transactional
-    public ResponseEntity<?> addComment(int packageId,
+    public ResponseEntity<String> addComment(int packageId,
                                         long userId,
                                         @NonNull PackageEvaluationDto packageEvaluationDto) {
         try {
@@ -90,7 +90,7 @@ public class PackageEvaluationService {
 
 
     @Transactional
-    public ResponseEntity<?> editComment(long commentId,
+    public ResponseEntity<String> editComment(long commentId,
                                          EditPackageEvaluationDto editPackageEvaluationDto) {
         try {
             if(!packageEvaluationUtils.checkHelper(editPackageEvaluationDto)){
@@ -108,7 +108,7 @@ public class PackageEvaluationService {
     }
 
     @Transactional
-    public ResponseEntity<?> removeComment(int packageId, long userId, long commentId) {
+    public ResponseEntity<String> removeComment(int packageId, long userId, long commentId) {
         try {
             PackageEntity packageEntity = packageUtils.findById(packageId);
             UserEntity user = userUtils.findById(userId);

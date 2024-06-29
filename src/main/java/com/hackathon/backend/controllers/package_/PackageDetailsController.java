@@ -26,7 +26,7 @@ public class PackageDetailsController {
     }
 
     @PutMapping(path = "${EDIT_PACKAGE_DETAILS_PATH}")
-    public ResponseEntity<?> editPackageDetails(@PathVariable("packageDetailsId") int packageDetailsId,
+    public ResponseEntity<String> editPackageDetails(@PathVariable("packageDetailsId") int packageDetailsId,
                                                 @RequestParam(name = "imageOne", required = false) MultipartFile imageOne,
                                                 @RequestParam(name = "imageTwo", required = false) MultipartFile imageTwo,
                                                 @RequestParam(name = "imageThree", required = false) MultipartFile imageThree,

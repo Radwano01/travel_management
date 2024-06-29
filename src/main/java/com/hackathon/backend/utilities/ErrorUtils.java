@@ -9,27 +9,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class ErrorUtils {
 
-    public static ResponseEntity<?> serverErrorException(Exception e){
+    public static ResponseEntity<String> serverErrorException(Exception e){
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 
-    public static ResponseEntity<?> serverErrorException(String message){
+    public static ResponseEntity<String> serverErrorException(String message){
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message);
     }
 
-    public static ResponseEntity<?> notFoundException(EntityNotFoundException e){
+    public static ResponseEntity<String> notFoundException(EntityNotFoundException e){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
-    public static ResponseEntity<?> notFoundException(String message){
+    public static ResponseEntity<String> notFoundException(String message){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
     }
 
-    public static ResponseEntity<?> alreadyValidException(String message){
+    public static ResponseEntity<String> alreadyValidException(String message){
         return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
     }
 
-    public static ResponseEntity<?> badRequestException(String message){
+    public static ResponseEntity<String> badRequestException(String message){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
     }
 }

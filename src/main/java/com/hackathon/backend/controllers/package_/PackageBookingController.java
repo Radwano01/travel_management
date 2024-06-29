@@ -17,7 +17,7 @@ public class PackageBookingController {
     }
 
     @PostMapping("{PACKAGE_PAYMENT_PATH}")
-    public ResponseEntity<?> payment(@PathVariable("userId") long userId,
+    public ResponseEntity<String> payment(@PathVariable("userId") long userId,
                                      @PathVariable("packageId") int packageId,
                                      @PathVariable("paymentIntent") String paymentIntent){
         return packageBookingService.payment(userId, packageId, paymentIntent);

@@ -17,18 +17,18 @@ public class RoomController {
     }
 
     @PostMapping(path = "${ADD_ROOM_PATH}")
-    public ResponseEntity<?> addRoom(@PathVariable("hotelId") long hotelId){
+    public ResponseEntity<String> addRoom(@PathVariable("hotelId") long hotelId){
         return roomService.addRoom(hotelId);
     }
 
     @PutMapping(path = "${EDIT_ROOM_PATH}")
-    public ResponseEntity<?> editRoom(@PathVariable("hotelId") long hotelId,
+    public ResponseEntity<String> editRoom(@PathVariable("hotelId") long hotelId,
                                       @PathVariable("roomId") long roomId){
         return roomService.editRoom(hotelId,roomId);
     }
 
     @DeleteMapping(path = "${DELETE_ROOM_PATH}")
-    public ResponseEntity<?> deleteRoom(@PathVariable("hotelId") long hotelId,
+    public ResponseEntity<String> deleteRoom(@PathVariable("hotelId") long hotelId,
                                         @PathVariable("roomId") long roomId){
         return roomService.deleteRooms(hotelId,roomId);
     }

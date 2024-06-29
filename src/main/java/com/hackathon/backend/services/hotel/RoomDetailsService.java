@@ -55,7 +55,7 @@ public class RoomDetailsService {
     }
 
     @Transactional
-    public ResponseEntity<?> editRoomDetails(long hotelId,
+    public ResponseEntity<String> editRoomDetails(long hotelId,
                                              EditRoomDetailsDto editRoomDetailsDto) {
         try{
             if(!roomDetailsUtils.checkHelper(editRoomDetailsDto)){

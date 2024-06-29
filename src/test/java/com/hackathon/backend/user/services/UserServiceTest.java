@@ -9,7 +9,7 @@ import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.user.RoleRepository;
 import com.hackathon.backend.security.JWTGenerator;
 import com.hackathon.backend.services.UserService;
-import com.hackathon.backend.utilities.UserUtils;
+import com.hackathon.backend.utilities.user.UserUtils;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +26,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,7 +60,7 @@ class UserServiceTest {
     private UserService userService;
 
     @Test
-    void registerUser() {
+    void registerUser() throws ExecutionException, InterruptedException {
         //given
         RegisterUserDto registerUserDto = new RegisterUserDto("username", "email@example.com", "Password123!");
         RoleEntity role = new RoleEntity();
@@ -70,15 +72,15 @@ class UserServiceTest {
         when(passwordEncoder.encode(registerUserDto.getPassword())).thenReturn("encodedPassword");
 
         //when
-        ResponseEntity<?> response = userService.registerUser(registerUserDto);
+        CompletableFuture<ResponseEntity<?>> response = userService.registerUser(registerUserDto);
 
-        assertEquals("Account Created", response.getBody());
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("Account Created", response.get().getBody());
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
         verify(userUtils, times(1)).save(any(UserEntity.class));
     }
 
     @Test
-    void loginUser() {
+    void loginUser() throws ExecutionException, InterruptedException {
         //given
         LoginUserDto loginUserDto = new LoginUserDto("username", "password");
         Authentication authentication = mock(Authentication.class);
@@ -95,11 +97,11 @@ class UserServiceTest {
         when(userUtils.findUserByUsername("username")).thenReturn(userEntity);
 
         //when
-        ResponseEntity<?> response = userService.loginUser(loginUserDto);
+        CompletableFuture<ResponseEntity<?>> response = userService.loginUser(loginUserDto);
 
         //then
-        AuthResponseDto authResponseDto = (AuthResponseDto) response.getBody();
-        assertEquals(200, response.getStatusCodeValue());
+        AuthResponseDto authResponseDto = (AuthResponseDto) response.get().getBody();
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
         assertEquals("token", authResponseDto.getAccessToken());
         assertEquals("username", authResponseDto.getEssentialUserDto().getUsername());
         assertEquals(1L, authResponseDto.getEssentialUserDto().getId());
@@ -107,7 +109,7 @@ class UserServiceTest {
     }
 
     @Test
-    void deleteUser() {
+    void deleteUser() throws ExecutionException, InterruptedException {
         //given
         long userId = 1L;
         UserEntity userEntity = new UserEntity();
@@ -118,17 +120,17 @@ class UserServiceTest {
         when(userUtils.findById(userId)).thenReturn(userEntity);
 
         //when
-        ResponseEntity<?> response = userService.deleteUser(userId);
+        CompletableFuture<ResponseEntity<?>> response = userService.deleteUser(userId);
 
         //then
-        assertEquals("Account deleted successfully", response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Account deleted successfully", response.get().getBody());
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
         verify(s3Service, times(1)).deleteFile("image_url");
         verify(userUtils, times(1)).delete(userEntity);
     }
 
     @Test
-    void editUser() {
+    void editUser() throws ExecutionException, InterruptedException {
         // given
         long userId = 1L;
 
@@ -159,11 +161,11 @@ class UserServiceTest {
         }).when(userUtils).editHelper(any(UserEntity.class), any(EditUserDto.class));
 
         // when
-        ResponseEntity<?> response = userService.editUser(userId, editUserDto);
+        CompletableFuture<ResponseEntity<?>> response = userService.editUser(userId, editUserDto);
 
         // then
-        assertEquals("user updated successfully", response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("user updated successfully", response.get().getBody());
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
         assertEquals("encodedNewPassword123!!", userEntity.getPassword());
         assertEquals("newImageUrl", userEntity.getImage());
 
@@ -175,7 +177,7 @@ class UserServiceTest {
 
 
     @Test
-    void verifyUser() {
+    void verifyUser() throws ExecutionException, InterruptedException {
         //given
         String email = "user@example.com";
         UserEntity userEntity = new UserEntity();
@@ -186,11 +188,11 @@ class UserServiceTest {
         when(userUtils.findUserByEmail(email)).thenReturn(userEntity);
 
         //when
-        ResponseEntity<?> response = userService.verifyUser(email);
+        CompletableFuture<ResponseEntity<?>> response = userService.verifyUser(email);
 
         //then
-        assertEquals("User has been verified", response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("User has been verified", response.get().getBody());
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
         assertTrue(userEntity.isVerificationStatus());
 
         verify(userUtils, times(1)).findUserByEmail(email);

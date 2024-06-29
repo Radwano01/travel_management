@@ -22,7 +22,7 @@ public class PackageController {
     }
 
     @PostMapping(path = "${CREATE_PACKAGE_PATH}")
-    public ResponseEntity<?> createPackage(@PathVariable("countryId") int countryId,
+    public ResponseEntity<String> createPackage(@PathVariable("countryId") int countryId,
                                            @RequestParam("packageName") String packageName,
                                            @RequestParam("price") int price,
                                            @RequestParam("rate") int rate,
@@ -51,7 +51,7 @@ public class PackageController {
     }
 
     @PutMapping(path = "${EDIT_PACKAGE_PATH}")
-    public ResponseEntity<?> editPackage(@PathVariable("packageId") int packageId,
+    public ResponseEntity<String> editPackage(@PathVariable("packageId") int packageId,
                                          @RequestParam(name = "packageName",required = false) String packageName,
                                          @RequestParam(name = "price",required = false) Integer price,
                                          @RequestParam(name = "rate",required = false) Integer rate,
@@ -66,7 +66,7 @@ public class PackageController {
     }
 
     @DeleteMapping(path = "${DELETE_PACKAGE_PATH}")
-    public ResponseEntity<?> deletePackage(@PathVariable("packageId") int packageId){
+    public ResponseEntity<String> deletePackage(@PathVariable("packageId") int packageId){
         return packageService.deletePackage(packageId);
     }
 }

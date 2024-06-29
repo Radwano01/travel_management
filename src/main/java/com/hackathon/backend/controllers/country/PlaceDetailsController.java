@@ -25,7 +25,7 @@ public class PlaceDetailsController {
     }
 
     @PutMapping(path = "${EDIT_PLACE_DETAILS_PATH}")
-    public ResponseEntity<?> editPlaceDetails(@PathVariable("placeId") int placeId,
+    public ResponseEntity<String> editPlaceDetails(@PathVariable("placeId") int placeId,
                                               @RequestParam("imageOne") MultipartFile imageOne,
                                               @RequestParam("imageTwo") MultipartFile imageTwo,
                                               @RequestParam("imageThree") MultipartFile imageThree,

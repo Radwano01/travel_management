@@ -29,7 +29,7 @@ public class HotelFeaturesRelationsService {
     }
 
     @Transactional
-    public ResponseEntity<?> addHotelFeatureToHotel(long hotelId,
+    public ResponseEntity<String> addHotelFeatureToHotel(long hotelId,
                                                     int featureId) {
         try{
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
@@ -52,7 +52,7 @@ public class HotelFeaturesRelationsService {
     }
 
     @Transactional
-    public ResponseEntity<?> removeHotelFeatureFromHotel(long hotelId, int featureId) {
+    public ResponseEntity<String> removeHotelFeatureFromHotel(long hotelId, int featureId) {
         try{
             HotelEntity hotelEntity = hotelUtils.findHotelById(hotelId);
             HotelFeaturesEntity hotelFeaturesEntity = hotelFeaturesUtils.findById(featureId);

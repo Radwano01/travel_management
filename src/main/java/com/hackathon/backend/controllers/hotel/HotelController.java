@@ -20,7 +20,7 @@ public class HotelController {
     }
 
     @PostMapping(path = "${CREATE_HOTEL_PATH}")
-    public ResponseEntity<?> createHotel(@PathVariable("countryId") int countryId,
+    public ResponseEntity<String> createHotel(@PathVariable("countryId") int countryId,
                                          @RequestParam("hotelName") String hotelName,
                                          @RequestParam("mainImage") MultipartFile mainImage,
                                          @RequestParam("description") String description,
@@ -56,7 +56,7 @@ public class HotelController {
     }
 
     @PutMapping(path = "${EDIT_HOTEL_PATH}")
-    public ResponseEntity<?> editHotel(@PathVariable("hotelId") long hotelId,
+    public ResponseEntity<String> editHotel(@PathVariable("hotelId") long hotelId,
                                        @RequestParam(name = "hotelName", required = false) String hotelName,
                                        @RequestParam(name = "mainImage", required = false) MultipartFile mainImage,
                                        @RequestParam(name = "description", required = false) String description,
@@ -79,7 +79,7 @@ public class HotelController {
     }
 
     @DeleteMapping(path = "${DELETE_HOTEL_PATH}")
-    public ResponseEntity<?> deleteHotel(@PathVariable("hotelId") long hotelId){
+    public ResponseEntity<String> deleteHotel(@PathVariable("hotelId") long hotelId){
         return hotelService.deleteHotel(hotelId);
     }
 }

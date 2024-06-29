@@ -27,7 +27,7 @@ public class AirPortService {
         this.placeUtils = placeUtils;
     }
 
-    public ResponseEntity<?> createAirPort(int placeId,
+    public ResponseEntity<String> createAirPort(int placeId,
                                            @NonNull AirPortDto airPortDto) {
         try{
             PlaceEntity place = placeUtils.findById(placeId);
@@ -56,7 +56,7 @@ public class AirPortService {
 
 
     @Transactional
-    public ResponseEntity<?> editAirPort(long airPortId,
+    public ResponseEntity<String> editAirPort(long airPortId,
                                          AirPortDto airPortDto) {
         try{
             if(!airPortsUtils.checkHelper(airPortDto)){
@@ -73,7 +73,7 @@ public class AirPortService {
         }
     }
 
-    public ResponseEntity<?> deleteAirPort(long airPortId){
+    public ResponseEntity<String> deleteAirPort(long airPortId){
         try{
             airPortsUtils.deleteById(airPortId);
             return ResponseEntity.ok("AirPort deleted successfully");

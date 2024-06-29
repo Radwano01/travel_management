@@ -19,7 +19,7 @@ public class HotelEvaluationController {
     }
 
     @PostMapping(path = "${ADD_HOTEL_EVALUATION_PATH}")
-    public ResponseEntity<?> addComment(@PathVariable("hotelId") long hotelId,
+    public ResponseEntity<String> addComment(@PathVariable("hotelId") long hotelId,
                                         @PathVariable("userId") long userId,
                                         @RequestBody HotelEvaluationDto hotelEvaluationDto){
         return hotelEvaluationService.addComment(hotelId, userId, hotelEvaluationDto);
@@ -31,13 +31,13 @@ public class HotelEvaluationController {
     }
 
     @PutMapping(path = "${EDIT_HOTEL_EVALUATION_PATH}")
-    public ResponseEntity<?> editComment(@PathVariable("commentId") long commentId,
+    public ResponseEntity<String> editComment(@PathVariable("commentId") long commentId,
                                          @RequestBody EditHotelEvaluationDto editHotelEvaluationDto){
         return hotelEvaluationService.editComment(commentId, editHotelEvaluationDto);
     }
 
     @DeleteMapping(path = "${REMOVE_HOTEL_EVALUATION_PATH}")
-    public ResponseEntity<?> deleteComment(@PathVariable("hotelId") long hotelId,
+    public ResponseEntity<String> deleteComment(@PathVariable("hotelId") long hotelId,
                                            @PathVariable("userId") long userId,
                                            @PathVariable("commentId") long commentId){
         return hotelEvaluationService.removeComment(hotelId,userId,commentId);

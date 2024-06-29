@@ -28,7 +28,7 @@ public class RoadmapService{
         this.packageDetailsUtils = packageDetailsUtils;
     }
 
-    public ResponseEntity<?> createRoadmap(String roadmap){
+    public ResponseEntity<String> createRoadmap(String roadmap){
         try{
             if(roadmapUtils.existsByRoadmap(roadmap)) {
                 return alreadyValidException("Roadmap already exists");
@@ -55,7 +55,7 @@ public class RoadmapService{
     }
 
     @Transactional
-    public ResponseEntity<?> editRoadmap(int roadmapId,
+    public ResponseEntity<String> editRoadmap(int roadmapId,
                                          String roadmap){
         try{
             if(roadmap == null){
@@ -73,7 +73,7 @@ public class RoadmapService{
     }
 
     @Transactional
-    public ResponseEntity<?> deleteRoadmap(int roadmapId){
+    public ResponseEntity<String> deleteRoadmap(int roadmapId){
         try{
             RoadmapEntity roadmapEntity = roadmapUtils.findById(roadmapId);
                 for(PackageDetailsEntity packageDetails:roadmapEntity.getPackageDetails()){

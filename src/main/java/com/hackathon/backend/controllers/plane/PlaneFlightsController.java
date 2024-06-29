@@ -19,7 +19,7 @@ public class PlaneFlightsController {
     }
 
     @PostMapping(path = "${ADD_FLIGHT_PATH}")
-    public ResponseEntity<?> addFlight(@PathVariable("planeId") long planeId,
+    public ResponseEntity<String> addFlight(@PathVariable("planeId") long planeId,
                                        @PathVariable("departureCountryId") int departureCountryId,
                                        @PathVariable("destinationCountryId") int destinationCountryId,
                                        @RequestBody FlightDto flightDto){
@@ -33,7 +33,7 @@ public class PlaneFlightsController {
     }
 
     @PutMapping(path = "${EDIT_FLIGHT_PATH}")
-    public ResponseEntity<?> editFlight(@PathVariable("flightId") long flightId,
+    public ResponseEntity<String> editFlight(@PathVariable("flightId") long flightId,
                                         @RequestBody EditFlightDto editFlightDto){
         return planeFlightsService.editFlight(
                 flightId,
@@ -42,7 +42,7 @@ public class PlaneFlightsController {
     }
 
     @DeleteMapping(path = "${DELETE_FLIGHT_PATH}")
-    public ResponseEntity<?> deleteFlight(@PathVariable("flightId") long flightId){
+    public ResponseEntity<String> deleteFlight(@PathVariable("flightId") long flightId){
         return planeFlightsService.deleteFlight(flightId);
     }
 }

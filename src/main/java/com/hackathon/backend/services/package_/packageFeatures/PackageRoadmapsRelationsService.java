@@ -32,7 +32,7 @@ public class PackageRoadmapsRelationsService {
     }
 
     @Transactional
-    public ResponseEntity<?> addPackageRoadmap(int packageId, int roadmapId) {
+    public ResponseEntity<String> addPackageRoadmap(int packageId, int roadmapId) {
         try{
             PackageEntity packageEntity = packageUtils.findById(packageId);
             RoadmapEntity roadmapEntity = roadmapUtils.findById(roadmapId);
@@ -55,7 +55,7 @@ public class PackageRoadmapsRelationsService {
     }
 
     @Transactional
-    public ResponseEntity<?> removePackageRoadmap(int packageId, int roadmapId) {
+    public ResponseEntity<String> removePackageRoadmap(int packageId, int roadmapId) {
         try{
             PackageEntity packageEntity = packageUtils.findById(packageId);
             RoadmapEntity roadmapEntity = roadmapUtils.findById(roadmapId);

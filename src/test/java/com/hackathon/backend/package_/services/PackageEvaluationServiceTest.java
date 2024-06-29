@@ -1,15 +1,12 @@
 package com.hackathon.backend.package_.services;
 
-import com.hackathon.backend.dto.hotelDto.HotelEvaluationDto;
 import com.hackathon.backend.dto.packageDto.EditPackageEvaluationDto;
 import com.hackathon.backend.dto.packageDto.PackageEvaluationDto;
-import com.hackathon.backend.entities.hotel.HotelEntity;
-import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
 import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.services.package_.PackageEvaluationService;
-import com.hackathon.backend.utilities.UserUtils;
+import com.hackathon.backend.utilities.user.UserUtils;
 import com.hackathon.backend.utilities.package_.PackageEvaluationUtils;
 import com.hackathon.backend.utilities.package_.PackageUtils;
 import org.junit.jupiter.api.Test;

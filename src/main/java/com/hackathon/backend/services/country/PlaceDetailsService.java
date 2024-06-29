@@ -51,7 +51,7 @@ public class PlaceDetailsService {
     }
 
     @Transactional
-    public ResponseEntity<?> editPlaceDetails(int placeId,
+    public ResponseEntity<String> editPlaceDetails(int placeId,
                                               EditPlaceDetailsDto editPlaceDetailsDto) {
         try{
             if(!placeDetailsUtils.checkHelper(editPlaceDetailsDto)){

@@ -17,7 +17,7 @@ public class RoomFeaturesController {
     }
 
     @PostMapping(path = "${CREATE_ROOM_FEATURE_PATH}")
-    public ResponseEntity<?> createRoomFeature(@RequestParam("roomFeature") String roomFeature){
+    public ResponseEntity<String> createRoomFeature(@RequestParam("roomFeature") String roomFeature){
         return roomFeaturesService.createRoomFeature(roomFeature);
     }
 
@@ -27,13 +27,13 @@ public class RoomFeaturesController {
     }
 
     @PutMapping(path = "${EDIT_ROOM_FEATURE_PATH}")
-    public ResponseEntity<?> editRoomFeature(@PathVariable("featureId") int featureId,
+    public ResponseEntity<String> editRoomFeature(@PathVariable("featureId") int featureId,
                                              String roomFeature){
         return roomFeaturesService.editRoomFeature(featureId,roomFeature);
     }
 
     @DeleteMapping(path = "${DELETE_ROOM_FEATURE_PATH}")
-    public ResponseEntity<?> deleteRoomFeature(@PathVariable("featureId") int featureId){
+    public ResponseEntity<String> deleteRoomFeature(@PathVariable("featureId") int featureId){
         return roomFeaturesService.deleteRoomFeature(featureId);
     }
 }

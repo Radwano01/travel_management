@@ -4,8 +4,7 @@ import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
 import com.hackathon.backend.entities.plane.PlaneSeatsBookingEntity;
 import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.plane.PlaneSeatsBookingRepository;
-import com.hackathon.backend.repositories.plane.PlaneSeatsRepository;
-import com.hackathon.backend.utilities.UserUtils;
+import com.hackathon.backend.utilities.user.UserUtils;
 import com.hackathon.backend.utilities.plane.PlaneSeatsUtils;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
@@ -42,7 +41,7 @@ public class PlaneSeatBookingService {
     }
 
     @Transactional
-    public ResponseEntity<?> payment(long userId,
+    public ResponseEntity<String> payment(long userId,
                                      long planeId,
                                      String paymentIntentCode){
         try{

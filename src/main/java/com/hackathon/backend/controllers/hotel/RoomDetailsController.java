@@ -25,7 +25,7 @@ public class RoomDetailsController {
     }
 
     @PutMapping(path = "${EDIT_ROOM_DETAILS_PATH}")
-    public ResponseEntity<?> editRoomDetails(@PathVariable("hotelId") long hotelId,
+    public ResponseEntity<String> editRoomDetails(@PathVariable("hotelId") long hotelId,
                                              @RequestParam(name = "imageOne", required = false) MultipartFile imageOne,
                                              @RequestParam(name = "imageTwo", required = false) MultipartFile imageTwo,
                                              @RequestParam(name = "imageThree", required = false) MultipartFile imageThree,

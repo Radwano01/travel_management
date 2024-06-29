@@ -34,7 +34,7 @@ public class PlaneFlightsService {
         this.airPortsUtils = airPortsUtils;
     }
 
-    public ResponseEntity<?> addFlight(long planeId, long departureAirPortId,
+    public ResponseEntity<String> addFlight(long planeId, long departureAirPortId,
                                        long destinationAirPortId, FlightDto flightDto) {
         try {
             PlaneEntity plane = planeUtils.findPlaneById(planeId);
@@ -86,7 +86,7 @@ public class PlaneFlightsService {
     }
 
     @Transactional
-    public ResponseEntity<?> editFlight(long flightId,
+    public ResponseEntity<String> editFlight(long flightId,
                                         EditFlightDto editFlightDto) {
         try {
             if(!planeFlightsUtils.checkHelper(editFlightDto)){
@@ -103,7 +103,7 @@ public class PlaneFlightsService {
         }
     }
 
-    public ResponseEntity<?> deleteFlight(long flightId) {
+    public ResponseEntity<String> deleteFlight(long flightId) {
         try {
             PlaneFlightsEntity planeFlights = planeFlightsUtils.findById(flightId);
             if (planeFlights != null) {

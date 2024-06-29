@@ -27,7 +27,7 @@ public class RoomService {
     }
 
     @Transactional
-    public ResponseEntity<?> addRoom(long hotelId) {
+    public ResponseEntity<String> addRoom(long hotelId) {
         try {
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
             if(hotel.getRooms().size() > hotel.getHotelRoomsCount()){
@@ -48,7 +48,7 @@ public class RoomService {
 
     //button click to change status from frontend :)
     @Transactional
-    public ResponseEntity<?> editRoom(long hotelId, long roomId) {
+    public ResponseEntity<String> editRoom(long hotelId, long roomId) {
         try{
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
             Optional<RoomEntity> roomEntity = hotel.getRooms().stream()
@@ -67,7 +67,7 @@ public class RoomService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteRooms(long hotelId, long roomId){
+    public ResponseEntity<String> deleteRooms(long hotelId, long roomId){
         try{
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
             Optional<RoomEntity> foundRoom = hotel.getRooms().stream()

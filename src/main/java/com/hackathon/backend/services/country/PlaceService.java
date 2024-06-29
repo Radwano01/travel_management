@@ -42,7 +42,7 @@ public class PlaceService{
         this.s3Service = s3Service;
     }
 
-    public ResponseEntity<?> createPlace(int countryId,
+    public ResponseEntity<String> createPlace(int countryId,
                                          @NonNull PostPlaceDto postPlaceDto) {
         try{
             CountryEntity country = countryUtils.findCountryById(countryId);
@@ -93,7 +93,7 @@ public class PlaceService{
     }
 
     @Transactional
-    public ResponseEntity<?> editPlace(int countryId,
+    public ResponseEntity<String> editPlace(int countryId,
                                        int placeId,
                                        EditPlaceDto editPlaceDto) {
         try{
@@ -119,7 +119,7 @@ public class PlaceService{
     }
 
     @Transactional
-    public ResponseEntity<?> deletePlace(int countryId,
+    public ResponseEntity<String> deletePlace(int countryId,
                                          int placeId) {
         try{
             CountryEntity country = countryUtils.findCountryById(countryId);

@@ -19,18 +19,18 @@ public class PlaneController {
     }
 
     @PostMapping(path="${CREATE_PLANE_PATH}")
-    public ResponseEntity<?> createPlane(@RequestBody PlaneDto planeDto){
+    public ResponseEntity<String> createPlane(@RequestBody PlaneDto planeDto){
         return planeService.createPlane(planeDto);
     }
 
     @PutMapping(path="${EDIT_PLANE_PATH}")
-    public ResponseEntity<?> editPlane(@PathVariable("planeId") Long planeId,
+    public ResponseEntity<String> editPlane(@PathVariable("planeId") Long planeId,
                                        @RequestBody EditPlaneDto editPlaneDto){
         return planeService.editPlane(planeId, editPlaneDto);
     }
 
     @DeleteMapping(path = "${DELETE_PLANE_PATH}")
-    public ResponseEntity<?> deletePlane(@PathVariable("planeId") Long planeId){
+    public ResponseEntity<String> deletePlane(@PathVariable("planeId") Long planeId){
         return planeService.deletePlane(planeId);
     }
 }

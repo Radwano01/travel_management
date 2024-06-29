@@ -4,7 +4,7 @@ import com.hackathon.backend.entities.package_.PackageBookingEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.package_.PackageBookingRepository;
-import com.hackathon.backend.utilities.UserUtils;
+import com.hackathon.backend.utilities.user.UserUtils;
 import com.hackathon.backend.utilities.package_.PackageUtils;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
@@ -43,7 +43,7 @@ public class PackageBookingService {
 
 
     @Transactional
-    public ResponseEntity<?> payment(long userId,
+    public ResponseEntity<String> payment(long userId,
                                      int packageId,
                                      String paymentIntentCode){
         try{

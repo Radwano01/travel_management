@@ -17,7 +17,7 @@ public class PlaneSeatBookingController {
     }
 
     @PostMapping(path = "${PLANE_SEAT_PAYMENT_PATH}")
-    public ResponseEntity<?> payment(@PathVariable("userId") long userId,
+    public ResponseEntity<String> payment(@PathVariable("userId") long userId,
                                      @PathVariable("planeId") long planeId,
                                      @PathVariable("paymentIntent") String paymentIntent){
         return planeSeatBookingService.payment(userId, planeId, paymentIntent);

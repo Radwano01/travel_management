@@ -61,7 +61,7 @@ public class HotelService {
         this.s3Service = s3Service;
     }
 
-    public ResponseEntity<?> createHotel(int countryId,
+    public ResponseEntity<String> createHotel(int countryId,
                                          @NonNull PostHotelDto postHotelDto) {
         try {
             CountryEntity country = countryUtils.findCountryById(countryId);
@@ -118,7 +118,7 @@ public class HotelService {
     }
 
     @Transactional
-    public ResponseEntity<?> editHotel(long hotelId,
+    public ResponseEntity<String> editHotel(long hotelId,
                                        EditHotelDto editHotelDto){
         try{
             if(!hotelUtils.checkHelper(editHotelDto)){
@@ -136,7 +136,7 @@ public class HotelService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteHotel(long hotelId) {
+    public ResponseEntity<String> deleteHotel(long hotelId) {
         try {
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
 

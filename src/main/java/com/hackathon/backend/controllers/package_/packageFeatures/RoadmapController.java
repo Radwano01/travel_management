@@ -17,7 +17,7 @@ public class RoadmapController{
     }
 
     @PostMapping(path = "${CREATE_ROADMAP_PATH}")
-    public ResponseEntity<?> createRoadmap(String roadmap){
+    public ResponseEntity<String> createRoadmap(String roadmap){
         return roadmapService.createRoadmap(roadmap);
     }
 
@@ -27,13 +27,13 @@ public class RoadmapController{
     }
 
     @PutMapping(path = "${EDIT_ROADMAP_PATH}")
-    public ResponseEntity<?> editRoadmap(@PathVariable("roadmapId") int roadmapId,
+    public ResponseEntity<String> editRoadmap(@PathVariable("roadmapId") int roadmapId,
                                          String roadmap){
         return roadmapService.editRoadmap(roadmapId, roadmap);
     }
 
     @DeleteMapping(path = "${DELETE_ROADMAP_PATH}")
-    public ResponseEntity<?> deleteRoadmap(@PathVariable("roadmapId") int roadmapId){
+    public ResponseEntity<String> deleteRoadmap(@PathVariable("roadmapId") int roadmapId){
         return roadmapService.deleteRoadmap(roadmapId);
     }
 }

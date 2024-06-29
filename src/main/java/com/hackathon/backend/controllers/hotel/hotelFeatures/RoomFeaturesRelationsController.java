@@ -17,13 +17,13 @@ public class RoomFeaturesRelationsController {
     }
 
     @PostMapping(path = "${ROOM_FEATURE_RELATIONS_PATH}")
-    public ResponseEntity<?> addHotelFeatureToHotel(@PathVariable("hotelId") long hotelId,
+    public ResponseEntity<String> addHotelFeatureToHotel(@PathVariable("hotelId") long hotelId,
                                                     @PathVariable("featureId") int featureId){
         return roomFeaturesRelationsService.addRoomFeatureToHotel(hotelId,featureId);
     }
 
     @DeleteMapping(path = "${ROOM_FEATURE_RELATIONS_PATH}")
-    public ResponseEntity<?> removeHotelFeatureToHotel(@PathVariable("hotelId") long hotelId,
+    public ResponseEntity<String> removeHotelFeatureToHotel(@PathVariable("hotelId") long hotelId,
                                                        @PathVariable("featureId") int featureId){
         return roomFeaturesRelationsService.removeRoomFeatureFromHotel(hotelId,featureId);
     }

@@ -32,7 +32,7 @@ public class PackageBenefitsRelationsService {
     }
 
     @Transactional
-    public ResponseEntity<?> addPackageBenefit(int packageId, int benefitId) {
+    public ResponseEntity<String> addPackageBenefit(int packageId, int benefitId) {
         try{
             PackageEntity packageEntity = packageUtils.findById(packageId);
                     BenefitEntity benefitEntity = benefitUtils.findById(benefitId);
@@ -55,7 +55,7 @@ public class PackageBenefitsRelationsService {
     }
 
     @Transactional
-    public ResponseEntity<?> removePackageBenefit(int packageId, int benefitId) {
+    public ResponseEntity<String> removePackageBenefit(int packageId, int benefitId) {
         try{
             PackageEntity packageEntity = packageUtils.findById(packageId);
             BenefitEntity benefitEntity = benefitUtils.findById(benefitId);

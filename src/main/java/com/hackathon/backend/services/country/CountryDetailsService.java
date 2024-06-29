@@ -50,7 +50,7 @@ public class CountryDetailsService {
     }
 
     @Transactional
-    public ResponseEntity<?> editCountryDetails(int countryId,
+    public ResponseEntity<String> editCountryDetails(int countryId,
                                                 EditCountryDetailsDto editCountryDetailsDto) {
         try {
             if(!countryDetailsUtils.checkHelper(editCountryDetailsDto)){

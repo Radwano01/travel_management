@@ -79,7 +79,7 @@ public class CountryService{
         this.s3Service = s3Service;
     }
 
-    public ResponseEntity<?> createCountry(@NonNull PostCountryDto postCountryDto) {
+    public ResponseEntity<String> createCountry(@NonNull PostCountryDto postCountryDto) {
         try {
             String countryName = postCountryDto.getCountry().trim().toLowerCase();
             boolean existsCountry = countryUtils.existsByCountry(countryName);
@@ -127,7 +127,7 @@ public class CountryService{
     }
 
     @Transactional
-    public ResponseEntity<?> editCountry(int countryId,
+    public ResponseEntity<String> editCountry(int countryId,
                                         EditCountryDto editCountryDto) {
         try {
             if(!countryUtils.checkHelper(editCountryDto)) {
@@ -145,7 +145,7 @@ public class CountryService{
     }
 
     @Transactional
-    public ResponseEntity<?> deleteCountry(int countryId) {
+    public ResponseEntity<String> deleteCountry(int countryId) {
         try {
             CountryEntity countryEntity = countryUtils.findCountryById(countryId);
 

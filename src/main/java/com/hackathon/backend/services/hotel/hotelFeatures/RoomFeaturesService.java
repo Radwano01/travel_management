@@ -33,7 +33,7 @@ public class RoomFeaturesService {
     // because there is many to many with join table
 
 
-    public ResponseEntity<?> createRoomFeature(String roomFeature) {
+    public ResponseEntity<String> createRoomFeature(String roomFeature) {
         try{
             String feature = roomFeature.trim();
             boolean existsRoomFeature = roomFeaturesUtils.existsRoomFeatureByRoomFeatures(feature);
@@ -62,7 +62,7 @@ public class RoomFeaturesService {
     }
 
     @Transactional
-    public ResponseEntity<?> editRoomFeature(int featureId,
+    public ResponseEntity<String> editRoomFeature(int featureId,
                                              String roomFeature){
         try{
             if(roomFeature == null){
@@ -80,7 +80,7 @@ public class RoomFeaturesService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteRoomFeature(int featureId) {
+    public ResponseEntity<String> deleteRoomFeature(int featureId) {
         try {
             RoomFeaturesEntity roomFeatures = roomFeaturesUtils.findById(featureId);
             for (RoomDetailsEntity roomDetails : roomFeatures.getRoomDetails()) {

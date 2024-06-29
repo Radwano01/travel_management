@@ -17,13 +17,13 @@ public class RoadmapsRelationsController {
     }
 
     @PostMapping(path = "${PACKAGE_ROADMAP_RELATIONS_PATH}")
-    public ResponseEntity<?> addPackageRoadmap(@PathVariable("packageId") int packageId,
+    public ResponseEntity<String> addPackageRoadmap(@PathVariable("packageId") int packageId,
                                                @PathVariable("roadmapId") int roadmapId){
         return packageRoadmapsRelationsService.addPackageRoadmap(packageId,roadmapId);
     }
 
     @DeleteMapping(path = "${PACKAGE_ROADMAP_RELATIONS_PATH}")
-    public ResponseEntity<?> removePackageRoadmap(@PathVariable("packageId") int packageId,
+    public ResponseEntity<String> removePackageRoadmap(@PathVariable("packageId") int packageId,
                                                   @PathVariable("roadmapId") int roadmapId){
         return packageRoadmapsRelationsService.removePackageRoadmap(packageId,roadmapId);
     }

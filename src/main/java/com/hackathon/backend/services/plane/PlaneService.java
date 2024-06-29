@@ -37,7 +37,7 @@ public class PlaneService{
         this.planeFlightsUtils = planeFlightsUtils;
     }
 
-    public ResponseEntity<?> createPlane(@NonNull PlaneDto planeDto) {
+    public ResponseEntity<String> createPlane(@NonNull PlaneDto planeDto) {
         try{
             PlaneEntity planeEntity = new PlaneEntity(
                     planeDto.getPlaneCompanyName(),
@@ -51,7 +51,7 @@ public class PlaneService{
     }
 
     @Transactional
-    public ResponseEntity<?> editPlane(long planeId,
+    public ResponseEntity<String> editPlane(long planeId,
                                        EditPlaneDto editPlaneDto){
         try{
             if(!planeUtils.checkHelper(editPlaneDto)){
@@ -69,7 +69,7 @@ public class PlaneService{
     }
 
     @Transactional
-    public ResponseEntity<?> deletePlane(long planeId) {
+    public ResponseEntity<String> deletePlane(long planeId) {
         try{
             PlaneEntity plane = planeUtils.findById(planeId);
 

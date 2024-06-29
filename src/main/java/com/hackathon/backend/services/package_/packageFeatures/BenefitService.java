@@ -28,7 +28,7 @@ public class BenefitService{
         this.packageDetailsUtils = packageDetailsUtils;
     }
 
-    public ResponseEntity<?> createBenefit(String benefit){
+    public ResponseEntity<String> createBenefit(String benefit){
         try{
             if(benefitUtils.existsByBenefit(benefit)) {
                 return alreadyValidException("Benefit already exists");
@@ -53,7 +53,7 @@ public class BenefitService{
     }
 
     @Transactional
-    public ResponseEntity<?> editBenefit(int benefitId,
+    public ResponseEntity<String> editBenefit(int benefitId,
                                          String benefit){
         try{
             if(benefit == null){
@@ -71,7 +71,7 @@ public class BenefitService{
     }
 
     @Transactional
-    public ResponseEntity<?> deleteBenefit(int benefitId) {
+    public ResponseEntity<String> deleteBenefit(int benefitId) {
         try {
             BenefitEntity benefitEntity = benefitUtils.findById(benefitId);
             for (PackageDetailsEntity packageDetails : benefitEntity.getPackageDetails()) {

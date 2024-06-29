@@ -5,7 +5,7 @@ import com.hackathon.backend.entities.user.RoleEntity;
 import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.user.RoleRepository;
 import com.hackathon.backend.security.JWTGenerator;
-import com.hackathon.backend.utilities.UserUtils;
+import com.hackathon.backend.utilities.user.UserUtils;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,7 +24,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.*;
+
 import static com.hackathon.backend.utilities.ErrorUtils.*;
+import static com.hackathon.backend.utilities.user.PasswordChecker.isStrongPassword;
 
 @Service
 public class UserService {
@@ -61,21 +65,23 @@ public class UserService {
         this.s3Service = s3Service;
     }
 
-    public ResponseEntity<?> registerUser(@NonNull RegisterUserDto registerUserDto) {
+    @Async("userServiceTaskExecutor")
+    public CompletableFuture<ResponseEntity<?>> registerUser(@NonNull RegisterUserDto registerUserDto) {
         if(!isStrongPassword(registerUserDto.getPassword())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password must be at least 8 characters long and contain"
-                    + " at least one uppercase letter, one lowercase letter, one number, and one special character.");
+            return CompletableFuture.completedFuture(
+                    ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password must be at least 8 characters long and contain"
+                    + " at least one uppercase letter, one lowercase letter, one number, and one special character."));
         }
         try {
             boolean checkExistsEmail = userUtils
                     .existsByEmail(registerUserDto.getEmail());
             if (checkExistsEmail) {
-                return alreadyValidException("Email exists");
+                return CompletableFuture.completedFuture((alreadyValidException("Email exists")));
             }
             boolean existsUsername = userUtils
                     .existsUsernameByUsername(registerUserDto.getUsername());
             if (existsUsername) {
-                return alreadyValidException("Username already valid");
+                return CompletableFuture.completedFuture((alreadyValidException("Username already valid")));
             }
             RoleEntity role = roleRepository.findByRole("USER")
                     .orElseThrow(()-> new EntityNotFoundException("Role not found"));
@@ -89,16 +95,17 @@ public class UserService {
                     defaultImageForNewUsers
             );
             userUtils.save(userEntity);
-            return ResponseEntity.ok("Account Created");
+            return CompletableFuture.completedFuture((ResponseEntity.ok("Account Created")));
         } catch (EntityNotFoundException e) {
-            return notFoundException(e);
+            return CompletableFuture.completedFuture((notFoundException(e)));
         } catch (Exception e) {
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture((serverErrorException(e)));
         }
     }
 
     //login
-    public ResponseEntity<?> loginUser(LoginUserDto loginUserDto) {
+    @Async("userServiceTaskExecutor")
+    public CompletableFuture<ResponseEntity<?>> loginUser(LoginUserDto loginUserDto) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginUserDto.getUsername(), loginUserDto.getPassword())
@@ -116,72 +123,77 @@ public class UserService {
                         user.getImage()
                 );
                 AuthResponseDto authResponseDto = new AuthResponseDto(token,essentialUserDto);
-                return ResponseEntity.ok(authResponseDto);
+                return CompletableFuture.completedFuture((ResponseEntity.ok(authResponseDto)));
             }
-            return badRequestException("Something went wrong");
+            return CompletableFuture.completedFuture((badRequestException("Something went wrong")));
         }catch(AuthenticationException e){
-            return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
+            return CompletableFuture.completedFuture
+                    ((new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED)));
         }
     }
 
 
     //delete
-    public ResponseEntity<?> deleteUser(long userId) {
+    @Async("userServiceTaskExecutor")
+    public CompletableFuture<ResponseEntity<?>> deleteUser(long userId) {
         try{
             UserEntity user = userUtils.findById(userId);
             s3Service.deleteFile(user.getImage());
             userUtils.delete(user);
-            return ResponseEntity.ok("Account deleted successfully");
+            return CompletableFuture.completedFuture((ResponseEntity.ok("Account deleted successfully")));
         }catch (Exception e){
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture((serverErrorException(e)));
         }
     }
 
+    @Async("userServiceTaskExecutor")
     @Transactional
-    public ResponseEntity<?> editUser(long userId, EditUserDto editUserDto) {
+    public CompletableFuture<ResponseEntity<?>> editUser(long userId, EditUserDto editUserDto) {
         try {
             if(!userUtils.checkHelper(editUserDto)){
-                return badRequestException("you sent an empty data to change");
+                return CompletableFuture.completedFuture((badRequestException("you sent an empty data to change")));
             }
             if (!isStrongPassword(editUserDto.getPassword())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                return CompletableFuture.completedFuture((ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Password must be at least 8 characters" +
                                 " long and contain at least one uppercase" +
                                 " letter, one lowercase letter, one number," +
-                                " and one special character.");
+                                " and one special character.")));
             }
 
             UserEntity user = userUtils.findById(userId);
             userUtils.editHelper(user, editUserDto);
             userUtils.save(user);
-            return ResponseEntity.ok("user updated successfully");
+            return CompletableFuture.completedFuture((ResponseEntity.ok("user updated successfully")));
         } catch (EntityNotFoundException e) {
-            return notFoundException(e);
+            return CompletableFuture.completedFuture((notFoundException(e)));
         } catch (Exception e) {
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture((serverErrorException(e)));
         }
     }
 
 
+    @Async("userServiceTaskExecutor")
     @Transactional
-    public ResponseEntity<?> verifyUser(String email) {
+    public CompletableFuture<ResponseEntity<?>> verifyUser(String email) {
         try{
             UserEntity userEntity = userUtils.findUserByEmail(email);
             userEntity.setVerificationStatus(true);
             userUtils.save(userEntity);
-            return ResponseEntity.ok("User has been verified");
+            return CompletableFuture.completedFuture((ResponseEntity.ok("User has been verified")));
         }catch (EntityNotFoundException e) {
-            return notFoundException(e);
+            return CompletableFuture.completedFuture((notFoundException(e)));
         }catch (Exception e){
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture((serverErrorException(e)));
         }
     }
 
-    public ResponseEntity<?> sendVerificationLink(long userId, String token) {
+    @Async("userServiceTaskExecutor")
+    public CompletableFuture<ResponseEntity<?>> sendVerificationLink(long userId, String token) {
         try{
             UserEntity user = userUtils.findById(userId);
             if(user.isVerificationStatus()){
-                return badRequestException("This account has verified already");
+                return CompletableFuture.completedFuture((badRequestException("This account has verified already")));
             }
             String verificationLink = verifyLink+user.getEmail()+"/"+token;
 
@@ -190,28 +202,11 @@ public class UserService {
                     userUtils.sendMessageToEmail(user.getEmail(), verificationLink)
             );
 
-            return ResponseEntity.ok("Verification email sent");
+            return CompletableFuture.completedFuture((ResponseEntity.ok("Verification email sent")));
         }catch (EntityNotFoundException e){
-            return notFoundException(e);
+            return CompletableFuture.completedFuture((notFoundException(e)));
         } catch (Exception e){
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture((serverErrorException(e)));
         }
-    }
-
-    public boolean isStrongPassword(String password){
-        if (password == null || password.length() < 8) {
-            return false;
-        }
-
-        boolean isUppercase = false, isLowercase = false, isDigit = false, isSpecial = false;
-
-        for(char c:password.toCharArray()){
-            if(Character.isUpperCase(c)) isUppercase = true;
-            else if(Character.isLowerCase(c)) isLowercase = true;
-            else if(Character.isDigit(c)) isDigit = true;
-            else isSpecial = true;
-        }
-
-        return isUppercase && isLowercase && isDigit && isSpecial;
     }
 }

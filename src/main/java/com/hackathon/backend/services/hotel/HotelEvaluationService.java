@@ -5,7 +5,7 @@ import com.hackathon.backend.dto.hotelDto.HotelEvaluationDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
 import com.hackathon.backend.entities.user.UserEntity;
-import com.hackathon.backend.utilities.UserUtils;
+import com.hackathon.backend.utilities.user.UserUtils;
 import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,7 +37,7 @@ public class HotelEvaluationService {
 
 
     @Transactional
-    public ResponseEntity<?> addComment(long hotelId, long userId,
+    public ResponseEntity<String> addComment(long hotelId, long userId,
                                         @NonNull HotelEvaluationDto
                                                 hotelEvaluationDto) {
         try{
@@ -85,7 +85,7 @@ public class HotelEvaluationService {
     }
 
     @Transactional
-    public ResponseEntity<?> editComment(long commentId,
+    public ResponseEntity<String> editComment(long commentId,
                                          EditHotelEvaluationDto editHotelEvaluationDto) {
         try{
             if(!hotelEvaluationUtils.checkHelper(editHotelEvaluationDto)){
@@ -103,7 +103,7 @@ public class HotelEvaluationService {
     }
 
     @Transactional
-    public ResponseEntity<?> removeComment(long hotelId,
+    public ResponseEntity<String> removeComment(long hotelId,
                                            long userId,
                                            long commentId) {
         try {

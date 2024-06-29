@@ -19,7 +19,7 @@ public class PackageEvaluationController {
     }
 
     @PostMapping(path = "${ADD_PACKAGE_EVALUATION_PATH}")
-    public ResponseEntity<?> addComment(@PathVariable("packageId") int packageId,
+    public ResponseEntity<String> addComment(@PathVariable("packageId") int packageId,
                                         @PathVariable("userId") long userId,
                                         @RequestBody PackageEvaluationDto packageEvaluationDto){
         return packageEvaluationService.addComment(packageId, userId, packageEvaluationDto);
@@ -31,13 +31,13 @@ public class PackageEvaluationController {
     }
 
     @PutMapping(path = "${EDIT_PACKAGE_EVALUATION_PATH}")
-    public ResponseEntity<?> editComment(@PathVariable("commentId") long commentId,
+    public ResponseEntity<String> editComment(@PathVariable("commentId") long commentId,
                                          @RequestBody EditPackageEvaluationDto editPackageEvaluationDto){
         return packageEvaluationService.editComment(commentId, editPackageEvaluationDto);
     }
 
     @DeleteMapping(path = "${REMOVE_PACKAGE_EVALUATION_PATH}")
-    public ResponseEntity<?> removeComment(@PathVariable("packageId") int packageId,
+    public ResponseEntity<String> removeComment(@PathVariable("packageId") int packageId,
                                            @PathVariable("userId") long userId,
                                            @PathVariable("commentId") long commentId){
         return packageEvaluationService.removeComment(packageId, userId, commentId);

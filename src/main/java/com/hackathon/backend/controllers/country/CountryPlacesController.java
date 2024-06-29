@@ -19,7 +19,7 @@ public class CountryPlacesController {
     }
 
     @PostMapping(path = "${CREATE_PLACE_PATH}")
-    public ResponseEntity<?> createPlace(@PathVariable("countryId") int countryId,
+    public ResponseEntity<String> createPlace(@PathVariable("countryId") int countryId,
                                          @RequestParam("place") String place,
                                          @RequestParam("mainImage") MultipartFile mainImage,
                                          @RequestParam("imageOne") MultipartFile imageOne,
@@ -44,7 +44,7 @@ public class CountryPlacesController {
     }
 
     @PutMapping(path = "${EDIT_PLACE_PATH}")
-    public ResponseEntity<?> editPlace(@PathVariable("countryId") int countryId,
+    public ResponseEntity<String> editPlace(@PathVariable("countryId") int countryId,
                                        @PathVariable("placeId") int placeId,
                                        @RequestParam("place") String place,
                                        @RequestParam("mainImage") MultipartFile mainImage){
@@ -56,7 +56,7 @@ public class CountryPlacesController {
     }
 
     @DeleteMapping(path = "${DELETE_PLACE_PATH}")
-    public ResponseEntity<?> deletePlace(@PathVariable("countryId") int countryId,
+    public ResponseEntity<String> deletePlace(@PathVariable("countryId") int countryId,
                                          @PathVariable("placeId") int placeId){
         return placeService.deletePlace(countryId,placeId);
     }

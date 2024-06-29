@@ -17,7 +17,7 @@ public class HotelFeaturesController {
     }
 
     @PostMapping(path = "${CREATE_HOTEL_FEATURE_PATH}")
-    public ResponseEntity<?> createHotelFeature(@RequestParam("hotelFeature") String hotelFeature){
+    public ResponseEntity<String> createHotelFeature(@RequestParam("hotelFeature") String hotelFeature){
         return hotelFeaturesService.createHotelFeature(hotelFeature);
     }
 
@@ -27,13 +27,13 @@ public class HotelFeaturesController {
     }
 
     @PutMapping(path = "${EDIT_HOTEL_FEATURE_PATH}")
-    public ResponseEntity<?> editHotelFeature(@PathVariable("featureId") int featureId,
+    public ResponseEntity<String> editHotelFeature(@PathVariable("featureId") int featureId,
                                               String hotelFeature){
         return hotelFeaturesService.editHotelFeature(featureId,hotelFeature);
     }
 
     @DeleteMapping(path = "${DELETE_HOTEL_FEATURE_PATH}")
-    public ResponseEntity<?> deleteHotelFeature(@PathVariable("featureId") int featureId){
+    public ResponseEntity<String> deleteHotelFeature(@PathVariable("featureId") int featureId){
         return hotelFeaturesService.deleteHotelFeature(featureId);
     }
 }

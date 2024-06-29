@@ -31,7 +31,7 @@ public class HotelFeaturesService {
     //note: create feature without connecting it with hotels details
     // because there is many to many with join table
 
-    public ResponseEntity<?> createHotelFeature(String hotelFeature) {
+    public ResponseEntity<String> createHotelFeature(String hotelFeature) {
         try{
             String feature = hotelFeature.trim();
             boolean existsHotelFeature = hotelFeaturesUtils.existsHotelFeatureByHotelFeatures(feature);
@@ -60,7 +60,7 @@ public class HotelFeaturesService {
     }
 
     @Transactional
-    public ResponseEntity<?> editHotelFeature(int featureId,
+    public ResponseEntity<String> editHotelFeature(int featureId,
                                               String hotelFeature){
         try{
             if(hotelFeature == null){
@@ -78,7 +78,7 @@ public class HotelFeaturesService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteHotelFeature(int featureId) {
+    public ResponseEntity<String> deleteHotelFeature(int featureId) {
         try {
             HotelFeaturesEntity hotelFeatures = hotelFeaturesUtils.findById(featureId);
             for (RoomDetailsEntity roomDetails : hotelFeatures.getRoomDetails()) {

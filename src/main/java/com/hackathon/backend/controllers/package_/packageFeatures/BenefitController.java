@@ -17,7 +17,7 @@ public class BenefitController{
     }
 
     @PostMapping(path = "${CREATE_BENEFIT_PATH}")
-    public ResponseEntity<?> createBenefit(String benefit){
+    public ResponseEntity<String> createBenefit(String benefit){
         return benefitService.createBenefit(benefit);
     }
 
@@ -27,13 +27,13 @@ public class BenefitController{
     }
 
     @PutMapping(path = "${EDIT_BENEFIT_PATH}")
-    public ResponseEntity<?> editBenefit(@PathVariable("benefitId") int benefitId,
+    public ResponseEntity<String> editBenefit(@PathVariable("benefitId") int benefitId,
                                          @RequestBody String benefit){
         return benefitService.editBenefit(benefitId, benefit);
     }
 
     @DeleteMapping(path = "${DELETE_BENEFIT_PATH}")
-    public ResponseEntity<?> deleteBenefit(@PathVariable("benefitId") int benefitId){
+    public ResponseEntity<String> deleteBenefit(@PathVariable("benefitId") int benefitId){
         return benefitService.deleteBenefit(benefitId);
     }
 }

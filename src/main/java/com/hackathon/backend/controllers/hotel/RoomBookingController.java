@@ -18,7 +18,7 @@ public class RoomBookingController {
     }
 
     @PostMapping("{HOTEL_ROOM_PAYMENT_PATH}")
-    public ResponseEntity<?> payment(@PathVariable("userId") long userId,
+    public ResponseEntity<String> payment(@PathVariable("userId") long userId,
                                      @PathVariable("hotelId") long hotelId,
                                      @PathVariable("paymentIntent") String paymentIntent,
                                      @RequestBody RoomPaymentDto roomPaymentDto){

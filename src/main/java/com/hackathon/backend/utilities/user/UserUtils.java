@@ -1,4 +1,4 @@
-package com.hackathon.backend.utilities;
+package com.hackathon.backend.utilities.user;
 
 
 import com.hackathon.backend.dto.userDto.EditUserDto;
