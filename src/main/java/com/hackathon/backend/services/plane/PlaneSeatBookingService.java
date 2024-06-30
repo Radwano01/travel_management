@@ -16,7 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
 
 import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
 import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
@@ -40,19 +43,22 @@ public class PlaneSeatBookingService {
         this.planeSeatsBookingRepository = planeSeatsBookingRepository;
     }
 
+    @Async("bookingTaskExecutor")
     @Transactional
-    public ResponseEntity<String> payment(long userId,
-                                     long planeId,
-                                     String paymentIntentCode){
+    public CompletableFuture<ResponseEntity<String>> payment(long userId,
+                                                             long planeId,
+                                                             String paymentIntentCode){
         try{
             UserEntity user = userUtils.findById(userId);
             boolean userVerification = user.isVerificationStatus();
             if(!userVerification) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is Not Verified yet!");
+                return CompletableFuture.completedFuture
+                        ((ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is Not Verified yet!")));
             }
             PlaneSeatsEntity seat = planeSeatsUtils.findById(planeId);
             if (!seat.isStatus()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Visa Not Valid!");
+                return CompletableFuture.completedFuture
+                        ((ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Visa Not Valid!")));
             }
             try {
                 PaymentIntent paymentIntent = createPayment(paymentIntentCode);
@@ -63,18 +69,18 @@ public class PlaneSeatBookingService {
                             seat
                     );
                     planeSeatsBookingRepository.save(planeSeatsBookingEntity);
-                    return ResponseEntity.ok("Visa booked successfully");
+                    return CompletableFuture.completedFuture((ResponseEntity.ok("Visa booked successfully")));
                 } else {
-                    return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
-                            .body("Payment failed. Please check your payment details and try again.");
+                    return CompletableFuture.completedFuture((ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
+                            .body("Payment failed. Please check your payment details and try again.")));
                 }
             } catch (Exception e) {
-                return serverErrorException(e);
+                return CompletableFuture.completedFuture((serverErrorException(e)));
             }
         }catch (EntityNotFoundException e){
-            return notFoundException(e);
+            return CompletableFuture.completedFuture((notFoundException(e)));
         } catch (Exception e){
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture((serverErrorException(e)));
         }
     }
 

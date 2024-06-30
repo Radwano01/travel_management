@@ -18,11 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
@@ -46,16 +48,17 @@ public class RoomBookingService {
         this.userUtils = userUtils;
     }
 
+    @Async("bookingTaskExecutor")
     @Transactional
-    public ResponseEntity<String> payment(long userId,
-                                     long hotelId,
-                                     String paymentIntentCode,
-                                     RoomPaymentDto roomPaymentDto){
+    public CompletableFuture<ResponseEntity<String>> payment(long userId,
+                                                             long hotelId,
+                                                             String paymentIntentCode,
+                                                             RoomPaymentDto roomPaymentDto){
         try{
             UserEntity user = userUtils.findById(userId);
             boolean userVerification = user.isVerificationStatus();
             if(!userVerification) {
-                return badRequestException("User is Not Verified yet!");
+                return CompletableFuture.completedFuture(badRequestException("User is Not Verified yet!"));
             }
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
             for (RoomEntity room:hotel.getRooms()){
@@ -70,21 +73,22 @@ public class RoomBookingService {
                                     roomPaymentDto.getEndTime()
                             );
                             roomBookingRepository.save(roomBookingEntity);
-                            return ResponseEntity.ok("Room booked successfully");
+                            return CompletableFuture.completedFuture
+                                    ((ResponseEntity.ok("Room booked successfully")));
                         } else {
-                            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
-                                    .body("Payment failed. Please check your payment details and try again.");
+                            return CompletableFuture.completedFuture((ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
+                                    .body("Payment failed. Please check your payment details and try again.")));
                         }
                     } catch (Exception e) {
-                        return serverErrorException(e);
+                        return CompletableFuture.completedFuture((serverErrorException(e)));
                     }
                 }
             }
-            return notFoundException("Invalid rooms in this hotel");
+            return CompletableFuture.completedFuture((notFoundException("Invalid rooms in this hotel")));
         }catch (EntityNotFoundException e){
-            return notFoundException(e);
+            return CompletableFuture.completedFuture((notFoundException(e)));
         } catch (Exception e){
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture((serverErrorException(e)));
         }
     }
 

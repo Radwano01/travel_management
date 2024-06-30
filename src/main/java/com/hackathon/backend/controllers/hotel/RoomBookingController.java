@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.CompletableFuture;
+
 @RestController
 @RequestMapping(path = "${BASE_API}")
 public class RoomBookingController {
@@ -18,10 +20,10 @@ public class RoomBookingController {
     }
 
     @PostMapping("{HOTEL_ROOM_PAYMENT_PATH}")
-    public ResponseEntity<String> payment(@PathVariable("userId") long userId,
-                                     @PathVariable("hotelId") long hotelId,
-                                     @PathVariable("paymentIntent") String paymentIntent,
-                                     @RequestBody RoomPaymentDto roomPaymentDto){
+    public CompletableFuture<ResponseEntity<String>> payment(@PathVariable("userId") long userId,
+                                                             @PathVariable("hotelId") long hotelId,
+                                                             @PathVariable("paymentIntent") String paymentIntent,
+                                                             @RequestBody RoomPaymentDto roomPaymentDto){
         return roomBookingService.payment(userId, hotelId, paymentIntent, roomPaymentDto);
     }
 }

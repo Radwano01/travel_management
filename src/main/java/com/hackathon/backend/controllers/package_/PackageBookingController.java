@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.CompletableFuture;
+
 @RestController
 @RequestMapping(path = "${BASE_API}")
 public class PackageBookingController {
@@ -17,9 +19,9 @@ public class PackageBookingController {
     }
 
     @PostMapping("{PACKAGE_PAYMENT_PATH}")
-    public ResponseEntity<String> payment(@PathVariable("userId") long userId,
-                                     @PathVariable("packageId") int packageId,
-                                     @PathVariable("paymentIntent") String paymentIntent){
+    public CompletableFuture<ResponseEntity<String>> payment(@PathVariable("userId") long userId,
+                                                             @PathVariable("packageId") int packageId,
+                                                             @PathVariable("paymentIntent") String paymentIntent){
         return packageBookingService.payment(userId, packageId, paymentIntent);
     }
 }
