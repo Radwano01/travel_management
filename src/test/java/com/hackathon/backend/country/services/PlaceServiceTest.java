@@ -2,6 +2,7 @@ package com.hackathon.backend.country.services;
 
 import com.hackathon.backend.dto.countryDto.placeDto.EditPlaceDto;
 import com.hackathon.backend.dto.countryDto.placeDto.GetEssentialPlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.GetPlaceForFlightDto;
 import com.hackathon.backend.dto.countryDto.placeDto.PostPlaceDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
@@ -21,10 +22,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -105,7 +108,7 @@ class PlaceServiceTest {
         when(placeUtils.findPlacesByCountryId(countryId)).thenReturn(res);
 
         //when
-        ResponseEntity<?> response = placeService.getPlacesByCountry(countryId);
+        ResponseEntity<?> response = placeService.getPlacesByCountryId(countryId);
 
         List<GetEssentialPlaceDto> placeEntities = (List<GetEssentialPlaceDto>) response.getBody();
         GetEssentialPlaceDto responseData = placeEntities.get(0);
@@ -116,6 +119,21 @@ class PlaceServiceTest {
         assertEquals(place.getId(), responseData.getId());
         assertEquals(place.getPlace(), responseData.getPlace());
         assertEquals(place.getMainImage(), responseData.getMainImage());
+    }
+
+    @Test
+    void getPlaceByPlace(){
+        List<GetPlaceForFlightDto> mockPlaces = Arrays.asList(
+                new GetPlaceForFlightDto(1, "Test Place", "Airport 1"),
+                new GetPlaceForFlightDto(2, "Test Place", "Airport 2")
+        );
+
+        when(placeUtils.findPlaceByPlace(anyString())).thenReturn(mockPlaces);
+
+        ResponseEntity<?> response = placeService.getPlaceByPlace("Test Place");
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(mockPlaces, response.getBody());
     }
 
     @Test

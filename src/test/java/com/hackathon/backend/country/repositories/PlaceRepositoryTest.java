@@ -1,10 +1,13 @@
 package com.hackathon.backend.country.repositories;
 
 import com.hackathon.backend.dto.countryDto.placeDto.GetEssentialPlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.GetPlaceForFlightDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
+import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.repositories.country.CountryRepository;
 import com.hackathon.backend.repositories.country.PlaceRepository;
+import com.hackathon.backend.repositories.plane.AirPortRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +26,9 @@ class PlaceRepositoryTest {
 
     @Autowired
     PlaceRepository placeRepository;
+
+    @Autowired
+    AirPortRepository airPortRepository;
 
     @BeforeEach
     void setUp() {
@@ -57,5 +63,36 @@ class PlaceRepositoryTest {
         //then
         assertEquals(places.get(0).getPlace(), "testPlace");
         assertEquals(places.get(0).getMainImage(), "testImage");
+    }
+
+    @Test
+    void findPlaceByPlace(){
+        // //given
+        PlaceEntity place = new PlaceEntity();
+        place.setPlace("Test Place");
+
+        AirPortEntity airport1 = new AirPortEntity();
+        airport1.setAirPortName("Airport 1");
+        airport1.setPlace(place);
+
+        AirPortEntity airport2 = new AirPortEntity();
+        airport2.setAirPortName("Airport 2");
+        airport2.setPlace(place);
+
+        placeRepository.save(place);
+        airPortRepository.save(airport1);
+        airPortRepository.save(airport2);
+
+
+        //when
+        List<GetPlaceForFlightDto> result = placeRepository.findPlaceByPlace("Test Place");
+
+        //then
+        assertNotNull(result);
+        assertEquals(result.size(), 2);
+        assertEquals(result.get(0).getPlace(), "Test Place");
+        assertEquals(result.get(0).getAirPortName(), "Airport 1");
+        assertEquals(result.get(1).getPlace(), "Test Place");
+        assertEquals(result.get(1).getAirPortName(), "Airport 2");
     }
 }

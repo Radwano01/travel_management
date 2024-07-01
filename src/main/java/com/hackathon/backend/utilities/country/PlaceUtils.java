@@ -2,6 +2,7 @@ package com.hackathon.backend.utilities.country;
 
 import com.hackathon.backend.dto.countryDto.placeDto.EditPlaceDto;
 import com.hackathon.backend.dto.countryDto.placeDto.GetEssentialPlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.GetPlaceForFlightDto;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.repositories.country.PlaceRepository;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
@@ -59,5 +60,9 @@ public class PlaceUtils {
             String placeMainImageName = s3Service.uploadFile(editPlaceDto.getMainImage());
             place.setMainImage(placeMainImageName);
         }
+    }
+
+    public List<GetPlaceForFlightDto> findPlaceByPlace(String place) {
+        return placeRepository.findPlaceByPlace(place);
     }
 }

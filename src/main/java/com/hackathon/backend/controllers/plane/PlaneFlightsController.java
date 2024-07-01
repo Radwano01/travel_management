@@ -20,10 +20,10 @@ public class PlaneFlightsController {
 
     @PostMapping(path = "${ADD_FLIGHT_PATH}")
     public ResponseEntity<String> addFlight(@PathVariable("planeId") long planeId,
-                                       @PathVariable("departureCountryId") int departureCountryId,
-                                       @PathVariable("destinationCountryId") int destinationCountryId,
+                                       @PathVariable("departureAirPortId") int departureAirPortId,
+                                       @PathVariable("destinationAirPortId") int destinationAirPortId,
                                        @RequestBody FlightDto flightDto){
-        return planeFlightsService.addFlight(planeId,departureCountryId,destinationCountryId,flightDto);
+        return planeFlightsService.addFlight(planeId,departureAirPortId,destinationAirPortId,flightDto);
     }
 
     @GetMapping(path = "${GET_FLIGHT_PATH}")

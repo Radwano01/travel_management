@@ -15,7 +15,7 @@ public class GetPlaceDetailsDto {
     private String imageTwo;
     private String imageThree;
     private String description;
-    //add packages variable soon!!
+
 
     public GetPlaceDetailsDto(int id, String place,
                               String mainImage, String imageOne,

@@ -24,11 +24,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -101,39 +106,33 @@ class HotelServiceTest {
 
     @Test
     void getHotels() {
-        //given
+        // Mock data
         int countryId = 1;
-        CountryEntity country = new CountryEntity();
-        country.setId(countryId);
+        int page = 0;
+        int size = 10;
+        List<GetHotelDto> hotelList = Collections.singletonList(new GetHotelDto(/* provide necessary data */));
+        Page<List<GetHotelDto>> hotelsPage = new PageImpl<>(Collections.singletonList(hotelList), PageRequest.of(page, size), 1);
 
-        List<GetHotelDto> getHotelDtos = new ArrayList<>();
+        // Mock behavior
+        when(hotelUtils.findByCountryId(eq(countryId), any(org.springframework.data.domain.Pageable.class))).thenReturn(hotelsPage);
 
-        GetHotelDto getHotelDto = new GetHotelDto();
-        getHotelDto.setId(1);
-        getHotelDto.setHotelName("testHotel");
-        getHotelDto.setMainImage("testImage");
-        getHotelDto.setDescription("testDesc");
-        getHotelDto.setAddress("testAddress");
-        getHotelDto.setRate(2);
 
-        getHotelDtos.add(getHotelDto);
+        try {
+            // Call the method
+            ResponseEntity<?> responseEntity = hotelService.getHotels(countryId, page, size);
 
-        //behavior
-        when(hotelUtils.findByCountryId(countryId)).thenReturn(getHotelDtos);
+            // Verify the response
+            assertEquals(200, responseEntity.getStatusCodeValue(), "Expected status code 200");
+            assertEquals(hotelsPage, responseEntity.getBody(), "Expected body to match");
 
-        //when
-        ResponseEntity<?> response = hotelService.getHotels(countryId);
-
-        List<GetHotelDto> getHotelDtoList = (List<GetHotelDto>) response.getBody();
-
-        //then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(getHotelDto.getId(), getHotelDtoList.get(0).getId());
-        assertEquals(getHotelDto.getHotelName(), getHotelDtoList.get(0).getHotelName());
-        assertEquals(getHotelDto.getMainImage(), getHotelDtoList.get(0).getMainImage());
-        assertEquals(getHotelDto.getDescription(), getHotelDtoList.get(0).getDescription());
-        assertEquals(getHotelDto.getAddress(), getHotelDtoList.get(0).getAddress());
-        assertEquals(getHotelDto.getRate(), getHotelDtoList.get(0).getRate());
+            // Verify interactions
+            verify(hotelUtils, times(1)).findByCountryId(eq(countryId), any(Pageable.class));
+            verifyNoMoreInteractions(hotelUtils);
+        } catch (Exception e) {
+            // Print the stack trace for debugging
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.hackathon.backend.services.country;
 
 import com.hackathon.backend.dto.countryDto.placeDto.EditPlaceDto;
 import com.hackathon.backend.dto.countryDto.placeDto.GetEssentialPlaceDto;
+import com.hackathon.backend.dto.countryDto.placeDto.GetPlaceForFlightDto;
 import com.hackathon.backend.dto.countryDto.placeDto.PostPlaceDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
@@ -81,9 +82,20 @@ public class PlaceService{
         }
     }
 
-    public ResponseEntity<?> getPlacesByCountry(int countryId){
+    public ResponseEntity<?> getPlacesByCountryId(int countryId){
         try{
             List<GetEssentialPlaceDto> places = placeUtils.findPlacesByCountryId(countryId);
+            return ResponseEntity.ok(places);
+        }catch(EntityNotFoundException e){
+            return notFoundException(e);
+        }catch(Exception e){
+            return serverErrorException(e);
+        }
+    }
+
+    public ResponseEntity<?> getPlaceByPlace(String place){
+        try{
+            List<GetPlaceForFlightDto> places = placeUtils.findPlaceByPlace(place);
             return ResponseEntity.ok(places);
         }catch(EntityNotFoundException e){
             return notFoundException(e);
@@ -127,16 +139,17 @@ public class PlaceService{
                     .filter((data)-> data.getId() == placeId).findFirst();
 
             if(place.isPresent()) {
-                PlaceDetailsEntity placeDetails = place.get().getPlaceDetails();
-                String[] ls = new String[]{
-                        placeDetails.getImageOne(),
-                        placeDetails.getImageTwo(),
-                        placeDetails.getImageThree()
-                };
+                if(place.get().getPlaceDetails() != null) {
+                    PlaceDetailsEntity placeDetails = place.get().getPlaceDetails();
+                    String[] ls = new String[]{
+                            placeDetails.getImageOne(),
+                            placeDetails.getImageTwo(),
+                            placeDetails.getImageThree()
+                    };
 
-                s3Service.deleteFiles(ls);
-                placeDetailsUtils.delete(placeDetails);
-
+                    s3Service.deleteFiles(ls);
+                    placeDetailsUtils.delete(placeDetails);
+                }
                 s3Service.deleteFile(place.get().getMainImage());
                 placeUtils.delete(place.get());
                 countryUtils.save(country);

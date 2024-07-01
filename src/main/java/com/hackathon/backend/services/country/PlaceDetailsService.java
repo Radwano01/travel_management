@@ -19,15 +19,12 @@ import static com.hackathon.backend.utilities.ErrorUtils.*;
 public class PlaceDetailsService {
     private final PlaceUtils placeUtils;
     private final PlaceDetailsUtils placeDetailsUtils;
-    private final S3Service s3Service;
 
     @Autowired
     public PlaceDetailsService(PlaceUtils placeUtils,
-                               PlaceDetailsUtils placeDetailsUtils,
-                               S3Service s3Service) {
+                               PlaceDetailsUtils placeDetailsUtils) {
         this.placeUtils = placeUtils;
         this.placeDetailsUtils = placeDetailsUtils;
-        this.s3Service = s3Service;
     }
 
     public ResponseEntity<?> getSinglePlaceDetails(int placeId) {

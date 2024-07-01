@@ -1,11 +1,14 @@
 package com.hackathon.backend.utilities.plane;
 
 import com.hackathon.backend.dto.planeDto.AirPortDto;
+import com.hackathon.backend.dto.planeDto.GetAirPortDto;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.repositories.plane.AirPortRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class AirPortsUtils {
@@ -56,5 +59,13 @@ public class AirPortsUtils {
         if (airPortDto.getAirPortCode() != null) {
             airPortEntity.setAirPortCode(airPortDto.getAirPortCode());
         }
+    }
+
+    public boolean existsAirPortByAirPortCode(String airPortCode) {
+        return airPortRepository.existsAirPortByAirPortCode(airPortCode);
+    }
+
+    public List<GetAirPortDto> findByPlaceId(int placeId) {
+        return airPortRepository.findByPlaceId(placeId).orElseThrow(()-> new EntityNotFoundException("place id has no airports"));
     }
 }

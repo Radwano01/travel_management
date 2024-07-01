@@ -1,6 +1,7 @@
 package com.hackathon.backend.services.plane;
 
 import com.hackathon.backend.dto.planeDto.AirPortDto;
+import com.hackathon.backend.dto.planeDto.GetAirPortDto;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.utilities.country.PlaceUtils;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
@@ -30,6 +33,10 @@ public class AirPortService {
     public ResponseEntity<String> createAirPort(int placeId,
                                            @NonNull AirPortDto airPortDto) {
         try{
+            boolean existsAirPortCode = airPortsUtils.existsAirPortByAirPortCode(airPortDto.getAirPortCode());
+            if(existsAirPortCode){
+                return alreadyValidException("airport code already valid");
+            }
             PlaceEntity place = placeUtils.findById(placeId);
 
             boolean existsAirPort = airPortsUtils
@@ -50,6 +57,17 @@ public class AirPortService {
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         } catch (Exception e){
+            return serverErrorException(e);
+        }
+    }
+
+    public ResponseEntity<?> getAirPortsByPlaceId(int placeId){
+        try{
+            List<GetAirPortDto> airPortDtos = airPortsUtils.findByPlaceId(placeId);
+            return ResponseEntity.ok(airPortDtos);
+        }catch (EntityNotFoundException e){
+            return notFoundException(e);
+        }catch (Exception e){
             return serverErrorException(e);
         }
     }

@@ -2,6 +2,7 @@ package com.hackathon.backend.plane.services;
 
 import com.hackathon.backend.dto.planeDto.EditPlaneDto;
 import com.hackathon.backend.dto.planeDto.AirPortDto;
+import com.hackathon.backend.dto.planeDto.GetAirPortDto;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 
@@ -16,6 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
@@ -37,7 +41,7 @@ public class AirPortServiceTest {
     AirPortEntity airPortEntity;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         airPortDto = new AirPortDto();
         airPortDto.setAirPortName("Test Airport");
         airPortDto.setAirPortCode("TST");
@@ -51,13 +55,13 @@ public class AirPortServiceTest {
     }
 
     @AfterEach
-    public void tearDown(){
+    void tearDown(){
         airPortsUtils.deleteAll();
         placeUtils.deleteAll();
     }
 
     @Test
-    public void createAirPort() {
+    void createAirPort() {
         //given
         PlaceEntity place = new PlaceEntity();
         place.setId(1);
@@ -73,9 +77,23 @@ public class AirPortServiceTest {
         assertEquals(ResponseEntity.ok("AirPort created successfully"), response);
     }
 
+    @Test
+    void getAirPortsByPlaceId(){
+        List<GetAirPortDto> mockAirPortDtos = Arrays.asList(
+                new GetAirPortDto("Airport 1", "AP1"),
+                new GetAirPortDto("Airport 2", "AP2")
+        );
+
+        when(airPortsUtils.findByPlaceId(anyInt())).thenReturn(mockAirPortDtos);
+
+        ResponseEntity<?> response = airPortService.getAirPortsByPlaceId(1);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(mockAirPortDtos, response.getBody());
+    }
 
     @Test
-    public void editAirPort() {
+    void editAirPort() {
         //behavior
         when(airPortsUtils.findById(anyLong())).thenReturn(airPortEntity);
         when(airPortsUtils.checkHelper(any(AirPortDto.class))).thenReturn(true);
@@ -88,7 +106,7 @@ public class AirPortServiceTest {
     }
 
     @Test
-    public void deleteAirPort() {
+    void deleteAirPort() {
         //given
         doNothing().when(airPortsUtils).deleteById(anyLong());
 

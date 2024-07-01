@@ -21,6 +21,9 @@ import com.hackathon.backend.utilities.hotel.features.RoomFeaturesUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -108,9 +111,10 @@ public class HotelService {
     }
 
 
-    public ResponseEntity<?> getHotels(int countryId) {
+    public ResponseEntity<?> getHotels(int countryId, int page, int size) {
         try{
-            List<GetHotelDto> hotels = hotelUtils.findByCountryId(countryId);
+            Pageable pageable = PageRequest.of(page, size);
+            Page<List<GetHotelDto>> hotels = hotelUtils.findByCountryId(countryId, pageable);
             return ResponseEntity.ok(hotels);
         }catch (Exception e){
             return serverErrorException(e);

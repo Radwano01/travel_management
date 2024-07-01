@@ -40,7 +40,12 @@ public class CountryPlacesController {
 
     @GetMapping(path = "${GET_PLACES_PATH}")
     public ResponseEntity<?> getPlaces(@PathVariable("countryId") int countryId){
-        return placeService.getPlacesByCountry(countryId);
+        return placeService.getPlacesByCountryId(countryId);
+    }
+
+    @GetMapping(path = "${GET_PLACE_FOR_FLIGHTS_PATH}")
+    public ResponseEntity<?> getPlace(@RequestParam("place") String place){
+        return placeService.getPlaceByPlace(place);
     }
 
     @PutMapping(path = "${EDIT_PLACE_PATH}")

@@ -9,6 +9,8 @@ import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -39,8 +41,8 @@ public class HotelUtils {
         hotelRepository.save(hotelEntity);
     }
 
-    public List<GetHotelDto> findByCountryId(int countryId) {
-        return hotelRepository.findByCountryId(countryId);
+    public Page<List<GetHotelDto>> findByCountryId(int countryId, Pageable pageable) {
+        return hotelRepository.findByCountryId(countryId, pageable);
     }
 
     public void delete(HotelEntity hotel) {
