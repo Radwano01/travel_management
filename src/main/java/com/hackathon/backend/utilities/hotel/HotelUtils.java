@@ -41,7 +41,7 @@ public class HotelUtils {
         hotelRepository.save(hotelEntity);
     }
 
-    public Page<List<GetHotelDto>> findByCountryId(int countryId, Pageable pageable) {
+    public Page<GetHotelDto> findByCountryId(int countryId, Pageable pageable) {
         return hotelRepository.findByCountryId(countryId, pageable);
     }
 

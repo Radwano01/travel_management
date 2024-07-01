@@ -17,5 +17,5 @@ public interface HotelRepository extends JpaRepository<HotelEntity, Long> {
     @Query("SELECT new com.hackathon.backend.dto.hotelDto.GetHotelDto(h.id, h.hotelName, h.mainImage, h.description, h.address, h.rate)" +
             " FROM HotelEntity h WHERE h.country.id = :countryId"
     )
-    Page<List<GetHotelDto>> findByCountryId(int countryId, Pageable pageable);
+    Page<GetHotelDto> findByCountryId(int countryId, Pageable pageable);
 }

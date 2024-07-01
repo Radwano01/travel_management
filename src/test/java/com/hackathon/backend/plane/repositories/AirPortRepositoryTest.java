@@ -17,7 +17,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-public class AirPortRepositoryTest {
+class AirPortRepositoryTest {
 
     @Autowired
     AirPortRepository airPortRepository;
@@ -28,8 +28,6 @@ public class AirPortRepositoryTest {
     @BeforeEach
     void setUp(){
         PlaceEntity place = new PlaceEntity();
-        place.setId(1);
-
         placeRepository.save(place);
 
 
@@ -49,8 +47,8 @@ public class AirPortRepositoryTest {
 
     @AfterEach
     void tearDown(){
-        placeRepository.deleteAll();
         airPortRepository.deleteAll();
+        placeRepository.deleteAll();
     }
 
     @Test

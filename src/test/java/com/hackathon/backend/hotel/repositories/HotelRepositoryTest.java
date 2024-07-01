@@ -28,7 +28,7 @@ class HotelRepositoryTest {
     HotelRepository hotelRepository;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         CountryEntity country = new CountryEntity(
                 "testCountry",
                 "testImage"
@@ -48,25 +48,28 @@ class HotelRepositoryTest {
     }
 
     @AfterEach
-    void tearDown(){
+    void tearDown() {
         hotelRepository.deleteAll();
         countryRepository.deleteAll();
     }
 
     @Test
     void findByCountryId() {
-        //given
+        // given
         int countryId = countryRepository.findAll().get(0).getId();
 
-        Pageable pageable = PageRequest.of(1, 6);
-        //when
-        Page<List<GetHotelDto>> response = hotelRepository.findByCountryId(countryId, pageable);
+        Pageable pageable = PageRequest.of(0, 6); // Zero-based page index
 
-        //then
-        assertEquals(response.getContent().get(0).get(0).getHotelName(), "testName");
-        assertEquals(response.getContent().get(0).get(0).getMainImage(), "testImage");
-        assertEquals(response.getContent().get(0).get(0).getDescription(), "testDesc");
-        assertEquals(response.getContent().get(0).get(0).getAddress(), "testAddress");
-        assertEquals(response.getContent().get(0).get(0).getRate(), 3);
+        // when
+        Page<GetHotelDto> response = hotelRepository.findByCountryId(countryId, pageable);
+
+        // then
+        assertFalse(response.isEmpty(), "Response should not be empty");
+        GetHotelDto hotelDto = response.getContent().get(0);
+        assertEquals("testName", hotelDto.getHotelName());
+        assertEquals("testImage", hotelDto.getMainImage());
+        assertEquals("testDesc", hotelDto.getDescription());
+        assertEquals("testAddress", hotelDto.getAddress());
+        assertEquals(3, hotelDto.getRate());
     }
 }

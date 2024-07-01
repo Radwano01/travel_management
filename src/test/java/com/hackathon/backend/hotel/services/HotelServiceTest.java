@@ -110,12 +110,13 @@ class HotelServiceTest {
         int countryId = 1;
         int page = 0;
         int size = 10;
-        List<GetHotelDto> hotelList = Collections.singletonList(new GetHotelDto(/* provide necessary data */));
-        Page<List<GetHotelDto>> hotelsPage = new PageImpl<>(Collections.singletonList(hotelList), PageRequest.of(page, size), 1);
+        List<GetHotelDto> hotelList = Collections.singletonList(new GetHotelDto(
+                1L, "testName", "testImage", "testDesc", "testAddress", 3
+        ));
+        Page<GetHotelDto> hotelsPage = new PageImpl<>(hotelList, PageRequest.of(page, size), hotelList.size());
 
         // Mock behavior
-        when(hotelUtils.findByCountryId(eq(countryId), any(org.springframework.data.domain.Pageable.class))).thenReturn(hotelsPage);
-
+        when(hotelUtils.findByCountryId(eq(countryId), any(Pageable.class))).thenReturn(hotelsPage);
 
         try {
             // Call the method
@@ -134,6 +135,7 @@ class HotelServiceTest {
             throw e;
         }
     }
+
 
     @Test
     void editHotel() {

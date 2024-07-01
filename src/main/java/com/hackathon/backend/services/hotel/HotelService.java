@@ -114,7 +114,7 @@ public class HotelService {
     public ResponseEntity<?> getHotels(int countryId, int page, int size) {
         try{
             Pageable pageable = PageRequest.of(page, size);
-            Page<List<GetHotelDto>> hotels = hotelUtils.findByCountryId(countryId, pageable);
+            Page<GetHotelDto> hotels = hotelUtils.findByCountryId(countryId, pageable);
             return ResponseEntity.ok(hotels);
         }catch (Exception e){
             return serverErrorException(e);
