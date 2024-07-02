@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface PlaneFlightsRepository extends JpaRepository<PlaneFlightsEntity,Long> {
 
-    @Query("SELECT f FROM PlaneFlightsEntity f WHERE f.departureAirPort.place.id = :departurePlaceId AND f.destinationAirPort.place.id = :destinationPlaceId")
-    List<PlaneFlightsEntity> findAllByDeparturePlaceIdAndDestinationPlaceId(int departurePlaceId, int destinationPlaceId);
+    @Query("SELECT f FROM PlaneFlightsEntity f WHERE f.departureAirPort.id = :departureAirPortId AND f.destinationAirPort.id = :destinationAirPortId")
+    List<PlaneFlightsEntity> findAllByDepartureAirPortIdAndDestinationAirPortId(long departureAirPortId, long destinationAirPortId);
 }

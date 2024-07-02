@@ -8,10 +8,14 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class GetAirPortDto {
+    private long airPortId;
     private String airPortName;
     private String airPortCode;
 
-    public GetAirPortDto(String airPortName, String airPortCode) {
+    public GetAirPortDto(long airPortId,
+                         String airPortName,
+                         String airPortCode) {
+        this.airPortId = airPortId;
         this.airPortName = airPortName;
         this.airPortCode = airPortCode;
     }

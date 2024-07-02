@@ -36,6 +36,9 @@ class PlaneFlightsRepositoryTest {
     @Autowired
     PlaneFlightsRepository planeFlightsRepository;
 
+    long departureId;
+    long destinationId;
+
     @BeforeEach
     void setUp(){
         PlaceEntity place1 = new PlaceEntity();
@@ -52,6 +55,7 @@ class PlaneFlightsRepositoryTest {
                 place1
         );
         airPortRepository.save(airPortEntity1);
+        departureId = airPortEntity1.getId();
 
         AirPortEntity airPortEntity2 = new AirPortEntity(
                 "airport two",
@@ -59,6 +63,7 @@ class PlaneFlightsRepositoryTest {
                 place2
         );
         airPortRepository.save(airPortEntity2);
+        destinationId = airPortEntity2.getId();
 
         PlaneEntity plane = new PlaneEntity(
                 "testName",
@@ -71,8 +76,8 @@ class PlaneFlightsRepositoryTest {
                 plane,
                 airPortEntity1,
                 airPortEntity2,
-                "2024:10:01T20:00:00",
-                "2024:10:01T23:00:00"
+                "2024-10-01T20:00:00",
+                "2024-10-01T23:00:00"
         );
         planeFlightsRepository.save(planeFlights);
     }
@@ -87,13 +92,10 @@ class PlaneFlightsRepositoryTest {
 
     @Test
     void findAllByDepartureCountryIdAndDestinationCountryId(){
-        //given
-        int departureId = airPortRepository.findAll().get(0).getPlace().getId();
-        int destinationId = airPortRepository.findAll().get(1).getPlace().getId();
 
         //when
         List<PlaneFlightsEntity> response = planeFlightsRepository
-                .findAllByDeparturePlaceIdAndDestinationPlaceId(departureId,destinationId);
+                .findAllByDepartureAirPortIdAndDestinationAirPortId(departureId, destinationId);
 
         //then
         assertEquals(response.get(0).getDepartureAirPort().getPlace().getPlace(), "test1");

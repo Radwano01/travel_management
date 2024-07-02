@@ -25,11 +25,13 @@ class AirPortRepositoryTest {
     @Autowired
     PlaceRepository placeRepository;
 
+    private int placeId;
+
     @BeforeEach
     void setUp(){
         PlaceEntity place = new PlaceEntity();
         placeRepository.save(place);
-
+        placeId = place.getId();
 
         AirPortEntity airport1 = new AirPortEntity();
         airport1.setAirPortName("Airport 1");
@@ -69,15 +71,15 @@ class AirPortRepositoryTest {
     }
 
     @Test
-    void findPlaceByPlace(){
+    void findByPlaceId(){
 
         //when
-        Optional<List<GetAirPortDto>> result = airPortRepository.findByPlaceId(1);
+        Optional<List<GetAirPortDto>> result = airPortRepository.findByPlaceId(placeId);
 
         //then
-        assertNotNull(result.get());
-        assertEquals(result.get().size(),2);
-        assertEquals(result.get().get(0).getAirPortName(), "Airport 1");
-        assertEquals(result.get().get(1).getAirPortName(), "Airport 2");;
+        assertNotNull(result);
+        assertEquals(2, result.get().size());
+        assertEquals("Airport 1", result.get().get(0).getAirPortName());
+        assertEquals("Airport 2", result.get().get(1).getAirPortName());
     }
 }

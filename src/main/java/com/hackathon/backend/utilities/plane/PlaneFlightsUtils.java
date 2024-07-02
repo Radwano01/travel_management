@@ -33,10 +33,10 @@ public class PlaneFlightsUtils {
         planeFlightsRepository.save(planeFlights);
     }
 
-    public List<PlaneFlightsEntity> findAllByDeparturePlaceIdAndDestinationPlaceId
+    public List<PlaneFlightsEntity> findAllByDepartureAirPortIdAndDestinationAirPortId
             (int departurePlaceId, int destinationPlaceId) {
         return planeFlightsRepository
-                .findAllByDeparturePlaceIdAndDestinationPlaceId
+                .findAllByDepartureAirPortIdAndDestinationAirPortId
                         (departurePlaceId,destinationPlaceId);
     }
 

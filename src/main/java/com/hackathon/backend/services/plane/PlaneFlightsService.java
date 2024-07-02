@@ -60,12 +60,12 @@ public class PlaneFlightsService {
         }
     }
 
-    public ResponseEntity<?> getFlights(int departurePlaceId,
-                                        int destinationPlaceId) {
+    public ResponseEntity<?> getFlights(int departureAirPortId,
+                                        int destinationAirPortId) {
         try {
             List<PlaneFlightsEntity> planeFlights = planeFlightsUtils
-                    .findAllByDeparturePlaceIdAndDestinationPlaceId(
-                            departurePlaceId, destinationPlaceId
+                    .findAllByDepartureAirPortIdAndDestinationAirPortId(
+                            departureAirPortId, destinationAirPortId
                     );
             List<FlightDto> flights = planeFlights.stream()
                     .map((flight) -> new FlightDto(

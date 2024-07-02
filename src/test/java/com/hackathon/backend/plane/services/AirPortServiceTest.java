@@ -80,8 +80,8 @@ public class AirPortServiceTest {
     @Test
     void getAirPortsByPlaceId(){
         List<GetAirPortDto> mockAirPortDtos = Arrays.asList(
-                new GetAirPortDto("Airport 1", "AP1"),
-                new GetAirPortDto("Airport 2", "AP2")
+                new GetAirPortDto(1, "Airport 1", "AP1"),
+                new GetAirPortDto(1, "Airport 2", "AP2")
         );
 
         when(airPortsUtils.findByPlaceId(anyInt())).thenReturn(mockAirPortDtos);

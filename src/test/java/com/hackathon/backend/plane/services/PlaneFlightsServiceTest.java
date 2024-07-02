@@ -109,7 +109,7 @@ class PlaneFlightsServiceTest {
         planeFlightsList.add(flight1);
 
         //behavior
-        when(planeFlightsUtils.findAllByDeparturePlaceIdAndDestinationPlaceId(departureAirPortId, destinationAirPortId))
+        when(planeFlightsUtils.findAllByDepartureAirPortIdAndDestinationAirPortId(departureAirPortId, destinationAirPortId))
                 .thenReturn(planeFlightsList);
 
         //when

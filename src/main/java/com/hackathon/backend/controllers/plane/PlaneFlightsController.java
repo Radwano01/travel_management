@@ -27,9 +27,9 @@ public class PlaneFlightsController {
     }
 
     @GetMapping(path = "${GET_FLIGHT_PATH}")
-    public ResponseEntity<?> getFlight(@PathVariable("departurePlaceId") int departurePlaceId,
-                                       @PathVariable("destinationPlaceId") int destinationPlaceId){
-        return planeFlightsService.getFlights(departurePlaceId,destinationPlaceId);
+    public ResponseEntity<?> getFlight(@PathVariable("departureAirPortId") int departureAirPortId,
+                                       @PathVariable("destinationAirPortId") int destinationAirPortId){
+        return planeFlightsService.getFlights(departureAirPortId,departureAirPortId);
     }
 
     @PutMapping(path = "${EDIT_FLIGHT_PATH}")
