@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
 import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
@@ -61,12 +62,18 @@ public class PackageBookingService {
             PackageEntity packageEntity = packageUtils.findById(packageId);
             try {
                 PaymentIntent paymentIntent = createPayment(packagePaymentDto.getPaymentIntent(), packageEntity.getPrice());
+                LocalDateTime bookedDate = LocalDateTime.now();
                 if (paymentIntent.getStatus().equals("succeeded")) {
                     PackageBookingEntity packageBookingEntity = new PackageBookingEntity(
                             user,
-                            packageEntity
+                            packageEntity,
+                            packagePaymentDto.getReservationName(),
+                            bookedDate
                     );
                     packageBookingRepository.save(packageBookingEntity);
+                    sendEmail(user.getEmail(), packageEntity.getPackageName(),
+                            packageEntity.getCountry().getCountry(), packagePaymentDto.getReservationName(),
+                            bookedDate);
                     return CompletableFuture.completedFuture
                             ((ResponseEntity.ok("package booked successfully")));
                 } else {
@@ -82,6 +89,34 @@ public class PackageBookingService {
             return CompletableFuture.completedFuture((serverErrorException(e)));
         }
     }
+
+    @Async("bookingTaskExecutor")
+    private void sendEmail(String email,
+                           String packageName,
+                           String country,
+                           String reservationName,
+                           LocalDateTime bookedDate) {
+        String subject = "Package Booking Confirmation";
+        String message = String.format("""
+        Dear %s,
+
+        Your package booking has been confirmed. Here are the details of your booking:
+
+        Package Name: %s
+        Destination Country: %s
+        Booked Date: %s
+
+        Thank you for choosing our service. We look forward to providing you with an excellent experience.
+
+        A guide will contact you for further arrangements and any special requests you may have.
+
+        Best regards,
+        The Travel Agency Team
+        """, reservationName, packageName, country, bookedDate);
+
+        userUtils.sendMessageToEmail(userUtils.prepareTheMessageEmail(email, subject, message));
+    }
+
 
     private PaymentIntent createPayment(String paymentIntentCode, int price) throws StripeException {
         Stripe.apiKey = stripeSecretKey;

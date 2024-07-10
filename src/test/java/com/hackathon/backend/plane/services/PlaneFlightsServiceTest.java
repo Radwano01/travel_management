@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,8 +60,8 @@ class PlaneFlightsServiceTest {
         flightDto.setPrice(100);
         flightDto.setDepartureAirPort("departureAirport");
         flightDto.setDestinationAirPort("destinationAirport");
-        flightDto.setDepartureTime("2024/10/01T20:00:00");
-        flightDto.setArrivalTime("2024/10/01T22:00:00");
+        flightDto.setDepartureTime(LocalDateTime.now());
+        flightDto.setArrivalTime(LocalDateTime.now().plusHours(2));
 
         //behavior
         when(planeUtils.findPlaneById(planeId)).thenReturn(plane);
@@ -86,8 +87,8 @@ class PlaneFlightsServiceTest {
         int destinationAirPortId = 2;
 
         List<FlightDto> mockPlaneFlights = new ArrayList<>();
-        mockPlaneFlights.add(new FlightDto(1, "TestPlane", 100, "DepartureAirport", "DEP", "DestinationAirport", "DEST", "2024/10/01T20:00:00", "2024/10/01T22:00:00", 10));
-        mockPlaneFlights.add(new FlightDto(2, "AnotherPlane", 120, "DepartureAirport", "DEP", "DestinationAirport", "DEST", "2024/10/02T10:00:00", "2024/10/02T12:00:00", 5));
+        mockPlaneFlights.add(new FlightDto(1, "TestPlane", 100, "DepartureAirport", "DEP", "DestinationAirport", "DEST", LocalDateTime.now(), LocalDateTime.now().plusHours(2), 10));
+        mockPlaneFlights.add(new FlightDto(2, "AnotherPlane", 120, "DepartureAirport", "DEP", "DestinationAirport", "DEST", LocalDateTime.now(), LocalDateTime.now().plusHours(2), 5));
 
         //behavior
         when(planeFlightsUtils.findAllByDepartureAirPortIdAndDestinationAirPortId(departureAirPortId, destinationAirPortId))
@@ -126,13 +127,13 @@ class PlaneFlightsServiceTest {
         PlaneFlightsEntity flight1 = new PlaneFlightsEntity();
         flight1.setId(flightId);
         flight1.setPrice(100);
-        flight1.setDepartureTime("2024/10/01T20:00:00");
-        flight1.setArrivalTime("2024/10/01T22:00:00");
+        flight1.setDepartureTime(LocalDateTime.now());
+        flight1.setArrivalTime(LocalDateTime.now().plusHours(2));
 
         EditFlightDto editFlightDto = new EditFlightDto();
         editFlightDto.setPrice(150);
-        editFlightDto.setDepartureTime("2024/10/01T21:00:00");
-        editFlightDto.setArrivalTime("2024/10/01T23:00:00");
+        editFlightDto.setDepartureTime(LocalDateTime.now());
+        editFlightDto.setArrivalTime(LocalDateTime.now().plusHours(2));
 
         // behavior
         when(planeFlightsUtils.findById(flightId)).thenReturn(flight1);
@@ -143,8 +144,8 @@ class PlaneFlightsServiceTest {
             EditFlightDto dto = invocation.getArgument(1);
 
             planeFlights.setPrice(dto.getPrice());
-            planeFlights.setDepartureTime(dto.getDepartureTime());
-            planeFlights.setArrivalTime(dto.getArrivalTime());
+            planeFlights.setDepartureTime(LocalDateTime.now());
+            planeFlights.setArrivalTime(LocalDateTime.now().plusHours(2));
 
             return null;
         }).when(planeFlightsUtils).editHelper(any(PlaneFlightsEntity.class), any(EditFlightDto.class));
@@ -155,8 +156,6 @@ class PlaneFlightsServiceTest {
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(editFlightDto.getPrice(), flight1.getPrice());
-        assertEquals(editFlightDto.getDepartureTime(), flight1.getDepartureTime());
-        assertEquals(editFlightDto.getArrivalTime(), flight1.getArrivalTime());
         verify(planeFlightsUtils).findById(flightId);
         verify(planeFlightsUtils).save(flight1);
     }

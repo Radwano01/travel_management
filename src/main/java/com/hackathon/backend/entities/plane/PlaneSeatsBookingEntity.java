@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "planeSeatsBooking")
 @Getter
@@ -29,9 +31,18 @@ public class PlaneSeatsBookingEntity {
     @JoinColumn(name = "flight_id")
     private PlaneFlightsEntity flight;
 
-    public PlaneSeatsBookingEntity(UserEntity user, PlaneSeatsEntity planeSeat, PlaneFlightsEntity flight) {
+    private String reservationName;
+    private LocalDateTime bookedDate;
+
+    public PlaneSeatsBookingEntity(UserEntity user,
+                                   PlaneSeatsEntity planeSeat,
+                                   PlaneFlightsEntity flight,
+                                   String reservationName,
+                                   LocalDateTime bookedDate) {
         this.user = user;
         this.planeSeat = planeSeat;
         this.flight = flight;
+        this.reservationName = reservationName;
+        this.bookedDate = bookedDate;
     }
 }

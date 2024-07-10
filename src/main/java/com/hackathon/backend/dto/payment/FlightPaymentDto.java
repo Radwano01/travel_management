@@ -8,5 +8,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class FlightPaymentDto {
+    private String reservationName;
     private String paymentIntent;
 }

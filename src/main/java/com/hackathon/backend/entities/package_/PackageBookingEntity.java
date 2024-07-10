@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "packageBooking")
 @Getter
@@ -25,8 +27,16 @@ public class PackageBookingEntity {
     @JoinColumn(name = "package_id")
     private PackageEntity package_;
 
-    public PackageBookingEntity(UserEntity user, PackageEntity package_){
+    private String reservationName;
+    private LocalDateTime bookedDate;
+
+    public PackageBookingEntity(UserEntity user,
+                                PackageEntity package_,
+                                String reservationName,
+                                LocalDateTime bookedDate){
         this.user = user;
         this.package_ = package_;
+        this.reservationName = reservationName;
+        this.bookedDate = bookedDate;
     }
 }

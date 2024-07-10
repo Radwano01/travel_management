@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,8 +75,8 @@ class PlaneFlightsRepositoryTest {
                 plane,
                 airPortEntity1,
                 airPortEntity2,
-                "2024-10-01T20:00:00",
-                "2024-10-01T23:00:00",
+                LocalDateTime.now(),
+                LocalDateTime.now().plusHours(2),
                 50
         );
         planeFlightsRepository.save(planeFlights);
@@ -90,19 +91,20 @@ class PlaneFlightsRepositoryTest {
     }
 
     @Test
-    void findAllByDepartureCountryIdAndDestinationCountryId(){
+    void findAllByDepartureAirPortIdAndDestinationAirPortId(){
 
         //when
         List<FlightDto> response = planeFlightsRepository
                 .findAllByDepartureAirPortIdAndDestinationAirPortId(departureId, destinationId);
 
         //then
-        assertEquals(response.get(0).getDepartureAirPort(), "test1");
-        assertEquals(response.get(0).getDestinationAirPort(), "test2");
-        assertEquals(response.get(0).getDepartureAirPort(), "airport one");
-        assertEquals(response.get(0).getDestinationAirPort(), "airport two");
-        assertEquals(response.get(0).getPlaneCompanyName(), "testName");
-        assertEquals(response.get(0).getPrice(), 200);
+        assertEquals(1, response.size());
+        assertEquals("testName", response.get(0).getPlaneCompanyName());
+        assertEquals(200, response.get(0).getPrice());
+        assertEquals("airport one", response.get(0).getDepartureAirPort());
+        assertEquals("QWE", response.get(0).getDepartureAirPortCode());
+        assertEquals("airport two", response.get(0).getDestinationAirPort());
+        assertEquals("QWE", response.get(0).getDestinationAirPortCode());
+        assertEquals(50, response.get(0).getAvailableSeats());
     }
-
 }

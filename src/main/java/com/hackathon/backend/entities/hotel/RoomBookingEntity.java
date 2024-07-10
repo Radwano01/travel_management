@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "roomBooking")
@@ -30,13 +31,20 @@ public class RoomBookingEntity {
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private String reservationName;
+    private LocalDateTime bookedDate;
 
-    public RoomBookingEntity(UserEntity user, HotelEntity hotel,
+    public RoomBookingEntity(UserEntity user,
+                             HotelEntity hotel,
                              LocalDateTime startTime,
-                             LocalDateTime endTime) {
+                             LocalDateTime endTime,
+                             String reservationName,
+                             LocalDateTime bookedDate) {
+        this.reservationName = reservationName;
         this.user = user;
         this.hotel = hotel;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.bookedDate = bookedDate;
     }
 }

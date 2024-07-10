@@ -22,19 +22,19 @@ public class FlightDto {
     private String destinationAirPort;
     private String destinationAirPortCode;
 
-    private String departureTime;
-    private String arrivalTime;
+    private LocalDateTime departureTime;
+    private LocalDateTime arrivalTime;
 
     public FlightDto(long id,
-                           String planeCompanyName,
-                           int price,
-                           String departureAirPort,
-                           String departureAirPortCode,
-                           String destinationAirPort,
-                           String destinationAirPortCode,
-                           String departureTime,
-                           String arrivalTime,
-                           int availableSeats) {
+                    String planeCompanyName,
+                    int price,
+                    String departureAirPort,
+                    String departureAirPortCode,
+                    String destinationAirPort,
+                    String destinationAirPortCode,
+                    LocalDateTime departureTime,
+                    LocalDateTime arrivalTime,
+                    int availableSeats) {
         this.id = id;
         this.planeCompanyName = planeCompanyName;
         this.price = price;
@@ -54,8 +54,8 @@ public class FlightDto {
                      String departureAirPortCode,
                      String destinationAirPort,
                      String destinationAirPortCode,
-                     String departureTime,
-                     String arrivalTime) {
+                     LocalDateTime departureTime,
+                     LocalDateTime arrivalTime) {
         this.id = id;
         this.planeCompanyName = planeCompanyName;
         this.price = price;

@@ -8,10 +8,9 @@ import com.hackathon.backend.utilities.amazonServices.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 
@@ -22,14 +21,18 @@ public class UserUtils {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final S3Service s3Service;
+    private final JavaMailSender javaMailSender;
 
     @Autowired
     public UserUtils(UserRepository userRepository,
                      PasswordEncoder passwordEncoder,
-                     S3Service s3Service) {
+                     S3Service s3Service,
+                     JavaMailSender javaMailSender
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.s3Service = s3Service;
+        this.javaMailSender = javaMailSender;
     }
 
     public UserEntity findById(long userId) {
@@ -71,12 +74,16 @@ public class UserUtils {
         userRepository.delete(user);
     }
 
-    public SimpleMailMessage sendMessageToEmail(String email, String message){
+    public SimpleMailMessage prepareTheMessageEmail(String email, String subject, String message){
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(email);
-        mailMessage.setSubject("Email Verification From Hackathon Project");
-        mailMessage.setText("Please Click to the link to verify your account: "+message);
+        mailMessage.setSubject(subject);
+        mailMessage.setText(message);
         return mailMessage;
+    }
+
+    public void sendMessageToEmail(SimpleMailMessage simpleMailMessage){
+        javaMailSender.send(simpleMailMessage);
     }
 
     public boolean checkHelper(EditUserDto editUserDto){

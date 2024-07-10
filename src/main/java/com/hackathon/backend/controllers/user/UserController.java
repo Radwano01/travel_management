@@ -1,4 +1,4 @@
-package com.hackathon.backend.controllers;
+package com.hackathon.backend.controllers.user;
 
 import com.hackathon.backend.dto.userDto.EditUserDto;
 import com.hackathon.backend.dto.userDto.LoginUserDto;

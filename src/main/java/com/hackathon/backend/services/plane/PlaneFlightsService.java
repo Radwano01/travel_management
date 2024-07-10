@@ -148,7 +148,7 @@ public class PlaneFlightsService {
                 continue;
             }
 
-            LocalDateTime endTime = LocalDateTime.parse(flight.getArrivalTime());
+            LocalDateTime endTime = flight.getArrivalTime();
             if (currentDateTime.isAfter(endTime)) {
                 planeFlightsUtils.deleteById(flight.getId());
             }

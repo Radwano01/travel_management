@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class RoomPaymentDto {
+    private String reservationName;
     private int price;
     private String paymentIntent;
     private LocalDateTime startTime;

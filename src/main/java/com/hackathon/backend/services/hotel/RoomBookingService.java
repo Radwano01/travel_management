@@ -18,11 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -67,14 +69,22 @@ public class RoomBookingService {
                         PaymentIntent paymentIntent = createPayment(roomPaymentDto.getPaymentIntent(), roomPaymentDto.getPrice());
                         if (paymentIntent.getStatus().equals("succeeded")) {
                             room.setStatus(true);
+                            LocalDateTime bookedDate = LocalDateTime.now();
                             RoomBookingEntity roomBookingEntity = new RoomBookingEntity(
                                     user,
                                     hotel,
                                     roomPaymentDto.getStartTime(),
-                                    roomPaymentDto.getEndTime()
+                                    roomPaymentDto.getEndTime(),
+                                    roomPaymentDto.getReservationName(),
+                                    bookedDate
                             );
                             roomBookingRepository.save(roomBookingEntity);
-                            return CompletableFuture.completedFuture(ResponseEntity.ok("Room booked successfully"));
+                            sendEmail(user.getEmail(), roomPaymentDto.getReservationName(),
+                                    roomPaymentDto.getStartTime(), roomPaymentDto.getEndTime(),
+                                    hotel.getHotelName(), hotel.getAddress(),
+                                    bookedDate);
+                            return CompletableFuture.completedFuture
+                                    (ResponseEntity.ok("Room booked successfully, Now! you can check your book in your Email."));
                         } else {
                             return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
                                     .body("Payment failed. Please check your payment details and try again."));
@@ -103,6 +113,34 @@ public class RoomBookingService {
                 .setConfirmationMethod(PaymentIntentCreateParams.ConfirmationMethod.MANUAL)
                 .setErrorOnRequiresAction(true);
         return PaymentIntent.create(paramsBuilder.build());
+    }
+
+    @Async("bookingTaskExecutor")
+    private void sendEmail(String email,
+                           String reservationName,
+                           LocalDateTime startTime,
+                           LocalDateTime endTime,
+                           String hotelName,
+                           String hotelAddress,
+                           LocalDateTime bookedDate) {
+        String subject = "Booking Confirmation";
+        String message = String.format("""
+            Dear %s,
+
+            Your booking has been confirmed. Here are the details of your booking:
+
+            Hotel Name: %s
+            Hotel Address: %s
+            Start Date: %s
+            End Date: %s
+            Booked Date: %s
+
+            Thank you for choosing our service. We look forward to hosting you.
+
+            Best regards,
+            The Hotel Team""", reservationName, hotelName, hotelAddress, startTime, endTime, bookedDate);
+
+        userUtils.sendMessageToEmail(userUtils.prepareTheMessageEmail(email, subject, message));
     }
 
     @Scheduled(fixedRate = 60000)

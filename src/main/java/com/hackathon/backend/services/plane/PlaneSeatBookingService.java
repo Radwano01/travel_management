@@ -20,11 +20,13 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
@@ -68,14 +70,22 @@ public class PlaneSeatBookingService {
                 PaymentIntent paymentIntent = createPayment(flightPaymentDto.getPaymentIntent(), flightsEntity.getPrice());
                 if (paymentIntent.getStatus().equals("succeeded")) {
                     flightsEntity.setAvailableSeats(flightsEntity.getAvailableSeats() - 1);
+                    LocalDateTime bookedDate = LocalDateTime.now();
                     for(PlaneSeatsEntity seat:flightsEntity.getPlane().getPlaneSeats()){
                         if(!seat.isStatus()){
                             PlaneSeatsBookingEntity planeSeatsBookingEntity = new PlaneSeatsBookingEntity(
                                     user,
                                     seat,
-                                    flightsEntity
+                                    flightsEntity,
+                                    flightPaymentDto.getReservationName(),
+                                    bookedDate
                             );
                             planeSeatsBookingRepository.save(planeSeatsBookingEntity);
+                            sendEmail(user.getEmail(), flightsEntity.getId(),
+                                    flightsEntity.getDepartureTime(), flightsEntity.getArrivalTime(),
+                                    flightsEntity.getDepartureAirPort().getAirPortName(), flightsEntity.getDestinationAirPort().getAirPortName(),
+                                    flightsEntity.getDepartureAirPort().getAirPortCode(), flightsEntity.getDestinationAirPort().getAirPortCode(),
+                                    flightPaymentDto.getReservationName(), bookedDate);
                         }
                     }
                     return CompletableFuture.completedFuture((ResponseEntity.ok("Visa booked successfully")));
@@ -91,6 +101,41 @@ public class PlaneSeatBookingService {
         } catch (Exception e){
             return CompletableFuture.completedFuture((serverErrorException(e)));
         }
+    }
+
+    @Async("bookingTaskExecutor")
+    private void sendEmail(String email,
+                           long flightNumber,
+                           LocalDateTime departureTime,
+                           LocalDateTime destinationTime,
+                           String departureAirport,
+                           String departureAirportCode,
+                           String arrivalAirport,
+                           String arrivalAirportCode,
+                           String reservationName,
+                           LocalDateTime bookedDate) {
+        String subject = "Flight Booking Confirmation";
+        String message = String.format("""
+        Dear %s,
+
+        Your flight booking has been confirmed. Here are the details of your booking:
+
+        Flight Number: %s
+        Departure Time: %s
+        Destination Time: %s
+        Departure Airport: %s (%s)
+        Arrival Airport: %s (%s)
+        Booked Date: %s
+
+        Thank you for choosing our service. We look forward to flying with you.
+
+        Best regards,
+        The Airline Team
+        """, reservationName, flightNumber, departureTime, destinationTime,
+                departureAirport, departureAirportCode, arrivalAirport,
+                arrivalAirportCode, bookedDate);
+
+        userUtils.sendMessageToEmail(userUtils.prepareTheMessageEmail(email, subject, message));
     }
 
     private PaymentIntent createPayment(String paymentIntentCode, int price) throws StripeException {

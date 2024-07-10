@@ -35,16 +35,16 @@ public class PlaneFlightsEntity {
     @JoinColumn(name = "destination_id")
     private AirPortEntity destinationAirPort;
 
-    private String departureTime;
+    private LocalDateTime departureTime;
 
-    private String arrivalTime;
+    private LocalDateTime arrivalTime;
 
 
     public PlaneFlightsEntity(int price, PlaneEntity plane,
                               AirPortEntity departureAirPort,
                               AirPortEntity destinationAirPort,
-                              String departureTime,
-                              String arrivalTime,
+                              LocalDateTime departureTime,
+                              LocalDateTime arrivalTime,
                               int availableSeats) {
         this.price = price;
         this.plane = plane;

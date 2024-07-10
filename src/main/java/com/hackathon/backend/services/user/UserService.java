@@ -196,11 +196,12 @@ public class UserService {
             if(user.isVerificationStatus()){
                 return CompletableFuture.completedFuture((badRequestException("This account has verified already")));
             }
-            String verificationLink = verifyLink+user.getEmail()+"/"+token;
 
-            userUtils.sendMessageToEmail(user.getEmail(), verificationLink);
-            javaMailSender.send(
-                    userUtils.sendMessageToEmail(user.getEmail(), verificationLink)
+            String subject = "Email Verification From Tourism Project";
+            String message = "Please Click to the link to verify your account: "+verifyLink+user.getEmail()+"/"+token;
+
+            userUtils.sendMessageToEmail(
+                    userUtils.prepareTheMessageEmail(user.getEmail(), subject, message)
             );
 
             return CompletableFuture.completedFuture((ResponseEntity.ok("Verification email sent")));
