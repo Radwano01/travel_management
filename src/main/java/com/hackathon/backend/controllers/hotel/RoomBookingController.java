@@ -19,11 +19,10 @@ public class RoomBookingController {
         this.roomBookingService = roomBookingService;
     }
 
-    @PostMapping("{HOTEL_ROOM_PAYMENT_PATH}")
+    @PostMapping(path = "${HOTEL_ROOM_PAYMENT_PATH}")
     public CompletableFuture<ResponseEntity<String>> payment(@PathVariable("userId") long userId,
                                                              @PathVariable("hotelId") long hotelId,
-                                                             @PathVariable("paymentIntent") String paymentIntent,
                                                              @RequestBody RoomPaymentDto roomPaymentDto){
-        return roomBookingService.payment(userId, hotelId, paymentIntent, roomPaymentDto);
+        return roomBookingService.payment(userId, hotelId, roomPaymentDto);
     }
 }

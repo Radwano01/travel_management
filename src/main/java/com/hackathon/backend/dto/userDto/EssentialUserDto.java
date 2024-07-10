@@ -12,12 +12,15 @@ public class EssentialUserDto {
     private long id;
     private String username;
     private String image;
+    private boolean verificationStatus;
 
     public EssentialUserDto(long id,
                             String username,
-                            String image) {
+                            String image,
+                            boolean verificationStatus) {
         this.id = id;
         this.username = username;
         this.image = image;
+        this.verificationStatus = verificationStatus;
     }
 }

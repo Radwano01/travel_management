@@ -21,6 +21,8 @@ public class PlaneFlightsEntity {
 
     private int price;
 
+    private int availableSeats;
+
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "plane_id")
     private PlaneEntity plane;
@@ -42,12 +44,14 @@ public class PlaneFlightsEntity {
                               AirPortEntity departureAirPort,
                               AirPortEntity destinationAirPort,
                               String departureTime,
-                              String arrivalTime) {
+                              String arrivalTime,
+                              int availableSeats) {
         this.price = price;
         this.plane = plane;
         this.departureAirPort = departureAirPort;
         this.destinationAirPort = destinationAirPort;
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
+        this.availableSeats = availableSeats;
     }
 }

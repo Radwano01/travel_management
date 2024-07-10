@@ -12,8 +12,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
@@ -38,6 +41,9 @@ public class PlaneFlightsService {
                                        long destinationAirPortId, FlightDto flightDto) {
         try {
             PlaneEntity plane = planeUtils.findPlaneById(planeId);
+            if(plane.getNumSeats() < flightDto.getAvailableSeats()){
+                return badRequestException("the provided seats number is higher then plane seats");
+            }
             if (plane.getFlight() != null) {
                 return alreadyValidException("This plane has already flight");
             }
@@ -49,7 +55,8 @@ public class PlaneFlightsService {
                     departureAirPort,
                     destinationAirPort,
                     flightDto.getDepartureTime(),
-                    flightDto.getArrivalTime()
+                    flightDto.getArrivalTime(),
+                    flightDto.getAvailableSeats()
             );
             planeFlightsUtils.save(planeFlights);
             return ResponseEntity.ok("Flight added successfully");
@@ -63,23 +70,30 @@ public class PlaneFlightsService {
     public ResponseEntity<?> getFlights(int departureAirPortId,
                                         int destinationAirPortId) {
         try {
-            List<PlaneFlightsEntity> planeFlights = planeFlightsUtils
+            List<FlightDto> planeFlights = planeFlightsUtils
                     .findAllByDepartureAirPortIdAndDestinationAirPortId(
                             departureAirPortId, destinationAirPortId
                     );
-            List<FlightDto> flights = planeFlights.stream()
-                    .map((flight) -> new FlightDto(
-                            flight.getId(),
-                            flight.getPlane().getPlaneCompanyName(),
-                            flight.getPrice(),
-                            flight.getDepartureAirPort().getAirPortName(),
-                            flight.getDepartureAirPort().getAirPortCode(),
-                            flight.getDestinationAirPort().getAirPortName(),
-                            flight.getDestinationAirPort().getAirPortCode(),
-                            flight.getDepartureTime(),
-                            flight.getArrivalTime()
-                    )).toList();
-            return ResponseEntity.ok(flights);
+
+            List<FlightDto> flightDtoList = new ArrayList<>();
+            for(FlightDto flights:planeFlights){
+                    if(flights.getAvailableSeats() != 0) {
+                        FlightDto flightDto = new FlightDto(
+                                flights.getId(),
+                                flights.getPlaneCompanyName(),
+                                flights.getPrice(),
+                                flights.getDepartureAirPort(),
+                                flights.getDepartureAirPortCode(),
+                                flights.getDestinationAirPort(),
+                                flights.getDestinationAirPortCode(),
+                                flights.getDepartureTime(),
+                                flights.getArrivalTime(),
+                                flights.getAvailableSeats()
+                        );
+                        flightDtoList.add(flightDto);
+                    }
+            }
+            return ResponseEntity.ok(flightDtoList);
         } catch (Exception e) {
             return serverErrorException(e);
         }
@@ -87,7 +101,7 @@ public class PlaneFlightsService {
 
     @Transactional
     public ResponseEntity<String> editFlight(long flightId,
-                                        EditFlightDto editFlightDto) {
+                                            EditFlightDto editFlightDto) {
         try {
             if(!planeFlightsUtils.checkHelper(editFlightDto)){
                 return badRequestException("you sent an empty data to change");
@@ -95,6 +109,7 @@ public class PlaneFlightsService {
             PlaneFlightsEntity planeFlights = planeFlightsUtils.findById(flightId);
             planeFlightsUtils.editHelper(planeFlights, editFlightDto);
             planeFlightsUtils.save(planeFlights);
+
             return ResponseEntity.ok("Flight edit successfully");
         } catch (EntityNotFoundException e) {
             return notFoundException(e);
@@ -116,6 +131,27 @@ public class PlaneFlightsService {
             return notFoundException(e);
         } catch (Exception e) {
             return serverErrorException(e);
+        }
+    }
+
+
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    public void removeFlights() {
+        List<PlaneFlightsEntity> flights = planeFlightsUtils.findAll();
+
+        LocalDateTime currentDateTime = LocalDateTime.now();
+
+        for (PlaneFlightsEntity flight : flights) {
+            if (flight.getAvailableSeats() == 0) {
+                planeFlightsUtils.deleteById(flight.getId());
+                continue;
+            }
+
+            LocalDateTime endTime = LocalDateTime.parse(flight.getArrivalTime());
+            if (currentDateTime.isAfter(endTime)) {
+                planeFlightsUtils.deleteById(flight.getId());
+            }
         }
     }
 }

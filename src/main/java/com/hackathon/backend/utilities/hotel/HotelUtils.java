@@ -2,8 +2,10 @@ package com.hackathon.backend.utilities.hotel;
 
 import com.hackathon.backend.dto.hotelDto.EditHotelDto;
 import com.hackathon.backend.dto.hotelDto.GetHotelDto;
+import com.hackathon.backend.dto.hotelDto.GetRoomsDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
+import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.repositories.hotel.HotelRepository;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
@@ -32,10 +34,15 @@ public class HotelUtils {
         this.countryUtils = countryUtils;
     }
 
-    public HotelEntity findHotelById(@NonNull long hotelId){
+    public HotelEntity findHotelById(long hotelId){
         return hotelRepository.findById(hotelId)
                 .orElseThrow(()-> new EntityNotFoundException("Hotel id not found"));
     }
+    public List<GetRoomsDto> findRoomsByHotelId(long hotelId){
+        return hotelRepository.findRoomsByHotelId(hotelId)
+                .orElseThrow(()-> new EntityNotFoundException("Hotel id not found"));
+    }
+
 
     public void save(HotelEntity hotelEntity) {
         hotelRepository.save(hotelEntity);

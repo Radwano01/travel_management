@@ -1,5 +1,6 @@
 package com.hackathon.backend.controllers.package_;
 
+import com.hackathon.backend.dto.payment.PackagePaymentDto;
 import com.hackathon.backend.services.package_.PackageBookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,10 @@ public class PackageBookingController {
         this.packageBookingService = packageBookingService;
     }
 
-    @PostMapping("{PACKAGE_PAYMENT_PATH}")
+    @PostMapping("${PACKAGE_PAYMENT_PATH}")
     public CompletableFuture<ResponseEntity<String>> payment(@PathVariable("userId") long userId,
                                                              @PathVariable("packageId") int packageId,
-                                                             @PathVariable("paymentIntent") String paymentIntent){
-        return packageBookingService.payment(userId, packageId, paymentIntent);
+                                                             @RequestBody PackagePaymentDto packagePaymentDto){
+        return packageBookingService.payment(userId, packageId, packagePaymentDto);
     }
 }

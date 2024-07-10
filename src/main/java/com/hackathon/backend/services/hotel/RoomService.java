@@ -1,5 +1,6 @@
 package com.hackathon.backend.services.hotel;
 
+import com.hackathon.backend.dto.hotelDto.GetRoomsDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
@@ -45,6 +47,19 @@ public class RoomService {
         }
     }
 
+    public ResponseEntity<?> getRooms(long hotelId) {
+        try{
+            List<GetRoomsDto> rooms = hotelUtils.findRoomsByHotelId(hotelId);
+            if(rooms == null){
+                return notFoundException("no rooms available for this hotel yet!");
+            }
+            return ResponseEntity.ok(rooms);
+        }catch (EntityNotFoundException e){
+            return notFoundException(e);
+        }catch (Exception e){
+            return  serverErrorException(e);
+        }
+    }
 
     //button click to change status from frontend :)
     @Transactional

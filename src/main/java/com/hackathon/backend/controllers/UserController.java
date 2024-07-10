@@ -3,7 +3,7 @@ package com.hackathon.backend.controllers;
 import com.hackathon.backend.dto.userDto.EditUserDto;
 import com.hackathon.backend.dto.userDto.LoginUserDto;
 import com.hackathon.backend.dto.userDto.RegisterUserDto;
-import com.hackathon.backend.services.UserService;
+import com.hackathon.backend.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -8,7 +8,7 @@ import com.hackathon.backend.entities.user.RoleEntity;
 import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.user.RoleRepository;
 import com.hackathon.backend.security.JWTGenerator;
-import com.hackathon.backend.services.UserService;
+import com.hackathon.backend.services.user.UserService;
 import com.hackathon.backend.utilities.user.UserUtils;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
 import org.junit.jupiter.api.Test;

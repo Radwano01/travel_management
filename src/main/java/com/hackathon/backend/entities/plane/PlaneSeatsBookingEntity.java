@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "visaBooking")
+@Table(name = "planeSeatsBooking")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,21 +18,20 @@ public class PlaneSeatsBookingEntity {
     private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    private UserEntity users;
-
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "visa_id", insertable = false, updatable = false)
-    private PlaneSeatsEntity planeSeats;
+    @JoinColumn(name = "plane_seat_id")
+    private PlaneSeatsEntity planeSeat;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "flight_id")
+    private PlaneFlightsEntity flight;
 
-
-    public PlaneSeatsBookingEntity(UserEntity user,
-                             PlaneSeatsEntity planeSeats
-                             ){
-        this.users = user;
-        this.planeSeats = planeSeats;
+    public PlaneSeatsBookingEntity(UserEntity user, PlaneSeatsEntity planeSeat, PlaneFlightsEntity flight) {
+        this.user = user;
+        this.planeSeat = planeSeat;
+        this.flight = flight;
     }
-
 }

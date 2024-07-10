@@ -52,20 +52,21 @@ public class RoomBookingService {
     @Transactional
     public CompletableFuture<ResponseEntity<String>> payment(long userId,
                                                              long hotelId,
-                                                             String paymentIntentCode,
-                                                             RoomPaymentDto roomPaymentDto){
-        try{
+                                                             RoomPaymentDto roomPaymentDto) {
+        try {
             UserEntity user = userUtils.findById(userId);
             boolean userVerification = user.isVerificationStatus();
-            if(!userVerification) {
+            if (!userVerification) {
                 return CompletableFuture.completedFuture(badRequestException("User is Not Verified yet!"));
             }
+
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
-            for (RoomEntity room:hotel.getRooms()){
-                if(room.isStatus()){
+            for (RoomEntity room : hotel.getRooms()) {
+                if (!room.isStatus()) {
                     try {
-                        PaymentIntent paymentIntent = createPayment(paymentIntentCode);
+                        PaymentIntent paymentIntent = createPayment(roomPaymentDto.getPaymentIntent(), roomPaymentDto.getPrice());
                         if (paymentIntent.getStatus().equals("succeeded")) {
+                            room.setStatus(true);
                             RoomBookingEntity roomBookingEntity = new RoomBookingEntity(
                                     user,
                                     hotel,
@@ -73,31 +74,29 @@ public class RoomBookingService {
                                     roomPaymentDto.getEndTime()
                             );
                             roomBookingRepository.save(roomBookingEntity);
-                            return CompletableFuture.completedFuture
-                                    ((ResponseEntity.ok("Room booked successfully")));
+                            return CompletableFuture.completedFuture(ResponseEntity.ok("Room booked successfully"));
                         } else {
-                            return CompletableFuture.completedFuture((ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
-                                    .body("Payment failed. Please check your payment details and try again.")));
+                            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
+                                    .body("Payment failed. Please check your payment details and try again."));
                         }
                     } catch (Exception e) {
-                        return CompletableFuture.completedFuture((serverErrorException(e)));
+                        return CompletableFuture.completedFuture(serverErrorException(e));
                     }
                 }
             }
-            return CompletableFuture.completedFuture((notFoundException("Invalid rooms in this hotel")));
-        }catch (EntityNotFoundException e){
-            return CompletableFuture.completedFuture((notFoundException(e)));
-        } catch (Exception e){
-            return CompletableFuture.completedFuture((serverErrorException(e)));
+            return CompletableFuture.completedFuture(notFoundException("Invalid rooms in this hotel"));
+        } catch (EntityNotFoundException e) {
+            return CompletableFuture.completedFuture(notFoundException(e));
+        } catch (Exception e) {
+            return CompletableFuture.completedFuture(serverErrorException(e));
         }
     }
 
-
-    private PaymentIntent createPayment(String paymentIntentCode) throws StripeException {
+    private PaymentIntent createPayment(String paymentIntentCode, int amount) throws StripeException {
         Stripe.apiKey = stripeSecretKey;
         PaymentIntentCreateParams.Builder paramsBuilder = new PaymentIntentCreateParams.Builder()
                 .setCurrency("USD")
-                .setAmount(1000L)
+                .setAmount((long) amount)
                 .addPaymentMethodType("card")
                 .setPaymentMethod(paymentIntentCode)
                 .setConfirm(true)

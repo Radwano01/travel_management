@@ -4,14 +4,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @NoArgsConstructor
-public class RoomPaymentDto {
-    private int price;
+public class FlightPaymentDto {
     private String paymentIntent;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
 }

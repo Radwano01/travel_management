@@ -81,50 +81,42 @@ class PlaneFlightsServiceTest {
 
     @Test
     void getFlights() {
-        //given
+        // given
         int departureAirPortId = 1;
         int destinationAirPortId = 2;
 
-        AirPortEntity departureAirPort = new AirPortEntity();
-        departureAirPort.setId(departureAirPortId);
-        departureAirPort.setAirPortName("departureAirport");
-
-        AirPortEntity destinationAirPort = new AirPortEntity();
-        destinationAirPort.setId(destinationAirPortId);
-        destinationAirPort.setAirPortName("destinationAirport");
-
-        PlaneEntity plane = new PlaneEntity();
-        plane.setPlaneCompanyName("testPlane");
-
-        PlaneFlightsEntity flight1 = new PlaneFlightsEntity();
-        flight1.setId(1);
-        flight1.setPrice(100);
-        flight1.setDepartureAirPort(departureAirPort);
-        flight1.setDestinationAirPort(destinationAirPort);
-        flight1.setDepartureTime("2024/10/01T20:00:00");
-        flight1.setArrivalTime("2024/10/01T22:00:00");
-        flight1.setPlane(plane);
-
-        List<PlaneFlightsEntity> planeFlightsList = new ArrayList<>();
-        planeFlightsList.add(flight1);
+        List<FlightDto> mockPlaneFlights = new ArrayList<>();
+        mockPlaneFlights.add(new FlightDto(1, "TestPlane", 100, "DepartureAirport", "DEP", "DestinationAirport", "DEST", "2024/10/01T20:00:00", "2024/10/01T22:00:00", 10));
+        mockPlaneFlights.add(new FlightDto(2, "AnotherPlane", 120, "DepartureAirport", "DEP", "DestinationAirport", "DEST", "2024/10/02T10:00:00", "2024/10/02T12:00:00", 5));
 
         //behavior
         when(planeFlightsUtils.findAllByDepartureAirPortIdAndDestinationAirPortId(departureAirPortId, destinationAirPortId))
-                .thenReturn(planeFlightsList);
+                .thenReturn(mockPlaneFlights);
 
-        //when
+        // when
         ResponseEntity<?> response = planeFlightsService.getFlights(departureAirPortId, destinationAirPortId);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         List<FlightDto> flights = (List<FlightDto>) response.getBody();
-        assertNotNull(flights);
-        assertEquals(flight1.getId(), flights.get(0).getId());
-        assertEquals(flight1.getPrice(), flights.get(0).getPrice());
-        assertEquals(flight1.getPlane().getPlaneCompanyName(), flights.get(0).getPlaneCompanyName());
-        assertEquals(flight1.getDepartureAirPort().getAirPortName(), flights.get(0).getDepartureAirPort());
-        assertEquals(flight1.getDestinationAirPort().getAirPortName(), flights.get(0).getDestinationAirPort());
+        assertEquals(2, flights.size());
+
+        assertEquals(mockPlaneFlights.get(0).getId(), flights.get(0).getId());
+        assertEquals(mockPlaneFlights.get(0).getPrice(), flights.get(0).getPrice());
+        assertEquals(mockPlaneFlights.get(0).getPlaneCompanyName(), flights.get(0).getPlaneCompanyName());
+        assertEquals(mockPlaneFlights.get(0).getDepartureAirPort(), flights.get(0).getDepartureAirPort());
+        assertEquals(mockPlaneFlights.get(0).getDestinationAirPort(), flights.get(0).getDestinationAirPort());
+
+        assertEquals(mockPlaneFlights.get(1).getId(), flights.get(1).getId());
+        assertEquals(mockPlaneFlights.get(1).getPrice(), flights.get(1).getPrice());
+        assertEquals(mockPlaneFlights.get(1).getPlaneCompanyName(), flights.get(1).getPlaneCompanyName());
+        assertEquals(mockPlaneFlights.get(1).getDepartureAirPort(), flights.get(1).getDepartureAirPort());
+        assertEquals(mockPlaneFlights.get(1).getDestinationAirPort(), flights.get(1).getDestinationAirPort());
+
+        verify(planeFlightsUtils, times(1)).findAllByDepartureAirPortIdAndDestinationAirPortId(departureAirPortId, destinationAirPortId);
+        verifyNoMoreInteractions(planeFlightsUtils);
     }
+
 
     @Test
     void editFlight() {

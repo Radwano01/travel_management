@@ -1,4 +1,4 @@
-package com.hackathon.backend.services;
+package com.hackathon.backend.services.user;
 
 import com.hackathon.backend.dto.userDto.*;
 import com.hackathon.backend.entities.user.RoleEntity;
@@ -120,7 +120,8 @@ public class UserService {
                 EssentialUserDto essentialUserDto = new EssentialUserDto(
                         user.getId(),
                         user.getUsername(),
-                        user.getImage()
+                        user.getImage(),
+                        user.isVerificationStatus()
                 );
                 AuthResponseDto authResponseDto = new AuthResponseDto(token,essentialUserDto);
                 return CompletableFuture.completedFuture((ResponseEntity.ok(authResponseDto)));

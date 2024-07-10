@@ -18,11 +18,11 @@ public class PackageBookingEntity {
     private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JoinColumn(name = "user_id")
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "package_id", insertable = false, updatable = false)
+    @JoinColumn(name = "package_id")
     private PackageEntity package_;
 
     public PackageBookingEntity(UserEntity user, PackageEntity package_){

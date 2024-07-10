@@ -1,11 +1,10 @@
 package com.hackathon.backend.plane.repositories;
 
-import com.hackathon.backend.entities.country.CountryEntity;
+import com.hackathon.backend.dto.planeDto.FlightDto;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
-import com.hackathon.backend.repositories.country.CountryRepository;
 import com.hackathon.backend.repositories.country.PlaceRepository;
 import com.hackathon.backend.repositories.plane.AirPortRepository;
 import com.hackathon.backend.repositories.plane.PlaneFlightsRepository;
@@ -16,10 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
 class PlaneFlightsRepositoryTest {
@@ -77,7 +75,8 @@ class PlaneFlightsRepositoryTest {
                 airPortEntity1,
                 airPortEntity2,
                 "2024-10-01T20:00:00",
-                "2024-10-01T23:00:00"
+                "2024-10-01T23:00:00",
+                50
         );
         planeFlightsRepository.save(planeFlights);
     }
@@ -94,15 +93,15 @@ class PlaneFlightsRepositoryTest {
     void findAllByDepartureCountryIdAndDestinationCountryId(){
 
         //when
-        List<PlaneFlightsEntity> response = planeFlightsRepository
+        List<FlightDto> response = planeFlightsRepository
                 .findAllByDepartureAirPortIdAndDestinationAirPortId(departureId, destinationId);
 
         //then
-        assertEquals(response.get(0).getDepartureAirPort().getPlace().getPlace(), "test1");
-        assertEquals(response.get(0).getDestinationAirPort().getPlace().getPlace(), "test2");
-        assertEquals(response.get(0).getDepartureAirPort().getAirPortName(), "airport one");
-        assertEquals(response.get(0).getDestinationAirPort().getAirPortName(), "airport two");
-        assertEquals(response.get(0).getPlane().getPlaneCompanyName(), "testName");
+        assertEquals(response.get(0).getDepartureAirPort(), "test1");
+        assertEquals(response.get(0).getDestinationAirPort(), "test2");
+        assertEquals(response.get(0).getDepartureAirPort(), "airport one");
+        assertEquals(response.get(0).getDestinationAirPort(), "airport two");
+        assertEquals(response.get(0).getPlaneCompanyName(), "testName");
         assertEquals(response.get(0).getPrice(), 200);
     }
 

@@ -5,14 +5,11 @@ import com.hackathon.backend.dto.planeDto.FlightDto;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
 import com.hackathon.backend.repositories.plane.PlaneFlightsRepository;
-import com.hackathon.backend.utilities.amazonServices.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class PlaneFlightsUtils {
@@ -33,7 +30,7 @@ public class PlaneFlightsUtils {
         planeFlightsRepository.save(planeFlights);
     }
 
-    public List<PlaneFlightsEntity> findAllByDepartureAirPortIdAndDestinationAirPortId
+    public List<FlightDto> findAllByDepartureAirPortIdAndDestinationAirPortId
             (int departurePlaceId, int destinationPlaceId) {
         return planeFlightsRepository
                 .findAllByDepartureAirPortIdAndDestinationAirPortId
@@ -58,13 +55,17 @@ public class PlaneFlightsUtils {
                 editFlightDto.getDepartureTime() != null ||
                 editFlightDto.getArrivalTime() != null ||
                 editFlightDto.getDepartureAirPort() != null ||
-                editFlightDto.getDestinationAirPort() != null;
+                editFlightDto.getDestinationAirPort() != null ||
+                editFlightDto.getAvailableSeats() != null;
     }
 
     public void editHelper(PlaneFlightsEntity planeFlights,
                            EditFlightDto editFlightDto) {
         if (editFlightDto.getPrice() != null && editFlightDto.getPrice() > 0) {
             planeFlights.setPrice(editFlightDto.getPrice());
+        }
+        if(editFlightDto.getAvailableSeats() != null && editFlightDto.getAvailableSeats() > 0){
+            planeFlights.setAvailableSeats(editFlightDto.getAvailableSeats());
         }
         if (editFlightDto.getDepartureTime() != null) {
             planeFlights.setDepartureTime(editFlightDto.getDepartureTime());
@@ -81,5 +82,9 @@ public class PlaneFlightsUtils {
             AirPortEntity airPortEntity = airPortsUtils.findAirPortByAirPort(editFlightDto.getDestinationAirPort());
             planeFlights.setDestinationAirPort(airPortEntity);
         }
+    }
+
+    public List<PlaneFlightsEntity> findAll() {
+        return planeFlightsRepository.findAll();
     }
 }

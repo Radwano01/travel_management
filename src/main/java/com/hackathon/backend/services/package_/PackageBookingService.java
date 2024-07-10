@@ -1,5 +1,6 @@
 package com.hackathon.backend.services.package_;
 
+import com.hackathon.backend.dto.payment.PackagePaymentDto;
 import com.hackathon.backend.entities.package_.PackageBookingEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.user.UserEntity;
@@ -49,7 +50,7 @@ public class PackageBookingService {
     @Transactional
     public CompletableFuture<ResponseEntity<String>> payment(long userId,
                                                              int packageId,
-                                                             String paymentIntentCode){
+                                                             PackagePaymentDto packagePaymentDto){
         try{
             UserEntity user = userUtils.findById(userId);
             boolean userVerification = user.isVerificationStatus();
@@ -59,7 +60,7 @@ public class PackageBookingService {
             }
             PackageEntity packageEntity = packageUtils.findById(packageId);
             try {
-                PaymentIntent paymentIntent = createPayment(paymentIntentCode);
+                PaymentIntent paymentIntent = createPayment(packagePaymentDto.getPaymentIntent(), packageEntity.getPrice());
                 if (paymentIntent.getStatus().equals("succeeded")) {
                     PackageBookingEntity packageBookingEntity = new PackageBookingEntity(
                             user,
@@ -67,7 +68,7 @@ public class PackageBookingService {
                     );
                     packageBookingRepository.save(packageBookingEntity);
                     return CompletableFuture.completedFuture
-                            ((ResponseEntity.ok("Visa booked successfully")));
+                            ((ResponseEntity.ok("package booked successfully")));
                 } else {
                     return CompletableFuture.completedFuture((ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
                             .body("Payment failed. Please check your payment details and try again.")));
@@ -82,11 +83,11 @@ public class PackageBookingService {
         }
     }
 
-    private PaymentIntent createPayment(String paymentIntentCode) throws StripeException {
+    private PaymentIntent createPayment(String paymentIntentCode, int price) throws StripeException {
         Stripe.apiKey = stripeSecretKey;
         PaymentIntentCreateParams.Builder paramsBuilder = new PaymentIntentCreateParams.Builder()
                 .setCurrency("USD")
-                .setAmount(1000L)
+                .setAmount((long) price * 100)
                 .addPaymentMethodType("card")
                 .setPaymentMethod(paymentIntentCode)
                 .setConfirm(true)

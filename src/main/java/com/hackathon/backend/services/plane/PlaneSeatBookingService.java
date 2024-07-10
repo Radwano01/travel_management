@@ -1,9 +1,15 @@
 package com.hackathon.backend.services.plane;
 
+import com.hackathon.backend.dto.payment.FlightPaymentDto;
+import com.hackathon.backend.entities.plane.PlaneEntity;
+import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
 import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
 import com.hackathon.backend.entities.plane.PlaneSeatsBookingEntity;
 import com.hackathon.backend.entities.user.UserEntity;
+import com.hackathon.backend.repositories.plane.PlaneRepository;
 import com.hackathon.backend.repositories.plane.PlaneSeatsBookingRepository;
+import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
+import com.hackathon.backend.utilities.plane.PlaneUtils;
 import com.hackathon.backend.utilities.user.UserUtils;
 import com.hackathon.backend.utilities.plane.PlaneSeatsUtils;
 import com.stripe.Stripe;
@@ -21,14 +27,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
 
-import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
-import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
+import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class PlaneSeatBookingService {
 
     private final UserUtils userUtils;
-    private final PlaneSeatsUtils planeSeatsUtils;
+    private final PlaneFlightsUtils planeFlightsUtils;
     private final PlaneSeatsBookingRepository planeSeatsBookingRepository;
 
     @Value("${STRIPE_SECRET_KEY}")
@@ -36,18 +41,18 @@ public class PlaneSeatBookingService {
 
     @Autowired
     public PlaneSeatBookingService(UserUtils userUtils,
-                                   PlaneSeatsUtils planeSeatsUtils,
-                              PlaneSeatsBookingRepository planeSeatsBookingRepository) {
+                                   PlaneFlightsUtils planeFlightsUtils,
+                                   PlaneSeatsBookingRepository planeSeatsBookingRepository) {
         this.userUtils = userUtils;
-        this.planeSeatsUtils = planeSeatsUtils;
+        this.planeFlightsUtils = planeFlightsUtils;
         this.planeSeatsBookingRepository = planeSeatsBookingRepository;
     }
 
     @Async("bookingTaskExecutor")
     @Transactional
     public CompletableFuture<ResponseEntity<String>> payment(long userId,
-                                                             long planeId,
-                                                             String paymentIntentCode){
+                                                             long flightId,
+                                                             FlightPaymentDto flightPaymentDto){
         try{
             UserEntity user = userUtils.findById(userId);
             boolean userVerification = user.isVerificationStatus();
@@ -55,20 +60,24 @@ public class PlaneSeatBookingService {
                 return CompletableFuture.completedFuture
                         ((ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is Not Verified yet!")));
             }
-            PlaneSeatsEntity seat = planeSeatsUtils.findById(planeId);
-            if (!seat.isStatus()) {
-                return CompletableFuture.completedFuture
-                        ((ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Visa Not Valid!")));
+            PlaneFlightsEntity flightsEntity = planeFlightsUtils.findById(flightId);
+            if(flightsEntity.getAvailableSeats() == 0){
+                return CompletableFuture.completedFuture(notFoundException("there is no seats for this flights"));
             }
             try {
-                PaymentIntent paymentIntent = createPayment(paymentIntentCode);
+                PaymentIntent paymentIntent = createPayment(flightPaymentDto.getPaymentIntent(), flightsEntity.getPrice());
                 if (paymentIntent.getStatus().equals("succeeded")) {
-                    seat.setStatus(false);
-                    PlaneSeatsBookingEntity planeSeatsBookingEntity = new PlaneSeatsBookingEntity(
-                            user,
-                            seat
-                    );
-                    planeSeatsBookingRepository.save(planeSeatsBookingEntity);
+                    flightsEntity.setAvailableSeats(flightsEntity.getAvailableSeats() - 1);
+                    for(PlaneSeatsEntity seat:flightsEntity.getPlane().getPlaneSeats()){
+                        if(!seat.isStatus()){
+                            PlaneSeatsBookingEntity planeSeatsBookingEntity = new PlaneSeatsBookingEntity(
+                                    user,
+                                    seat,
+                                    flightsEntity
+                            );
+                            planeSeatsBookingRepository.save(planeSeatsBookingEntity);
+                        }
+                    }
                     return CompletableFuture.completedFuture((ResponseEntity.ok("Visa booked successfully")));
                 } else {
                     return CompletableFuture.completedFuture((ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
@@ -84,11 +93,11 @@ public class PlaneSeatBookingService {
         }
     }
 
-    private PaymentIntent createPayment(String paymentIntentCode) throws StripeException {
+    private PaymentIntent createPayment(String paymentIntentCode, int price) throws StripeException {
         Stripe.apiKey = stripeSecretKey;
         PaymentIntentCreateParams.Builder paramsBuilder = new PaymentIntentCreateParams.Builder()
                 .setCurrency("USD")
-                .setAmount(1000L)
+                .setAmount((long) price * 100)
                 .addPaymentMethodType("card")
                 .setPaymentMethod(paymentIntentCode)
                 .setConfirm(true)

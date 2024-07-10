@@ -21,6 +21,11 @@ public class RoomController {
         return roomService.addRoom(hotelId);
     }
 
+    @GetMapping(path = "${GET_ROOM_PATH}")
+    public ResponseEntity<?> getRooms(@PathVariable("hotelId") long hotelId){
+        return roomService.getRooms(hotelId);
+    }
+
     @PutMapping(path = "${EDIT_ROOM_PATH}")
     public ResponseEntity<String> editRoom(@PathVariable("hotelId") long hotelId,
                                       @PathVariable("roomId") long roomId){

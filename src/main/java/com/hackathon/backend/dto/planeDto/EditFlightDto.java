@@ -11,6 +11,7 @@ public class EditFlightDto {
     private long id;
     private String planeCompanyName;
     private Integer price;
+    private Integer availableSeats;
     private String departureAirPort;
     private String departureAirPortCode;
 
