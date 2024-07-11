@@ -30,8 +30,6 @@ public class PlaneSeatsEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-
-
     public PlaneSeatsEntity(Character seatClass, int seatNumber, PlaneEntity plane) {
         this.seatClass = seatClass;
         this.seatNumber = seatNumber;

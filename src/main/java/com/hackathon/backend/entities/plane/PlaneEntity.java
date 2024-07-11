@@ -24,13 +24,12 @@ public class PlaneEntity {
     private int numSeats;
 
     @OneToMany(mappedBy = "plane", fetch = FetchType.EAGER)
-    private List<PlaneSeatsEntity> planeSeats = new ArrayList<>();;
+    private List<PlaneSeatsEntity> planeSeats = new ArrayList<>();
 
     @OneToOne(mappedBy = "plane", fetch = FetchType.LAZY)
     private PlaneFlightsEntity flight;
 
-    public PlaneEntity(String planeCompanyName,
-                       int numSeats) {
+    public PlaneEntity(String planeCompanyName, int numSeats) {
         this.planeCompanyName = planeCompanyName;
         this.numSeats = numSeats;
     }
