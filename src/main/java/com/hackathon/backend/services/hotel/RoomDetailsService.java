@@ -5,6 +5,8 @@ import com.hackathon.backend.dto.hotelDto.GetHotelDto;
 import com.hackathon.backend.dto.hotelDto.GetRoomDetailsDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
+import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
+import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
 import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
@@ -13,6 +15,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
@@ -33,13 +38,18 @@ public class RoomDetailsService {
         try{
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
             RoomDetailsEntity roomDetails = hotel.getRoomDetails();
+            if(roomDetails == null){
+                return notFoundException("This hotel doesn't have room Details");
+            }
+            List<HotelFeaturesEntity> HotelFeaturesEntity = new ArrayList<>();
+            List<RoomFeaturesEntity> roomFeaturesEntities = new ArrayList<>();
             GetRoomDetailsDto getRoomDetailsDto = new GetRoomDetailsDto(
                     hotel.getId(),
                     hotel.getHotelName(),
                     hotel.getAddress(),
                     hotel.getRate(),
-                    roomDetails.getHotelFeatures(),
-                    roomDetails.getRoomFeatures(),
+                    roomDetails.getHotelFeatures() == null ? HotelFeaturesEntity : roomDetails.getHotelFeatures(),
+                    roomDetails.getRoomFeatures() == null ? roomFeaturesEntities : roomDetails.getRoomFeatures(),
                     roomDetails.getImageOne(),
                     roomDetails.getImageTwo(),
                     roomDetails.getImageThree(),

@@ -31,7 +31,7 @@ public class CountryDetailsController {
                                                 @RequestParam(name = "imageOne", required = false) MultipartFile imageOne,
                                                 @RequestParam(name = "imageTwo", required = false) MultipartFile imageTwo,
                                                 @RequestParam(name = "imageThree", required = false) MultipartFile imageThree,
-                                                @RequestParam(name = "description",required = false) String description){
+                                                @RequestParam(name = "description", required = false) String description){
         EditCountryDetailsDto editCountryDetailsDto = new EditCountryDetailsDto(
                 imageOne,
                 imageTwo,

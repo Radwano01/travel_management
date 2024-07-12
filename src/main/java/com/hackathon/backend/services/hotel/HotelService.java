@@ -64,6 +64,7 @@ public class HotelService {
         this.s3Service = s3Service;
     }
 
+    @Transactional
     public ResponseEntity<String> createHotel(int countryId,
                                          @NonNull PostHotelDto postHotelDto) {
         try {
@@ -100,8 +101,11 @@ public class HotelService {
 
             roomDetailsUtils.save(roomDetails);
 
-            hotelEntity.setRoomDetails(roomDetails);
-            hotelUtils.save(hotelEntity);
+            boolean existsRoomDetails = roomDetailsUtils.existsById(roomDetails.getId());
+            if(!existsRoomDetails){
+                return notFoundException("Room Details is not created");
+            }
+
             return ResponseEntity.ok("Hotel created successfully: " + postHotelDto.getHotelName());
         } catch (EntityNotFoundException e) {
             return notFoundException(e);
@@ -148,14 +152,6 @@ public class HotelService {
                 throw new EntityNotFoundException("Hotel not found");
             }
 
-            RoomDetailsEntity roomDetails = hotel.getRoomDetails();
-            CountryEntity country = hotel.getCountry();
-
-            if (country != null) {
-                country.getHotels().remove(hotel);
-                countryUtils.save(country);
-            }
-
             for (RoomEntity room : hotel.getRooms()) {
                 roomUtils.delete(room);
             }
@@ -164,36 +160,42 @@ public class HotelService {
                 hotelEvaluationUtils.delete(evaluation);
             }
 
+            RoomDetailsEntity roomDetails = hotel.getRoomDetails();
             if (roomDetails != null) {
+                // Clear hotel features association
                 List<HotelFeaturesEntity> hotelFeatures = roomDetails.getHotelFeatures();
                 if (hotelFeatures != null) {
-                    for (HotelFeaturesEntity hotelFeature : hotelFeatures) {
-                        roomDetails.getHotelFeatures().remove(hotelFeature);
-                        hotelFeaturesUtils.save(hotelFeature);
-                    }
+                    hotelFeatures.clear();
+                    roomDetailsUtils.save(roomDetails);
                 }
 
                 List<RoomFeaturesEntity> roomFeatures = roomDetails.getRoomFeatures();
                 if (roomFeatures != null) {
-                    for (RoomFeaturesEntity roomFeature : roomFeatures) {
-                        roomDetails.getRoomFeatures().remove(roomFeature);
-                        roomFeaturesUtils.save(roomFeature);
-                    }
+                    roomFeatures.clear();
+                    roomDetailsUtils.save(roomDetails);
                 }
 
-                String[] ls = new String[]{
+                String[] imageKeys = new String[]{
                         roomDetails.getImageOne(),
                         roomDetails.getImageTwo(),
                         roomDetails.getImageThree(),
                         roomDetails.getImageFour()
                 };
+                s3Service.deleteFiles(imageKeys);
 
-                s3Service.deleteFiles(ls);
                 roomDetailsUtils.delete(roomDetails);
             }
 
+            CountryEntity country = hotel.getCountry();
+            if (country != null) {
+                country.getHotels().remove(hotel);
+                countryUtils.save(country);
+            }
+
             s3Service.deleteFile(hotel.getMainImage());
+
             hotelUtils.delete(hotel);
+
             return ResponseEntity.ok("Hotel deleted Successfully");
         } catch (EntityNotFoundException e) {
             return notFoundException(e);

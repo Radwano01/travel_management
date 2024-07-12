@@ -49,7 +49,7 @@ public class PlaceDetailsService {
 
     @Transactional
     public ResponseEntity<String> editPlaceDetails(int placeId,
-                                              EditPlaceDetailsDto editPlaceDetailsDto) {
+                                                EditPlaceDetailsDto editPlaceDetailsDto) {
         try{
             if(!placeDetailsUtils.checkHelper(editPlaceDetailsDto)){
                 return badRequestException("you sent an empty data to change");

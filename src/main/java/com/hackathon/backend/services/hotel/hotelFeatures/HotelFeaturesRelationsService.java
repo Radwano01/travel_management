@@ -1,6 +1,7 @@
 package com.hackathon.backend.services.hotel.hotelFeatures;
 
 import com.hackathon.backend.entities.hotel.HotelEntity;
+import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
 import com.hackathon.backend.utilities.hotel.features.HotelFeaturesUtils;
@@ -29,24 +30,31 @@ public class HotelFeaturesRelationsService {
     }
 
     @Transactional
-    public ResponseEntity<String> addHotelFeatureToHotel(long hotelId,
-                                                    int featureId) {
-        try{
+    public ResponseEntity<String> addHotelFeatureToHotel(long hotelId, int featureId) {
+        try {
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
             HotelFeaturesEntity hotelFeatures = hotelFeaturesUtils.findById(featureId);
-            Optional<HotelFeaturesEntity> exists = hotel.getRoomDetails().getHotelFeatures().stream()
-                    .filter((feature)-> feature.getId() == featureId)
-                    .findFirst();
-            if(exists.isPresent()){
-                return alreadyValidException("This Hotel feature already valid for this hotel");
+
+            RoomDetailsEntity roomDetails = hotel.getRoomDetails();
+            if (roomDetails == null) {
+                return badRequestException("Room details not found for this hotel");
             }
-            hotel.getRoomDetails().getHotelFeatures().add(hotelFeatures);
+
+            Optional<HotelFeaturesEntity> exists = roomDetails.getHotelFeatures().stream()
+                    .filter(feature -> feature.getId() == featureId)
+                    .findFirst();
+
+            if (exists.isPresent()) {
+                return notFoundException("This Hotel feature already exists for this hotel");
+            }
+
+            roomDetails.getHotelFeatures().add(hotelFeatures);
             hotelUtils.save(hotel);
             hotelFeaturesUtils.save(hotelFeatures);
             return ResponseEntity.ok("Hotel feature added successfully");
-        }catch (EntityNotFoundException e){
+        } catch (EntityNotFoundException e) {
             return notFoundException(e);
-        }catch (Exception e){
+        } catch (Exception e) {
             return serverErrorException(e);
         }
     }

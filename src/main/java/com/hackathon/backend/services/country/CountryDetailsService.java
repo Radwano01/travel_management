@@ -51,7 +51,7 @@ public class CountryDetailsService {
 
     @Transactional
     public ResponseEntity<String> editCountryDetails(int countryId,
-                                                EditCountryDetailsDto editCountryDetailsDto) {
+                                                    EditCountryDetailsDto editCountryDetailsDto) {
         try {
             if(!countryDetailsUtils.checkHelper(editCountryDetailsDto)){
                 return badRequestException("you sent an empty data to change");

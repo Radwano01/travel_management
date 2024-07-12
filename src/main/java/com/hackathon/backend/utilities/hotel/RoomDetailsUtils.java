@@ -80,4 +80,8 @@ public class RoomDetailsUtils {
             roomDetails.setPrice(editRoomDetailsDto.getPrice());
         }
     }
+
+    public boolean existsById(long id) {
+        return roomDetailsRepository.existsById(id);
+    }
 }
