@@ -95,6 +95,7 @@ class HotelServiceTest {
 
         // Mock the behavior
         when(countryUtils.findCountryById(countryId)).thenReturn(country);
+        when(roomDetailsUtils.existsById(anyLong())).thenReturn(true);
 
         // when
         ResponseEntity<?> response = hotelService.createHotel(countryId, h);
