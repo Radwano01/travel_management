@@ -24,10 +24,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
@@ -122,14 +124,28 @@ public class HotelService {
     }
 
     public ResponseEntity<?> getHotels(int countryId, int page, int size) {
-        try{
+        try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<GetHotelDto> hotels = hotelUtils.findByCountryId(countryId, pageable);
-            return ResponseEntity.ok(hotels);
-        }catch (Exception e){
+            List<GetHotelDto> hotels = hotelUtils.findByCountryId(countryId, pageable);
+
+            List<GetHotelDto> hotelDtoList = new ArrayList<>();
+            for (GetHotelDto hotel : hotels) {
+                GetHotelDto getHotelDto1 = new GetHotelDto(
+                        hotel.getId(),
+                        hotel.getHotelName(),
+                        hotel.getMainImage(),
+                        hotel.getDescription(),
+                        hotel.getAddress(),
+                        hotel.getRate()
+                );
+                hotelDtoList.add(getHotelDto1);
+            }
+            return ResponseEntity.ok(hotelDtoList);
+        } catch (Exception e) {
             return serverErrorException(e);
         }
     }
+
 
     @Transactional
     public ResponseEntity<String> editHotel(long hotelId,

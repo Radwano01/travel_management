@@ -107,25 +107,28 @@ class HotelServiceTest {
 
     @Test
     void getHotels() {
-        // Mock data
+        // given
         int countryId = 1;
         int page = 0;
         int size = 10;
         List<GetHotelDto> hotelList = Collections.singletonList(new GetHotelDto(
                 1L, "testName", "testImage", "testDesc", "testAddress", 3
         ));
-        Page<GetHotelDto> hotelsPage = new PageImpl<>(hotelList, PageRequest.of(page, size), hotelList.size());
 
-        // Mock behavior
-        when(hotelUtils.findByCountryId(eq(countryId), any(Pageable.class))).thenReturn(hotelsPage);
+        when(hotelUtils.findByCountryId(countryId, PageRequest.of(page, size))).thenReturn(hotelList);
 
         try {
             // Call the method
             ResponseEntity<?> responseEntity = hotelService.getHotels(countryId, page, size);
 
+            List<GetHotelDto> expected = (List<GetHotelDto>) responseEntity.getBody();
             // Verify the response
-            assertEquals(200, responseEntity.getStatusCodeValue(), "Expected status code 200");
-            assertEquals(hotelsPage, responseEntity.getBody(), "Expected body to match");
+            assertEquals(HttpStatus.OK, responseEntity.getStatusCode(), "Expected status code 200");
+            assertEquals(hotelList.get(0).getHotelName(), expected.get(0).getHotelName());
+            assertEquals(hotelList.get(0).getMainImage(), expected.get(0).getMainImage());
+            assertEquals(hotelList.get(0).getDescription(), expected.get(0).getDescription());
+            assertEquals(hotelList.get(0).getAddress(), expected.get(0).getAddress());
+            assertEquals(hotelList.get(0).getRate(), expected.get(0).getRate());
 
             // Verify interactions
             verify(hotelUtils, times(1)).findByCountryId(eq(countryId), any(Pageable.class));

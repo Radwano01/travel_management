@@ -59,7 +59,7 @@ public class HotelController {
     public ResponseEntity<?> getHotels(@PathVariable("countryId") int countryId,
                                        @RequestParam("page") int page,
                                        @RequestParam("size") int size){
-        return ResponseEntity.ok(hotelService.getHotels(countryId, page, size));
+        return hotelService.getHotels(countryId, page, size);
     }
 
     @PutMapping(path = "${EDIT_HOTEL_PATH}")

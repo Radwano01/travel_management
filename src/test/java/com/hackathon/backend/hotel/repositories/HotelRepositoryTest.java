@@ -61,11 +61,11 @@ class HotelRepositoryTest {
         Pageable pageable = PageRequest.of(0, 6); // Zero-based page index
 
         // when
-        Page<GetHotelDto> response = hotelRepository.findByCountryId(countryId, pageable);
+        List<GetHotelDto> response = hotelRepository.findByCountryId(countryId, pageable);
 
         // then
         assertFalse(response.isEmpty(), "Response should not be empty");
-        GetHotelDto hotelDto = response.getContent().get(0);
+        GetHotelDto hotelDto = response.get(0);
         assertEquals("testName", hotelDto.getHotelName());
         assertEquals("testImage", hotelDto.getMainImage());
         assertEquals("testDesc", hotelDto.getDescription());

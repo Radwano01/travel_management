@@ -16,10 +16,9 @@ import java.util.Optional;
 @Repository
 public interface HotelRepository extends JpaRepository<HotelEntity, Long> {
 
-    @Query("SELECT new com.hackathon.backend.dto.hotelDto.GetHotelDto(h.id, h.hotelName, h.mainImage, h.description, h.address, h.rate)" +
-            " FROM HotelEntity h WHERE h.country.id = :countryId"
-    )
-    Page<GetHotelDto> findByCountryId(int countryId, Pageable pageable);
+    @Query("SELECT new com.hackathon.backend.dto.hotelDto.GetHotelDto(h.id, h.hotelName, h.mainImage, h.description, h.address, h.rate) " +
+            "FROM HotelEntity h WHERE h.country.id = :countryId")
+    List<GetHotelDto> findByCountryId(int countryId, Pageable pageable);
 
     @Query("SELECT new com.hackathon.backend.dto.hotelDto.GetRoomsDto(r.id, r.status) FROM HotelEntity h JOIN h.rooms r WHERE h.id = :hotelId")
     Optional<List<GetRoomsDto>> findRoomsByHotelId(long hotelId);
