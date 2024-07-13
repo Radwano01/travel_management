@@ -4,6 +4,7 @@ import com.hackathon.backend.dto.hotelDto.EditHotelDto;
 import com.hackathon.backend.dto.hotelDto.PostHotelDto;
 import com.hackathon.backend.dto.hotelDto.GetHotelDto;
 import com.hackathon.backend.entities.country.CountryEntity;
+import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
@@ -13,6 +14,7 @@ import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import com.hackathon.backend.services.hotel.HotelService;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
+import com.hackathon.backend.utilities.country.PlaceUtils;
 import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
 import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
@@ -44,7 +46,7 @@ import static org.mockito.Mockito.*;
 class HotelServiceTest {
 
     @Mock
-    CountryUtils countryUtils;
+    PlaceUtils placeUtils;
 
     @Mock
     HotelUtils hotelUtils;
@@ -75,8 +77,8 @@ class HotelServiceTest {
     void createHotel() {
         // given
         int countryId = 1;
-        CountryEntity country = new CountryEntity();
-        country.setId(countryId);
+        PlaceEntity place = new PlaceEntity();
+        place.setId(countryId);
 
         PostHotelDto h = new PostHotelDto(
                 "testHotel",
@@ -94,7 +96,7 @@ class HotelServiceTest {
         );
 
         // Mock the behavior
-        when(countryUtils.findCountryById(countryId)).thenReturn(country);
+        when(placeUtils.findById(countryId)).thenReturn(place);
         when(roomDetailsUtils.existsById(anyLong())).thenReturn(true);
 
         // when
@@ -115,7 +117,7 @@ class HotelServiceTest {
                 1L, "testName", "testImage", "testDesc", "testAddress", 3
         ));
 
-        when(hotelUtils.findByCountryId(countryId, PageRequest.of(page, size))).thenReturn(hotelList);
+        when(hotelUtils.findByPlaceId(countryId, PageRequest.of(page, size))).thenReturn(hotelList);
 
         try {
             // Call the method
@@ -131,7 +133,7 @@ class HotelServiceTest {
             assertEquals(hotelList.get(0).getRate(), expected.get(0).getRate());
 
             // Verify interactions
-            verify(hotelUtils, times(1)).findByCountryId(eq(countryId), any(Pageable.class));
+            verify(hotelUtils, times(1)).findByPlaceId(eq(countryId), any(Pageable.class));
             verifyNoMoreInteractions(hotelUtils);
         } catch (Exception e) {
             // Print the stack trace for debugging
@@ -178,8 +180,8 @@ class HotelServiceTest {
         long hotelId = 1L;
         HotelEntity hotel = new HotelEntity();
         hotel.setId(hotelId);
-        CountryEntity country = new CountryEntity();
-        hotel.setCountry(country);
+        PlaceEntity place = new PlaceEntity();
+        hotel.setPlace(place);
 
         RoomDetailsEntity roomDetails = new RoomDetailsEntity();
         List<HotelFeaturesEntity> hotelFeatures = new ArrayList<>();
@@ -207,6 +209,5 @@ class HotelServiceTest {
         verify(roomFeaturesUtils, times(roomFeatures.size())).save(any(RoomFeaturesEntity.class));
         verify(roomDetailsUtils).delete(roomDetails);
         verify(hotelUtils).delete(hotel);
-        verify(countryUtils).save(country);
     }
 }

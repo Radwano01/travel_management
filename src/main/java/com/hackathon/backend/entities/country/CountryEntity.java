@@ -27,9 +27,6 @@ public class CountryEntity {
 
     private String mainImage;
 
-    @OneToMany(mappedBy = "country",fetch = FetchType.LAZY)
-    private List<HotelEntity> hotels = new ArrayList<>();
-
     @OneToMany(mappedBy = "country", fetch = FetchType.LAZY)
     private List<PackageEntity> packages = new ArrayList<>();
 

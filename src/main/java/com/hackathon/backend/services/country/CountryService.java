@@ -48,10 +48,6 @@ public class CountryService{
     private final CountryDetailsUtils countryDetailsUtils;
     private final PlaceUtils placeUtils;
     private final PlaceDetailsUtils placeDetailsUtils;
-    private final HotelUtils hotelUtils;
-    private final RoomDetailsUtils roomDetailsUtils;
-    private final HotelEvaluationUtils hotelEvaluationUtils;
-    private final RoomUtils roomUtils;
     private final PackageUtils packageUtils;
     private final PackageDetailsUtils packageDetailsUtils;
     private final S3Service s3Service;
@@ -61,10 +57,6 @@ public class CountryService{
                           CountryDetailsUtils countryDetailsUtils,
                           PlaceUtils placeUtils,
                           PlaceDetailsUtils placeDetailsUtils,
-                          HotelUtils hotelUtils,
-                          RoomDetailsUtils roomDetailsUtils,
-                          HotelEvaluationUtils hotelEvaluationUtils,
-                          RoomUtils roomUtils,
                           PackageUtils packageUtils,
                           PackageDetailsUtils packageDetailsUtils,
                           S3Service s3Service) {
@@ -72,10 +64,6 @@ public class CountryService{
         this.countryDetailsUtils = countryDetailsUtils;
         this.placeUtils = placeUtils;
         this.placeDetailsUtils = placeDetailsUtils;
-        this.hotelUtils = hotelUtils;
-        this.roomDetailsUtils = roomDetailsUtils;
-        this.hotelEvaluationUtils = hotelEvaluationUtils;
-        this.roomUtils = roomUtils;
         this.packageUtils = packageUtils;
         this.packageDetailsUtils = packageDetailsUtils;
         this.s3Service = s3Service;
@@ -162,41 +150,6 @@ public class CountryService{
                     }
                     s3Service.deleteFile(place.getMainImage());
                     placeUtils.delete(place);
-                }
-            }
-
-            if (countryEntity.getHotels() != null) {
-                for (HotelEntity hotel : countryEntity.getHotels()) {
-                    RoomDetailsEntity roomDetails = hotel.getRoomDetails();
-
-                    if (roomDetails.getHotelFeatures() != null) {
-                        roomDetails.getHotelFeatures().clear();
-                    }
-
-                    if (roomDetails.getRoomFeatures() != null) {
-                        roomDetails.getRoomFeatures().clear();
-                    }
-                    s3Service.deleteFile(roomDetails.getImageOne());
-                    s3Service.deleteFile(roomDetails.getImageTwo());
-                    s3Service.deleteFile(roomDetails.getImageThree());
-                    s3Service.deleteFile(roomDetails.getImageFour());
-
-                    roomDetailsUtils.delete(roomDetails);
-
-                    List<HotelEvaluationEntity> hotelEvaluations = hotel.getEvaluations();
-                    if (hotelEvaluations != null) {
-                        for (HotelEvaluationEntity hotelEvaluation : hotelEvaluations) {
-                            hotelEvaluationUtils.delete(hotelEvaluation);
-                        }
-                    }
-                    if (hotel.getRooms() != null) {
-                        for (RoomEntity room : hotel.getRooms()) {
-                            roomUtils.delete(room);
-                        }
-                    }
-
-                    s3Service.deleteFile(hotel.getMainImage());
-                    hotelUtils.delete(hotel);
                 }
             }
 

@@ -61,11 +61,6 @@ class CountryServiceTest {
 
     @Mock
     PlaceDetailsUtils placeDetailsUtils;
-    @Mock
-    HotelUtils hotelUtils;
-
-    @Mock
-    RoomDetailsUtils roomDetailsUtils;
 
     @Mock
     PackageUtils packageUtils;
@@ -164,9 +159,6 @@ class CountryServiceTest {
         HotelEntity hotelEntity = new HotelEntity();
         RoomDetailsEntity roomDetails = new RoomDetailsEntity();
         hotelEntity.setRoomDetails(roomDetails);
-        List<HotelEntity> hotels = new ArrayList<>();
-        hotels.add(hotelEntity);
-        countryEntity.setHotels(hotels);
 
         PackageEntity packageEntity = new PackageEntity();
         packageEntity.setPackageDetails(new PackageDetailsEntity());
@@ -191,9 +183,8 @@ class CountryServiceTest {
 
         verify(placeDetailsUtils).delete(any(PlaceDetailsEntity.class));
         verify(placeUtils).delete(any(PlaceEntity.class));
-        verify(roomDetailsUtils).delete(any(RoomDetailsEntity.class));
-        verify(hotelUtils).delete(any(HotelEntity.class));
         verify(packageUtils).delete(any(PackageEntity.class));
+        verify(packageDetailsUtils).delete(any(PackageDetailsEntity.class));
         verify(countryDetailsUtils).delete(any(CountryDetailsEntity.class));
         verify(countryUtils).delete(any(CountryEntity.class));
         verify(s3Service).deleteFile("mainImage.jpg");

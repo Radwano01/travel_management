@@ -2,8 +2,10 @@ package com.hackathon.backend.hotel.repositories;
 
 import com.hackathon.backend.dto.hotelDto.GetHotelDto;
 import com.hackathon.backend.entities.country.CountryEntity;
+import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.repositories.country.CountryRepository;
+import com.hackathon.backend.repositories.country.PlaceRepository;
 import com.hackathon.backend.repositories.hotel.HotelRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,18 +24,18 @@ import static org.junit.jupiter.api.Assertions.*;
 class HotelRepositoryTest {
 
     @Autowired
-    CountryRepository countryRepository;
+    PlaceRepository placeRepository;
 
     @Autowired
     HotelRepository hotelRepository;
 
     @BeforeEach
     void setUp() {
-        CountryEntity country = new CountryEntity(
-                "testCountry",
-                "testImage"
-        );
-        countryRepository.save(country);
+        PlaceEntity place = new PlaceEntity();
+        place.setPlace("testPlace");
+        place.setMainImage("testImage");
+
+        placeRepository.save(place);
 
         HotelEntity hotel = new HotelEntity(
                 "testName",
@@ -42,7 +44,7 @@ class HotelRepositoryTest {
                 100,
                 "testAddress",
                 3,
-                country
+                place
         );
         hotelRepository.save(hotel);
     }
@@ -50,18 +52,18 @@ class HotelRepositoryTest {
     @AfterEach
     void tearDown() {
         hotelRepository.deleteAll();
-        countryRepository.deleteAll();
+        placeRepository.deleteAll();
     }
 
     @Test
-    void findByCountryId() {
+    void findByPlaceId() {
         // given
-        int countryId = countryRepository.findAll().get(0).getId();
+        int placeId = placeRepository.findAll().get(0).getId();
 
         Pageable pageable = PageRequest.of(0, 6); // Zero-based page index
 
         // when
-        List<GetHotelDto> response = hotelRepository.findByCountryId(countryId, pageable);
+        List<GetHotelDto> response = hotelRepository.findByPlaceId(placeId, pageable);
 
         // then
         assertFalse(response.isEmpty(), "Response should not be empty");

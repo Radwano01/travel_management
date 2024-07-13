@@ -7,10 +7,18 @@ import com.hackathon.backend.dto.countryDto.placeDto.PostPlaceDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
+import com.hackathon.backend.entities.hotel.HotelEntity;
+import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
+import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
+import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.country.PlaceDetailsUtils;
 import com.hackathon.backend.utilities.country.PlaceUtils;
+import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
+import com.hackathon.backend.utilities.hotel.HotelUtils;
+import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
+import com.hackathon.backend.utilities.hotel.RoomUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,16 +39,27 @@ public class PlaceService{
     private final PlaceUtils placeUtils;
     private final PlaceDetailsUtils placeDetailsUtils;
     private final S3Service s3Service;
+    private final HotelUtils hotelUtils;
+    private final RoomDetailsUtils roomDetailsUtils;
+    private final HotelEvaluationUtils hotelEvaluationUtils;
+    private final RoomUtils roomUtils;
 
     @Autowired
     public PlaceService(CountryUtils countryUtils,
                         PlaceUtils placeUtils,
                         PlaceDetailsUtils placeDetailsUtils,
-                        S3Service s3Service) {
+                        S3Service s3Service, HotelUtils hotelUtils,
+                        RoomDetailsUtils roomDetailsUtils,
+                        HotelEvaluationUtils hotelEvaluationUtils,
+                        RoomUtils roomUtils) {
         this.countryUtils = countryUtils;
         this.placeUtils = placeUtils;
         this.placeDetailsUtils = placeDetailsUtils;
         this.s3Service = s3Service;
+        this.hotelUtils = hotelUtils;
+        this.roomDetailsUtils = roomDetailsUtils;
+        this.hotelEvaluationUtils = hotelEvaluationUtils;
+        this.roomUtils = roomUtils;
     }
 
     public ResponseEntity<String> createPlace(int countryId,
@@ -138,7 +157,44 @@ public class PlaceService{
             Optional<PlaceEntity> place = country.getPlaces().stream()
                     .filter((data)-> data.getId() == placeId).findFirst();
 
+
+
             if(place.isPresent()) {
+                if (place.get().getHotels() != null) {
+                    for (HotelEntity hotel : place.get().getHotels()) {
+                        RoomDetailsEntity roomDetails = hotel.getRoomDetails();
+
+                        if (roomDetails.getHotelFeatures() != null) {
+                            roomDetails.getHotelFeatures().clear();
+                        }
+
+                        if (roomDetails.getRoomFeatures() != null) {
+                            roomDetails.getRoomFeatures().clear();
+                        }
+                        s3Service.deleteFile(roomDetails.getImageOne());
+                        s3Service.deleteFile(roomDetails.getImageTwo());
+                        s3Service.deleteFile(roomDetails.getImageThree());
+                        s3Service.deleteFile(roomDetails.getImageFour());
+
+                        roomDetailsUtils.delete(roomDetails);
+
+                        List<HotelEvaluationEntity> hotelEvaluations = hotel.getEvaluations();
+                        if (hotelEvaluations != null) {
+                            for (HotelEvaluationEntity hotelEvaluation : hotelEvaluations) {
+                                hotelEvaluationUtils.delete(hotelEvaluation);
+                            }
+                        }
+                        if (hotel.getRooms() != null) {
+                            for (RoomEntity room : hotel.getRooms()) {
+                                roomUtils.delete(room);
+                            }
+                        }
+
+                        s3Service.deleteFile(hotel.getMainImage());
+                        hotelUtils.delete(hotel);
+                    }
+                }
+
                 if(place.get().getPlaceDetails() != null) {
                     PlaceDetailsEntity placeDetails = place.get().getPlaceDetails();
 

@@ -16,7 +16,6 @@ public class EditHotelDto {
     private String address;
     private Integer price;
     private Integer rate;
-    private Integer countryId;
 
     public EditHotelDto(String hotelName,
                         MultipartFile mainImage,
@@ -24,8 +23,7 @@ public class EditHotelDto {
                         Integer hotelRoomsCount,
                         String address,
                         Integer price,
-                        Integer rate,
-                        Integer countryId) {
+                        Integer rate) {
         this.hotelName = hotelName;
         this.mainImage = mainImage;
         this.description = description;
@@ -33,6 +31,5 @@ public class EditHotelDto {
         this.address = address;
         this.price = price;
         this.rate = rate;
-        this.countryId = countryId;
     }
 }

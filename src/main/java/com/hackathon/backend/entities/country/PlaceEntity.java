@@ -28,6 +28,9 @@ public class PlaceEntity {
     @JoinColumn(name = "country_id")
     private CountryEntity country;
 
+    @OneToMany(mappedBy = "place", fetch = FetchType.LAZY)
+    private List<HotelEntity> hotels;
+
     @OneToOne(mappedBy = "place", fetch = FetchType.LAZY)
     private PlaceDetailsEntity placeDetails;
 

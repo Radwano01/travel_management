@@ -9,7 +9,6 @@ import java.util.Collections;
 public class BackendApplication {
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplication(BackendApplication.class);
-		app.setDefaultProperties(Collections.singletonMap("application", "myapp"));
 		app.run(args);
 	}
 }

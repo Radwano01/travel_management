@@ -25,7 +25,7 @@ public class HotelController {
     }
 
     @PostMapping(path = "${CREATE_HOTEL_PATH}")
-    public ResponseEntity<String> createHotel(@PathVariable("countryId") int countryId,
+    public ResponseEntity<String> createHotel(@PathVariable("placeId") int placeId,
                                          @RequestParam("hotelName") String hotelName,
                                          @RequestParam("mainImage") MultipartFile mainImage,
                                          @RequestParam("description") String description,
@@ -52,14 +52,14 @@ public class HotelController {
                 roomDescription,
                 price
         );
-        return hotelService.createHotel(countryId, h);
+        return hotelService.createHotel(placeId, h);
     }
 
     @GetMapping(path = "${GET_HOTELS_PATH}")
-    public ResponseEntity<?> getHotels(@PathVariable("countryId") int countryId,
+    public ResponseEntity<?> getHotels(@PathVariable("placeId") int placeId,
                                        @RequestParam("page") int page,
                                        @RequestParam("size") int size){
-        return hotelService.getHotels(countryId, page, size);
+        return hotelService.getHotels(placeId, page, size);
     }
 
     @PutMapping(path = "${EDIT_HOTEL_PATH}")
@@ -70,8 +70,7 @@ public class HotelController {
                                            @RequestParam(name = "hotelRoomsCount", required = false) Integer hotelRoomsCount,
                                            @RequestParam(name = "address", required = false) String address,
                                            @RequestParam(name = "price", required = false) Integer price,
-                                           @RequestParam(name = "rate", required = false) Integer rate,
-                                           @RequestParam(name = "countryId", required = false) Integer countryId){
+                                           @RequestParam(name = "rate", required = false) Integer rate){
         EditHotelDto editHotelDto = new EditHotelDto(
                 hotelName,
                 mainImage,
@@ -79,8 +78,7 @@ public class HotelController {
                 hotelRoomsCount,
                 address,
                 price,
-                rate,
-                countryId
+                rate
         );
         return hotelService.editHotel(hotelId, editHotelDto);
     }

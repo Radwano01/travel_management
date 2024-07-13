@@ -4,11 +4,13 @@ import com.hackathon.backend.dto.hotelDto.EditHotelDto;
 import com.hackathon.backend.dto.hotelDto.GetHotelDto;
 import com.hackathon.backend.dto.hotelDto.GetRoomsDto;
 import com.hackathon.backend.entities.country.CountryEntity;
+import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.repositories.hotel.HotelRepository;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
+import com.hackathon.backend.utilities.country.PlaceUtils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,15 +25,15 @@ public class HotelUtils {
 
     private final HotelRepository hotelRepository;
     private final S3Service s3Service;
-    private final CountryUtils countryUtils;
+    private final PlaceUtils placeUtils;
 
     @Autowired
     public HotelUtils(HotelRepository hotelRepository,
                       S3Service s3Service,
-                      CountryUtils countryUtils) {
+                      PlaceUtils placeUtils) {
         this.hotelRepository = hotelRepository;
         this.s3Service = s3Service;
-        this.countryUtils = countryUtils;
+        this.placeUtils = placeUtils;
     }
 
     public HotelEntity findHotelById(long hotelId){
@@ -48,8 +50,8 @@ public class HotelUtils {
         hotelRepository.save(hotelEntity);
     }
 
-    public List<GetHotelDto> findByCountryId(int countryId, Pageable pageable) {
-        return hotelRepository.findByCountryId(countryId, pageable);
+    public List<GetHotelDto> findByPlaceId(int placeId, Pageable pageable) {
+        return hotelRepository.findByPlaceId(placeId, pageable);
     }
 
     public void delete(HotelEntity hotel) {
@@ -86,10 +88,6 @@ public class HotelUtils {
         }
         if (editHotelDto.getRate() != null && editHotelDto.getRate() > 0 && editHotelDto.getRate() <= 5) {
             hotel.setRate(editHotelDto.getRate());
-        }
-        if (editHotelDto.getCountryId() != null) {
-            CountryEntity country = countryUtils.findCountryById(editHotelDto.getCountryId());
-            hotel.setCountry(country);
         }
     }
 }

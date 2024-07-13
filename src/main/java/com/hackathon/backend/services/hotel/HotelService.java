@@ -4,6 +4,7 @@ import com.hackathon.backend.dto.hotelDto.EditHotelDto;
 import com.hackathon.backend.dto.hotelDto.PostHotelDto;
 import com.hackathon.backend.dto.hotelDto.GetHotelDto;
 import com.hackathon.backend.entities.country.CountryEntity;
+import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
@@ -12,19 +13,16 @@ import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
 import com.hackathon.backend.utilities.country.CountryUtils;
+import com.hackathon.backend.utilities.country.PlaceUtils;
 import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
 import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
 import com.hackathon.backend.utilities.hotel.RoomUtils;
-import com.hackathon.backend.utilities.hotel.features.HotelFeaturesUtils;
-import com.hackathon.backend.utilities.hotel.features.RoomFeaturesUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -37,30 +35,24 @@ import static com.hackathon.backend.utilities.ErrorUtils.*;
 @Service
 public class HotelService {
 
-    private final CountryUtils countryUtils;
+    private final PlaceUtils placeUtils;
     private final RoomUtils roomUtils;
     private final HotelUtils hotelUtils;
-    private final HotelFeaturesUtils hotelFeaturesUtils;
-    private final RoomFeaturesUtils roomFeaturesUtils;
     private final HotelEvaluationUtils hotelEvaluationUtils;
     private final RoomDetailsUtils roomDetailsUtils;
 
     private final S3Service s3Service;
 
     @Autowired
-    public HotelService(CountryUtils countryUtils,
+    public HotelService(PlaceUtils placeUtils,
                         RoomUtils roomUtils,
                         HotelUtils hotelUtils,
-                        HotelFeaturesUtils hotelFeaturesUtils,
-                        RoomFeaturesUtils roomFeaturesUtils,
                         HotelEvaluationUtils hotelEvaluationUtils,
                         RoomDetailsUtils roomDetailsUtils,
                         S3Service s3Service){
-        this.countryUtils = countryUtils;
+        this.placeUtils = placeUtils;
         this.roomUtils = roomUtils;
         this.hotelUtils = hotelUtils;
-        this.hotelFeaturesUtils = hotelFeaturesUtils;
-        this.roomFeaturesUtils = roomFeaturesUtils;
         this.hotelEvaluationUtils = hotelEvaluationUtils;
         this.roomDetailsUtils = roomDetailsUtils;
         this.s3Service = s3Service;
@@ -70,7 +62,7 @@ public class HotelService {
     public ResponseEntity<String> createHotel(int countryId,
                                               @NonNull PostHotelDto postHotelDto) {
         try {
-            CountryEntity country = countryUtils.findCountryById(countryId);
+            PlaceEntity place = placeUtils.findById(countryId);
 
             String hotelImageName = s3Service.uploadFile(postHotelDto.getMainImage());
 
@@ -81,7 +73,7 @@ public class HotelService {
                     postHotelDto.getHotelRoomsCount(),
                     postHotelDto.getAddress(),
                     postHotelDto.getRate(),
-                    country
+                    place
             );
 
             hotelUtils.save(hotelEntity);
@@ -123,10 +115,10 @@ public class HotelService {
         }
     }
 
-    public ResponseEntity<?> getHotels(int countryId, int page, int size) {
+    public ResponseEntity<?> getHotels(int placeId, int page, int size) {
         try {
             Pageable pageable = PageRequest.of(page, size);
-            List<GetHotelDto> hotels = hotelUtils.findByCountryId(countryId, pageable);
+            List<GetHotelDto> hotels = hotelUtils.findByPlaceId(placeId, pageable);
 
             List<GetHotelDto> hotelDtoList = new ArrayList<>();
             for (GetHotelDto hotel : hotels) {
@@ -203,11 +195,6 @@ public class HotelService {
                 roomDetailsUtils.delete(roomDetails);
             }
 
-            CountryEntity country = hotel.getCountry();
-            if (country != null) {
-                country.getHotels().remove(hotel);
-                countryUtils.save(country);
-            }
 
             s3Service.deleteFile(hotel.getMainImage());
 
