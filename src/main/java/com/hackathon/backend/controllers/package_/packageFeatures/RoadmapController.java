@@ -17,7 +17,7 @@ public class RoadmapController{
     }
 
     @PostMapping(path = "${CREATE_ROADMAP_PATH}")
-    public ResponseEntity<String> createRoadmap(String roadmap){
+    public ResponseEntity<String> createRoadmap(@RequestParam(name = "roadmap") String roadmap){
         return roadmapService.createRoadmap(roadmap);
     }
 
@@ -28,7 +28,7 @@ public class RoadmapController{
 
     @PutMapping(path = "${EDIT_ROADMAP_PATH}")
     public ResponseEntity<String> editRoadmap(@PathVariable("roadmapId") int roadmapId,
-                                         String roadmap){
+                                              @RequestParam(name = "roadmap", required = false) String roadmap){
         return roadmapService.editRoadmap(roadmapId, roadmap);
     }
 

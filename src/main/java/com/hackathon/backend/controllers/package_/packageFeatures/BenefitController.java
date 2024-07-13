@@ -17,7 +17,7 @@ public class BenefitController{
     }
 
     @PostMapping(path = "${CREATE_BENEFIT_PATH}")
-    public ResponseEntity<String> createBenefit(String benefit){
+    public ResponseEntity<String> createBenefit(@RequestParam(name = "benefit") String benefit){
         return benefitService.createBenefit(benefit);
     }
 
@@ -28,7 +28,7 @@ public class BenefitController{
 
     @PutMapping(path = "${EDIT_BENEFIT_PATH}")
     public ResponseEntity<String> editBenefit(@PathVariable("benefitId") int benefitId,
-                                         @RequestBody String benefit){
+                                              @RequestParam(name = "benefit", required = false) String benefit){
         return benefitService.editBenefit(benefitId, benefit);
     }
 
