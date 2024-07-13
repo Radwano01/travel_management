@@ -59,6 +59,9 @@ public class PlaneFlightsService {
                     flightDto.getAvailableSeats()
             );
             planeFlightsUtils.save(planeFlights);
+
+            plane.setStatus(false);
+            planeUtils.save(plane);
             return ResponseEntity.ok("Flight added successfully");
         } catch (EntityNotFoundException e) {
             return notFoundException(e);

@@ -10,4 +10,5 @@ import lombok.Setter;
 public class EditPlaneDto {
     private String planeCompanyName;
     private Integer numSeats;
+    private Boolean status;
 }

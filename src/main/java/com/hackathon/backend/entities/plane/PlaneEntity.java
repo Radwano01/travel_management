@@ -22,6 +22,7 @@ public class PlaneEntity {
 
     private String planeCompanyName;
     private int numSeats;
+    private boolean status = true;
 
     @OneToMany(mappedBy = "plane", fetch = FetchType.EAGER)
     private List<PlaneSeatsEntity> planeSeats = new ArrayList<>();

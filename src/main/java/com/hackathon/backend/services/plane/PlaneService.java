@@ -2,6 +2,7 @@ package com.hackathon.backend.services.plane;
 
 
 import com.hackathon.backend.dto.planeDto.EditPlaneDto;
+import com.hackathon.backend.dto.planeDto.GetPlaneDto;
 import com.hackathon.backend.dto.planeDto.PlaneDto;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
@@ -43,8 +44,26 @@ public class PlaneService{
                     planeDto.getPlaneCompanyName(),
                     planeDto.getNumSeats()
             );
+
+
+            for(int i = 0; i < planeDto.getNumSeats(); i++){
+                PlaneSeatsEntity planeSeats = new PlaneSeatsEntity();
+                planeSeatsUtils.save(planeSeats);
+                planeEntity.getPlaneSeats().add(planeSeats);
+            }
             planeUtils.save(planeEntity);
             return ResponseEntity.ok("Plane Name created Successfully");
+        }catch (Exception e){
+            return serverErrorException(e);
+        }
+    }
+
+    public ResponseEntity<?> getPlanes(){
+        try{
+            List<GetPlaneDto> plane = planeUtils.findAllPlanes();
+            return ResponseEntity.ok(plane);
+        }catch (EntityNotFoundException e){
+            return notFoundException(e);
         }catch (Exception e){
             return serverErrorException(e);
         }

@@ -1,6 +1,7 @@
 package com.hackathon.backend.plane.services;
 
 import com.hackathon.backend.dto.planeDto.EditPlaneDto;
+import com.hackathon.backend.dto.planeDto.GetPlaneDto;
 import com.hackathon.backend.dto.planeDto.PlaneDto;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
@@ -16,6 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,6 +52,36 @@ class PlaneServiceTest {
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void getPlanes(){
+        //given
+        List<GetPlaneDto> ls = new ArrayList<>();
+        GetPlaneDto getPlaneDto = new GetPlaneDto();
+        getPlaneDto.setPlaneCompanyName("test");
+        getPlaneDto.setStatus(true);
+
+        ls.add(getPlaneDto);
+
+        PlaneEntity plane = new PlaneEntity();
+        plane.setId(1L);
+        plane.setNumSeats(100);
+        plane.setPlaneCompanyName("test");
+        planeUtils.save(plane);
+
+        //behavior
+        when(planeUtils.findAllPlanes()).thenReturn(ls);
+
+        //when
+        ResponseEntity<?> response = planeService.getPlanes();
+
+        List<GetPlaneDto> planes = (List<GetPlaneDto>) response.getBody();
+
+        //then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(plane.getPlaneCompanyName(), planes.get(0).getPlaneCompanyName());
+        assertEquals(plane.isStatus(), planes.get(0).isStatus());
     }
 
     @Test

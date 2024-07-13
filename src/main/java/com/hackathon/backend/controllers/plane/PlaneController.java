@@ -23,6 +23,11 @@ public class PlaneController {
         return planeService.createPlane(planeDto);
     }
 
+    @GetMapping(path = "${GET_PLANES_PATH}")
+    public ResponseEntity<?> getPlanes(){
+        return planeService.getPlanes();
+    }
+
     @PutMapping(path="${EDIT_PLANE_PATH}")
     public ResponseEntity<String> editPlane(@PathVariable("planeId") Long planeId,
                                        @RequestBody EditPlaneDto editPlaneDto){
