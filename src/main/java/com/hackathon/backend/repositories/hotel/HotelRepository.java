@@ -3,7 +3,6 @@ package com.hackathon.backend.repositories.hotel;
 import com.hackathon.backend.dto.hotelDto.GetHotelDto;
 import com.hackathon.backend.dto.hotelDto.GetRoomsDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
-import com.hackathon.backend.entities.hotel.RoomEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

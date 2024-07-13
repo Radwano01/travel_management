@@ -2,6 +2,7 @@ package com.hackathon.backend.controllers.plane;
 
 import com.hackathon.backend.dto.planeDto.EditFlightDto;
 import com.hackathon.backend.dto.planeDto.FlightDto;
+import com.hackathon.backend.dto.planeDto.GetFlightDto;
 import com.hackathon.backend.services.plane.PlaneFlightsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +28,12 @@ public class PlaneFlightsController {
     }
 
     @GetMapping(path = "${GET_FLIGHT_PATH}")
-    public ResponseEntity<?> getFlight(@PathVariable("departureAirPortId") int departureAirPortId,
-                                       @PathVariable("destinationAirPortId") int destinationAirPortId){
-        return planeFlightsService.getFlights(departureAirPortId, destinationAirPortId);
+    public ResponseEntity<?> getFlight(@PathVariable("departureAirPortId") long departureAirPortId,
+                                       @PathVariable("destinationAirPortId") long destinationAirPortId,
+                                       @RequestParam("page") int page,
+                                       @RequestParam("size") int size){
+
+        return planeFlightsService.getFlights(departureAirPortId, destinationAirPortId, page, size);
     }
 
     @PutMapping(path = "${EDIT_FLIGHT_PATH}")

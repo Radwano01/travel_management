@@ -2,6 +2,7 @@ package com.hackathon.backend.services.plane;
 
 import com.hackathon.backend.dto.planeDto.EditFlightDto;
 import com.hackathon.backend.dto.planeDto.FlightDto;
+import com.hackathon.backend.dto.planeDto.GetFlightDto;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
@@ -11,6 +12,8 @@ import com.hackathon.backend.utilities.plane.PlaneUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -38,12 +41,9 @@ public class PlaneFlightsService {
     }
 
     public ResponseEntity<String> addFlight(long planeId, long departureAirPortId,
-                                       long destinationAirPortId, FlightDto flightDto) {
+                                            long destinationAirPortId, FlightDto flightDto) {
         try {
             PlaneEntity plane = planeUtils.findPlaneById(planeId);
-            if(plane.getNumSeats() < flightDto.getAvailableSeats()){
-                return badRequestException("the provided seats number is higher then plane seats");
-            }
             if (plane.getFlight() != null) {
                 return alreadyValidException("This plane has already flight");
             }
@@ -56,7 +56,7 @@ public class PlaneFlightsService {
                     destinationAirPort,
                     flightDto.getDepartureTime(),
                     flightDto.getArrivalTime(),
-                    flightDto.getAvailableSeats()
+                    plane.getNumSeats()
             );
             planeFlightsUtils.save(planeFlights);
 
@@ -70,18 +70,20 @@ public class PlaneFlightsService {
         }
     }
 
-    public ResponseEntity<?> getFlights(int departureAirPortId,
-                                        int destinationAirPortId) {
+    public ResponseEntity<?> getFlights(long departureAirPortId,
+                                        long destinationAirPortId,
+                                        int page, int size) {
         try {
-            List<FlightDto> planeFlights = planeFlightsUtils
+            Pageable pageable = PageRequest.of(page, size);
+            List<GetFlightDto> planeFlights = planeFlightsUtils
                     .findAllByDepartureAirPortIdAndDestinationAirPortId(
-                            departureAirPortId, destinationAirPortId
+                            departureAirPortId, destinationAirPortId, pageable
                     );
 
-            List<FlightDto> flightDtoList = new ArrayList<>();
-            for(FlightDto flights:planeFlights){
+            List<GetFlightDto> flightDtoList = new ArrayList<>();
+            for(GetFlightDto flights:planeFlights){
                     if(flights.getAvailableSeats() != 0) {
-                        FlightDto flightDto = new FlightDto(
+                        GetFlightDto flightDto = new GetFlightDto(
                                 flights.getId(),
                                 flights.getPlaneCompanyName(),
                                 flights.getPrice(),

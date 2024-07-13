@@ -1,6 +1,6 @@
 package com.hackathon.backend.plane.repositories;
 
-import com.hackathon.backend.dto.planeDto.FlightDto;
+import com.hackathon.backend.dto.planeDto.GetFlightDto;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneEntity;
@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -94,8 +95,8 @@ class PlaneFlightsRepositoryTest {
     void findAllByDepartureAirPortIdAndDestinationAirPortId(){
 
         //when
-        List<FlightDto> response = planeFlightsRepository
-                .findAllByDepartureAirPortIdAndDestinationAirPortId(departureId, destinationId);
+        List<GetFlightDto> response = planeFlightsRepository
+                .findAllByDepartureAirPortIdAndDestinationAirPortId(departureId, destinationId, PageRequest.of(0, 3));
 
         //then
         assertEquals(1, response.size());

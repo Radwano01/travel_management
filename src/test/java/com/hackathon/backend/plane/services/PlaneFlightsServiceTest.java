@@ -2,6 +2,7 @@ package com.hackathon.backend.plane.services;
 
 import com.hackathon.backend.dto.planeDto.EditFlightDto;
 import com.hackathon.backend.dto.planeDto.FlightDto;
+import com.hackathon.backend.dto.planeDto.GetFlightDto;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -56,10 +59,7 @@ class PlaneFlightsServiceTest {
         destinationAirPort.setId(destinationAirPortId);
 
         FlightDto flightDto = new FlightDto();
-        flightDto.setPlaneCompanyName("testPlane");
         flightDto.setPrice(100);
-        flightDto.setDepartureAirPort("departureAirport");
-        flightDto.setDestinationAirPort("destinationAirport");
         flightDto.setDepartureTime(LocalDateTime.now());
         flightDto.setArrivalTime(LocalDateTime.now().plusHours(2));
 
@@ -86,20 +86,24 @@ class PlaneFlightsServiceTest {
         int departureAirPortId = 1;
         int destinationAirPortId = 2;
 
-        List<FlightDto> mockPlaneFlights = new ArrayList<>();
-        mockPlaneFlights.add(new FlightDto(1, "TestPlane", 100, "DepartureAirport", "DEP", "DestinationAirport", "DEST", LocalDateTime.now(), LocalDateTime.now().plusHours(2), 10));
-        mockPlaneFlights.add(new FlightDto(2, "AnotherPlane", 120, "DepartureAirport", "DEP", "DestinationAirport", "DEST", LocalDateTime.now(), LocalDateTime.now().plusHours(2), 5));
+        int page = 0;
+        int size = 3;
+        Pageable pageable = PageRequest.of(page, size);
+
+        List<GetFlightDto> mockPlaneFlights = new ArrayList<>();
+        mockPlaneFlights.add(new GetFlightDto(1, "TestPlane", 100, "DepartureAirport", "DEP", "DestinationAirport", "DEST", LocalDateTime.now(), LocalDateTime.now().plusHours(2), 10));
+        mockPlaneFlights.add(new GetFlightDto(2, "AnotherPlane", 120, "DepartureAirport", "DEP", "DestinationAirport", "DEST", LocalDateTime.now(), LocalDateTime.now().plusHours(2), 5));
 
         //behavior
-        when(planeFlightsUtils.findAllByDepartureAirPortIdAndDestinationAirPortId(departureAirPortId, destinationAirPortId))
+        when(planeFlightsUtils.findAllByDepartureAirPortIdAndDestinationAirPortId(departureAirPortId, destinationAirPortId, pageable))
                 .thenReturn(mockPlaneFlights);
 
         // when
-        ResponseEntity<?> response = planeFlightsService.getFlights(departureAirPortId, destinationAirPortId);
+        ResponseEntity<?> response = planeFlightsService.getFlights(departureAirPortId, destinationAirPortId, page, size);
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        List<FlightDto> flights = (List<FlightDto>) response.getBody();
+        List<GetFlightDto> flights = (List<GetFlightDto>) response.getBody();
         assertEquals(2, flights.size());
 
         assertEquals(mockPlaneFlights.get(0).getId(), flights.get(0).getId());
@@ -114,7 +118,8 @@ class PlaneFlightsServiceTest {
         assertEquals(mockPlaneFlights.get(1).getDepartureAirPort(), flights.get(1).getDepartureAirPort());
         assertEquals(mockPlaneFlights.get(1).getDestinationAirPort(), flights.get(1).getDestinationAirPort());
 
-        verify(planeFlightsUtils, times(1)).findAllByDepartureAirPortIdAndDestinationAirPortId(departureAirPortId, destinationAirPortId);
+        verify(planeFlightsUtils, times(1))
+                .findAllByDepartureAirPortIdAndDestinationAirPortId(departureAirPortId, destinationAirPortId, pageable);
         verifyNoMoreInteractions(planeFlightsUtils);
     }
 

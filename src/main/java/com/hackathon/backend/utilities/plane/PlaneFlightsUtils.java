@@ -1,12 +1,13 @@
 package com.hackathon.backend.utilities.plane;
 
 import com.hackathon.backend.dto.planeDto.EditFlightDto;
-import com.hackathon.backend.dto.planeDto.FlightDto;
+import com.hackathon.backend.dto.planeDto.GetFlightDto;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
 import com.hackathon.backend.repositories.plane.PlaneFlightsRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -30,11 +31,11 @@ public class PlaneFlightsUtils {
         planeFlightsRepository.save(planeFlights);
     }
 
-    public List<FlightDto> findAllByDepartureAirPortIdAndDestinationAirPortId
-            (int departurePlaceId, int destinationPlaceId) {
+    public List<GetFlightDto> findAllByDepartureAirPortIdAndDestinationAirPortId
+            (long departureAirPortId, long destinationAirPortId, Pageable pageable) {
         return planeFlightsRepository
                 .findAllByDepartureAirPortIdAndDestinationAirPortId
-                        (departurePlaceId,destinationPlaceId);
+                        (departureAirPortId,destinationAirPortId, pageable);
     }
 
     public PlaneFlightsEntity findById(long flightId) {
