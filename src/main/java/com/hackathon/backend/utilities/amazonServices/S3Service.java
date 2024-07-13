@@ -53,14 +53,4 @@ public class S3Service {
             e.printStackTrace();
         }
     }
-
-    public void deleteFiles(String[] fileNames){
-        try{
-            for(String fileName:fileNames){
-                amazonS3.deleteObject(new DeleteObjectRequest(BUCKET_NAME, fileName));
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
 }

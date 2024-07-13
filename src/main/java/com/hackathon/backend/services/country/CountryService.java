@@ -11,6 +11,7 @@ import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
 import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
+import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
 import com.hackathon.backend.repositories.hotel.hotelFeatures.HotelFeaturesRepository;
@@ -25,6 +26,7 @@ import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
 import com.hackathon.backend.utilities.hotel.RoomUtils;
 import com.hackathon.backend.utilities.hotel.features.HotelFeaturesUtils;
 import com.hackathon.backend.utilities.hotel.features.RoomFeaturesUtils;
+import com.hackathon.backend.utilities.package_.PackageDetailsUtils;
 import com.hackathon.backend.utilities.package_.PackageUtils;
 import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
 import jakarta.persistence.EntityNotFoundException;
@@ -51,7 +53,7 @@ public class CountryService{
     private final HotelEvaluationUtils hotelEvaluationUtils;
     private final RoomUtils roomUtils;
     private final PackageUtils packageUtils;
-    private final PlaneFlightsUtils planeFlightsUtils;
+    private final PackageDetailsUtils packageDetailsUtils;
     private final S3Service s3Service;
 
     @Autowired
@@ -64,7 +66,7 @@ public class CountryService{
                           HotelEvaluationUtils hotelEvaluationUtils,
                           RoomUtils roomUtils,
                           PackageUtils packageUtils,
-                          PlaneFlightsUtils planeFlightsUtils,
+                          PackageDetailsUtils packageDetailsUtils,
                           S3Service s3Service) {
         this.countryUtils = countryUtils;
         this.countryDetailsUtils = countryDetailsUtils;
@@ -75,7 +77,7 @@ public class CountryService{
         this.hotelEvaluationUtils = hotelEvaluationUtils;
         this.roomUtils = roomUtils;
         this.packageUtils = packageUtils;
-        this.planeFlightsUtils = planeFlightsUtils;
+        this.packageDetailsUtils = packageDetailsUtils;
         this.s3Service = s3Service;
     }
 
@@ -153,8 +155,12 @@ public class CountryService{
                 for (PlaceEntity place : countryEntity.getPlaces()) {
                     PlaceDetailsEntity placeDetails = place.getPlaceDetails();
                     if (placeDetails != null) {
+                        s3Service.deleteFile(placeDetails.getImageOne());
+                        s3Service.deleteFile(placeDetails.getImageTwo());
+                        s3Service.deleteFile(placeDetails.getImageThree());
                         placeDetailsUtils.delete(placeDetails);
                     }
+                    s3Service.deleteFile(place.getMainImage());
                     placeUtils.delete(place);
                 }
             }
@@ -170,6 +176,10 @@ public class CountryService{
                     if (roomDetails.getRoomFeatures() != null) {
                         roomDetails.getRoomFeatures().clear();
                     }
+                    s3Service.deleteFile(roomDetails.getImageOne());
+                    s3Service.deleteFile(roomDetails.getImageTwo());
+                    s3Service.deleteFile(roomDetails.getImageThree());
+                    s3Service.deleteFile(roomDetails.getImageFour());
 
                     roomDetailsUtils.delete(roomDetails);
 
@@ -184,25 +194,31 @@ public class CountryService{
                             roomUtils.delete(room);
                         }
                     }
+
+                    s3Service.deleteFile(hotel.getMainImage());
                     hotelUtils.delete(hotel);
                 }
             }
 
             if (countryEntity.getPackages() != null) {
                 for (PackageEntity packageEntity : countryEntity.getPackages()) {
+                    PackageDetailsEntity packageDetails = packageEntity.getPackageDetails();
+
+                    s3Service.deleteFile(packageDetails.getImageOne());
+                    s3Service.deleteFile(packageDetails.getImageTwo());
+                    s3Service.deleteFile(packageDetails.getImageThree());
+                    packageDetailsUtils.delete(packageDetails);
+
+                    s3Service.deleteFile(packageEntity.getMainImage());
                     packageUtils.delete(packageEntity);
                 }
             }
 
             CountryDetailsEntity countryDetails = countryEntity.getCountryDetails();
             if (countryDetails != null) {
-                String[] images = {
-                        countryEntity.getMainImage(),
-                        countryDetails.getImageOne(),
-                        countryDetails.getImageTwo(),
-                        countryDetails.getImageThree()
-                };
-                s3Service.deleteFiles(images);
+                s3Service.deleteFile(countryDetails.getImageOne());
+                s3Service.deleteFile(countryDetails.getImageTwo());
+                s3Service.deleteFile(countryDetails.getImageThree());
                 countryDetailsUtils.delete(countryDetails);
             }
 

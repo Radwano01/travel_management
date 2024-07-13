@@ -12,6 +12,7 @@ import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
 import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
+import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
 import com.hackathon.backend.repositories.hotel.hotelFeatures.HotelFeaturesRepository;
@@ -27,6 +28,7 @@ import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
 import com.hackathon.backend.utilities.hotel.RoomUtils;
 import com.hackathon.backend.utilities.hotel.features.HotelFeaturesUtils;
 import com.hackathon.backend.utilities.hotel.features.RoomFeaturesUtils;
+import com.hackathon.backend.utilities.package_.PackageDetailsUtils;
 import com.hackathon.backend.utilities.package_.PackageUtils;
 import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
 import org.junit.jupiter.api.Test;
@@ -68,6 +70,8 @@ class CountryServiceTest {
     @Mock
     PackageUtils packageUtils;
 
+    @Mock
+    PackageDetailsUtils packageDetailsUtils;
 
     @Mock
     S3Service s3Service;
@@ -143,10 +147,9 @@ class CountryServiceTest {
         verify(countryUtils).save(country);
     }
 
-
     @Test
     void deleteCountry() {
-        //given
+        // given
         CountryEntity countryEntity = new CountryEntity();
         countryEntity.setId(1);
         countryEntity.setMainImage("mainImage.jpg");
@@ -166,6 +169,7 @@ class CountryServiceTest {
         countryEntity.setHotels(hotels);
 
         PackageEntity packageEntity = new PackageEntity();
+        packageEntity.setPackageDetails(new PackageDetailsEntity());
         List<PackageEntity> packages = new ArrayList<>();
         packages.add(packageEntity);
         countryEntity.setPackages(packages);
@@ -176,23 +180,26 @@ class CountryServiceTest {
         countryDetails.setImageThree("imageThree.jpg");
         countryEntity.setCountryDetails(countryDetails);
 
-        //behavior
+        // behavior
         when(countryUtils.findCountryById(1)).thenReturn(countryEntity);
 
-        //when
+        // when
         ResponseEntity<?> response = countryService.deleteCountry(1);
 
-        //then
+        // then
         assertEquals(ResponseEntity.ok("Country and country details deleted successfully"), response);
 
         verify(placeDetailsUtils).delete(any(PlaceDetailsEntity.class));
         verify(placeUtils).delete(any(PlaceEntity.class));
         verify(roomDetailsUtils).delete(any(RoomDetailsEntity.class));
-        verify(hotelUtils).delete(any(HotelEntity.class));verify(packageUtils).delete(any(PackageEntity.class));
+        verify(hotelUtils).delete(any(HotelEntity.class));
+        verify(packageUtils).delete(any(PackageEntity.class));
         verify(countryDetailsUtils).delete(any(CountryDetailsEntity.class));
         verify(countryUtils).delete(any(CountryEntity.class));
-        verify(s3Service).deleteFiles(any(String[].class));
         verify(s3Service).deleteFile("mainImage.jpg");
+        verify(s3Service).deleteFile("imageOne.jpg");
+        verify(s3Service).deleteFile("imageTwo.jpg");
+        verify(s3Service).deleteFile("imageThree.jpg");
     }
 
 }

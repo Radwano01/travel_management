@@ -141,13 +141,10 @@ public class PlaceService{
             if(place.isPresent()) {
                 if(place.get().getPlaceDetails() != null) {
                     PlaceDetailsEntity placeDetails = place.get().getPlaceDetails();
-                    String[] ls = new String[]{
-                            placeDetails.getImageOne(),
-                            placeDetails.getImageTwo(),
-                            placeDetails.getImageThree()
-                    };
 
-                    s3Service.deleteFiles(ls);
+                    s3Service.deleteFile(placeDetails.getImageOne());
+                    s3Service.deleteFile(placeDetails.getImageTwo());
+                    s3Service.deleteFile(placeDetails.getImageThree());
                     placeDetailsUtils.delete(placeDetails);
                 }
                 s3Service.deleteFile(place.get().getMainImage());

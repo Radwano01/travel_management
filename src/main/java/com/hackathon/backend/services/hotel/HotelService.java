@@ -66,7 +66,7 @@ public class HotelService {
 
     @Transactional
     public ResponseEntity<String> createHotel(int countryId,
-                                         @NonNull PostHotelDto postHotelDto) {
+                                              @NonNull PostHotelDto postHotelDto) {
         try {
             CountryEntity country = countryUtils.findCountryById(countryId);
 
@@ -102,10 +102,17 @@ public class HotelService {
             roomDetailsUtils.save(roomDetails);
 
             boolean existsRoomDetails = roomDetailsUtils.existsById(roomDetails.getId());
-            if(!existsRoomDetails){
+            if (!existsRoomDetails) {
                 return notFoundException("Room Details is not created");
             }
 
+            for (int i = 0; i < postHotelDto.getHotelRoomsCount(); i++) {
+                RoomEntity roomEntity = new RoomEntity(hotelEntity);
+                roomUtils.save(roomEntity);
+                hotelEntity.getRooms().add(roomEntity);
+            }
+
+            hotelUtils.save(hotelEntity);
             return ResponseEntity.ok("Hotel created successfully: " + postHotelDto.getHotelName());
         } catch (EntityNotFoundException e) {
             return notFoundException(e);
@@ -113,7 +120,6 @@ public class HotelService {
             return serverErrorException(e);
         }
     }
-
 
     public ResponseEntity<?> getHotels(int countryId, int page, int size) {
         try{
@@ -162,7 +168,6 @@ public class HotelService {
 
             RoomDetailsEntity roomDetails = hotel.getRoomDetails();
             if (roomDetails != null) {
-                // Clear hotel features association
                 List<HotelFeaturesEntity> hotelFeatures = roomDetails.getHotelFeatures();
                 if (hotelFeatures != null) {
                     hotelFeatures.clear();
@@ -174,14 +179,10 @@ public class HotelService {
                     roomFeatures.clear();
                     roomDetailsUtils.save(roomDetails);
                 }
-
-                String[] imageKeys = new String[]{
-                        roomDetails.getImageOne(),
-                        roomDetails.getImageTwo(),
-                        roomDetails.getImageThree(),
-                        roomDetails.getImageFour()
-                };
-                s3Service.deleteFiles(imageKeys);
+                s3Service.deleteFile(roomDetails.getImageOne());
+                s3Service.deleteFile(roomDetails.getImageTwo());
+                s3Service.deleteFile(roomDetails.getImageThree());
+                s3Service.deleteFile(roomDetails.getImageFour());
 
                 roomDetailsUtils.delete(roomDetails);
             }

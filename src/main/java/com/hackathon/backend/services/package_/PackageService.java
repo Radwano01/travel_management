@@ -145,13 +145,12 @@ public class PackageService {
                 benefitUtils.save(benefit);
             }
 
-            String[] ls = new String[]{
-                    packageDetails.getImageOne(),
-                    packageDetails.getImageTwo(),
-                    packageDetails.getImageThree()
-            };
-            s3Service.deleteFiles(ls);
+            s3Service.deleteFile(packageDetails.getImageOne());
+            s3Service.deleteFile(packageDetails.getImageTwo());
+            s3Service.deleteFile(packageDetails.getImageThree());
             packageDetailsUtils.delete(packageDetails);
+
+
             s3Service.deleteFile(packageEntity.getMainImage());
             packageUtils.delete(packageEntity);
             return ResponseEntity.ok("Package deleted successfully");
