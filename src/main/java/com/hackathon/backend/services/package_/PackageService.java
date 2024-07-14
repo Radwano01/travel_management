@@ -68,7 +68,6 @@ public class PackageService {
                     country
             );
 
-            packageUtils.save(packageEntity);
             country.getPackages().add(packageEntity);
             countryUtils.save(country);
 

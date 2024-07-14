@@ -83,7 +83,6 @@ public class CountryService{
                     postCountryDto.getCountry(),
                     countryImageName
             );
-            countryUtils.save(country);
 
             String countryDetailsImageNameOne = s3Service.uploadFile(postCountryDto.getImageOne());
             String countryDetailsImageNameTwo = s3Service.uploadFile(postCountryDto.getImageTwo());

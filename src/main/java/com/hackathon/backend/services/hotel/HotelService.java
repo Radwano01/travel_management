@@ -76,8 +76,6 @@ public class HotelService {
                     place
             );
 
-            hotelUtils.save(hotelEntity);
-
             String roomDetailsImageNameOne = s3Service.uploadFile(postHotelDto.getImageOne());
             String roomDetailsImageNameTwo = s3Service.uploadFile(postHotelDto.getImageTwo());
             String roomDetailsImageNameThree = s3Service.uploadFile(postHotelDto.getImageThree());
@@ -94,6 +92,7 @@ public class HotelService {
             );
 
             roomDetailsUtils.save(roomDetails);
+            hotelEntity.setRoomDetails(roomDetails);
 
             boolean existsRoomDetails = roomDetailsUtils.existsById(roomDetails.getId());
             if (!existsRoomDetails) {

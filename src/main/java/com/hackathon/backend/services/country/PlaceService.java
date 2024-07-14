@@ -86,9 +86,8 @@ public class PlaceService{
                     place
             );
 
-            place.setPlaceDetails(placeDetails);
-
             placeDetailsUtils.save(placeDetails);
+            place.setPlaceDetails(placeDetails);
 
             placeUtils.save(place);
 
