@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +29,14 @@ public class UserEntity {
     private String email;
     private String password;
     private boolean verificationStatus = false;
-
     private String image;
+
+    //details
+    private String fullName;
+    private String country;
+    private String phoneNumber;
+    private String address;
+    private LocalDate dateOfBirth;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="role_id")
@@ -42,12 +49,19 @@ public class UserEntity {
     private List<PackageEvaluationEntity> packageEvaluations = new ArrayList<>();
 
     public UserEntity(String username, String email,
-                      String password, RoleEntity role,
-                      String image) {
+                      String password, String image,
+                      String fullName, String country,
+                      String phoneNumber, String address,
+                      LocalDate dateOfBirth, RoleEntity role) {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.role = role;
         this.image = image;
+        this.fullName = fullName;
+        this.country = country;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.dateOfBirth = dateOfBirth;
+        this.role = role;
     }
 }

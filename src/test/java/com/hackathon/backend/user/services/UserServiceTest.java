@@ -62,7 +62,7 @@ class UserServiceTest {
     @Test
     void registerUser() throws ExecutionException, InterruptedException {
         //given
-        RegisterUserDto registerUserDto = new RegisterUserDto("username", "email@example.com", "Password123!");
+        RegisterUserDto registerUserDto = new RegisterUserDto();
         RoleEntity role = new RoleEntity();
 
         //behavior

@@ -37,29 +37,21 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTGenerator jwtGenerator;
-    private final JavaMailSender javaMailSender;
     private final S3Service s3Service;
-
 
     @Value("${VERIFY_LINK_TO_USER}")
     private String verifyLink;
-
-    @Value("${DEFAULT_USER_IMAGE}")
-    private String default_user_image;
-
 
     @Autowired
     public UserService(AuthenticationManager authenticationManager,
                        UserUtils userUtils,
                        RoleRepository roleRepository,
-                       JavaMailSender javaMailSender,
                        PasswordEncoder passwordEncoder,
                        JWTGenerator jwtGenerator,
                        S3Service s3Service) {
         this.authenticationManager = authenticationManager;
         this.userUtils = userUtils;
         this.roleRepository = roleRepository;
-        this.javaMailSender = javaMailSender;
         this.passwordEncoder = passwordEncoder;
         this.jwtGenerator = jwtGenerator;
         this.s3Service = s3Service;
@@ -86,13 +78,17 @@ public class UserService {
             RoleEntity role = roleRepository.findByRole("USER")
                     .orElseThrow(()-> new EntityNotFoundException("Role not found"));
 
-            String defaultImageForNewUsers = default_user_image;
             UserEntity userEntity = new UserEntity(
                     registerUserDto.getUsername(),
                     registerUserDto.getEmail(),
                     passwordEncoder.encode(registerUserDto.getPassword()),
-                    role,
-                    defaultImageForNewUsers
+                    registerUserDto.getImage(),
+                    registerUserDto.getFullName(),
+                    registerUserDto.getCountry(),
+                    registerUserDto.getPhoneNumber(),
+                    registerUserDto.getAddress(),
+                    registerUserDto.getDateOfBirth(),
+                    role
             );
             userUtils.save(userEntity);
             return CompletableFuture.completedFuture((ResponseEntity.ok("Account Created")));
