@@ -67,7 +67,7 @@ public class PackageService {
                     postPackageDto.getRate(),
                     country
             );
-
+            packageUtils.save(packageEntity);
             country.getPackages().add(packageEntity);
             countryUtils.save(country);
 

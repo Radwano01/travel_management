@@ -76,6 +76,8 @@ public class HotelService {
                     place
             );
 
+            hotelUtils.save(hotelEntity);
+
             String roomDetailsImageNameOne = s3Service.uploadFile(postHotelDto.getImageOne());
             String roomDetailsImageNameTwo = s3Service.uploadFile(postHotelDto.getImageTwo());
             String roomDetailsImageNameThree = s3Service.uploadFile(postHotelDto.getImageThree());

@@ -73,6 +73,7 @@ public class PlaceService{
                     placeImageName,
                     country
             );
+            placeUtils.save(place);
 
             String placeDetailsImageNameOne = s3Service.uploadFile(postPlaceDto.getImageOne());
             String placeDetailsImageNameTwo = s3Service.uploadFile(postPlaceDto.getImageTwo());

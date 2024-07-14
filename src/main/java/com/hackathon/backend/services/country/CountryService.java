@@ -74,7 +74,7 @@ public class CountryService{
             String countryName = postCountryDto.getCountry().trim().toLowerCase();
             boolean existsCountry = countryUtils.existsByCountry(countryName);
             if (existsCountry) {
-                return alreadyValidException("Country already exist: "+countryName);
+                return alreadyValidException("Country already exists: " + countryName);
             }
 
             String countryImageName = s3Service.uploadFile(postCountryDto.getMainImage());
@@ -83,6 +83,7 @@ public class CountryService{
                     postCountryDto.getCountry(),
                     countryImageName
             );
+            countryUtils.save(country);
 
             String countryDetailsImageNameOne = s3Service.uploadFile(postCountryDto.getImageOne());
             String countryDetailsImageNameTwo = s3Service.uploadFile(postCountryDto.getImageTwo());
@@ -96,13 +97,16 @@ public class CountryService{
                     country
             );
             countryDetailsUtils.save(countryDetails);
+
             country.setCountryDetails(countryDetails);
             countryUtils.save(country);
-            return ResponseEntity.ok("Country created Successfully: "+countryName);
+
+            return ResponseEntity.ok("Country created Successfully: " + countryName);
         } catch (Exception e) {
             return serverErrorException(e);
         }
     }
+
 
     public ResponseEntity<?> getCountry() {
         try {
