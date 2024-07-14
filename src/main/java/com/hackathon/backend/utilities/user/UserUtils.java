@@ -1,6 +1,7 @@
 package com.hackathon.backend.utilities.user;
 
 
+import com.hackathon.backend.dto.userDto.EditUserDetailsDto;
 import com.hackathon.backend.dto.userDto.EditUserDto;
 import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.user.UserRepository;
@@ -91,8 +92,16 @@ public class UserUtils {
                 editUserDto.getPassword() != null;
     }
 
+    public boolean checkHelper(EditUserDetailsDto editUserDetailsDto){
+        return  editUserDetailsDto.getFullName() != null ||
+                editUserDetailsDto.getCountry() != null ||
+                editUserDetailsDto.getPhoneNumber() != null ||
+                editUserDetailsDto.getAddress() != null ||
+                editUserDetailsDto.getDateOfBirth() != null;
+    }
+
     public void editHelper(UserEntity user,
-                            EditUserDto editUserDto) {
+                           EditUserDto editUserDto) {
         if (editUserDto.getPassword() != null) {
             user.setPassword(passwordEncoder.encode(editUserDto.getPassword()));
         }
@@ -102,6 +111,25 @@ public class UserUtils {
             }
             String userImageName = s3Service.uploadFile(editUserDto.getImage());
             user.setImage(userImageName);
+        }
+    }
+
+    public void editHelper(UserEntity user,
+                           EditUserDetailsDto editUserDetailsDto){
+        if (editUserDetailsDto.getFullName() != null) {
+            user.setFullName(editUserDetailsDto.getFullName());
+        }
+        if (editUserDetailsDto.getCountry() != null) {
+            user.setCountry(editUserDetailsDto.getCountry());
+        }
+        if (editUserDetailsDto.getPhoneNumber() != null) {
+            user.setPhoneNumber(editUserDetailsDto.getPhoneNumber());
+        }
+        if (editUserDetailsDto.getAddress() != null) {
+            user.setAddress(editUserDetailsDto.getAddress());
+        }
+        if (editUserDetailsDto.getDateOfBirth() != null) {
+            user.setDateOfBirth(editUserDetailsDto.getDateOfBirth());
         }
     }
 }

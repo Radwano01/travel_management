@@ -207,4 +207,46 @@ public class UserService {
             return CompletableFuture.completedFuture((serverErrorException(e)));
         }
     }
+
+    @Async("userServiceTaskExecutor")
+    public CompletableFuture<ResponseEntity<?>> getUserDetails(long userId){
+        try{
+            UserEntity user = userUtils.findById(userId);
+            UserDto userDto = new UserDto(
+                    user.getUsername(),
+                    user.getEmail(),
+                    user.getImage(),
+                    user.isVerificationStatus(),
+                    user.getFullName(),
+                    user.getCountry(),
+                    user.getPhoneNumber(),
+                    user.getAddress(),
+                    user.getDateOfBirth()
+            );
+            return CompletableFuture.completedFuture(ResponseEntity.ok(userDto));
+        }catch (EntityNotFoundException e){
+            return CompletableFuture.completedFuture(notFoundException(e));
+        }catch (Exception e){
+            return CompletableFuture.completedFuture(serverErrorException(e));
+        }
+    }
+
+    @Async("userServiceTaskExecutor")
+    @Transactional
+    public CompletableFuture<ResponseEntity<?>> editUserDetails(long userId,
+                                                                EditUserDetailsDto editUserDetailsDto) {
+        try{
+            if(!userUtils.checkHelper(editUserDetailsDto)){
+                return CompletableFuture.completedFuture(notFoundException("you sent an empty data to change"));
+            }
+            UserEntity user = userUtils.findById(userId);
+            userUtils.editHelper(user, editUserDetailsDto);
+            userUtils.save(user);
+            return CompletableFuture.completedFuture(ResponseEntity.ok("User Details edited successfully"));
+        }catch (EntityNotFoundException e){
+            return CompletableFuture.completedFuture(notFoundException(e));
+        }catch (Exception e){
+            return CompletableFuture.completedFuture(serverErrorException(e));
+        }
+    }
 }

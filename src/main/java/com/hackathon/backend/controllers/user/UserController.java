@@ -1,5 +1,6 @@
 package com.hackathon.backend.controllers.user;
 
+import com.hackathon.backend.dto.userDto.EditUserDetailsDto;
 import com.hackathon.backend.dto.userDto.EditUserDto;
 import com.hackathon.backend.dto.userDto.LoginUserDto;
 import com.hackathon.backend.dto.userDto.RegisterUserDto;
@@ -29,13 +30,13 @@ public class UserController {
 
     @PostMapping(path = "${USER_VERIFICATION_PATH}")
     public CompletableFuture<ResponseEntity<?>> verifyUserDetails(@PathVariable("email") String email,
-                                               @PathVariable("token") String token){
+                                                                  @PathVariable("token") String token){
         return userService.verifyUser(email);
     }
 
     @PostMapping(path = "${USER_SEND_VERIFICATION_PATH}")
     public CompletableFuture<ResponseEntity<?>> sendVerificationLink(@PathVariable("userId") long userId,
-                                                  @PathVariable("token") String token){
+                                                                     @PathVariable("token") String token){
         return userService.sendVerificationLink(userId, token);
     }
 
@@ -51,8 +52,8 @@ public class UserController {
 
     @PutMapping(path="${USER_EDIT_PATH}")
     public CompletableFuture<ResponseEntity<?>> editUserDetails(@PathVariable("userId") long userId,
-                                             @RequestParam(name = "password", required = false) String password,
-                                             @RequestParam(name = "image", required = false) MultipartFile image){
+                                                                @RequestParam(name = "password", required = false) String password,
+                                                                @RequestParam(name = "image", required = false) MultipartFile image){
         EditUserDto editUserDto = new EditUserDto(
                 password,
                 image
@@ -61,5 +62,21 @@ public class UserController {
 
     }
 
+    @GetMapping(path = "${GET_USER_DETAILS_PATH}")
+    public CompletableFuture<ResponseEntity<?>> getUserDetails(@PathVariable("userId") long userId){
+        return userService.getUserDetails(userId);
+    }
 
+    @PutMapping(path = "${EDIT_USER_DETAILS_PATH}")
+    public CompletableFuture<ResponseEntity<?>> editUserDetails(@PathVariable("userId") long userId,
+                                                                @RequestBody EditUserDetailsDto editUserDetailsDto){
+        EditUserDetailsDto userDetailsDto = new EditUserDetailsDto(
+                editUserDetailsDto.getFullName(),
+                editUserDetailsDto.getCountry(),
+                editUserDetailsDto.getPhoneNumber(),
+                editUserDetailsDto.getAddress(),
+                editUserDetailsDto.getDateOfBirth()
+        );
+        return userService.editUserDetails(userId, userDetailsDto);
+    }
 }

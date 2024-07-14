@@ -62,9 +62,8 @@ public class PlaceService{
         this.roomUtils = roomUtils;
     }
 
-    public ResponseEntity<String> createPlace(int countryId,
-                                         @NonNull PostPlaceDto postPlaceDto) {
-        try{
+    public ResponseEntity<String> createPlace(int countryId, @NonNull PostPlaceDto postPlaceDto) {
+        try {
             CountryEntity country = countryUtils.findCountryById(countryId);
 
             String placeImageName = s3Service.uploadFile(postPlaceDto.getMainImage());
@@ -74,10 +73,6 @@ public class PlaceService{
                     placeImageName,
                     country
             );
-
-            placeUtils.save(place);
-            country.getPlaces().add(place);
-            countryUtils.save(country);
 
             String placeDetailsImageNameOne = s3Service.uploadFile(postPlaceDto.getImageOne());
             String placeDetailsImageNameTwo = s3Service.uploadFile(postPlaceDto.getImageTwo());
@@ -90,13 +85,20 @@ public class PlaceService{
                     postPlaceDto.getDescription(),
                     place
             );
-            placeDetailsUtils.save(placeDetails);
+
             place.setPlaceDetails(placeDetails);
+
+            placeDetailsUtils.save(placeDetails);
+
             placeUtils.save(place);
+
+            country.getPlaces().add(place);
+            countryUtils.save(country);
+
             return ResponseEntity.ok("Place created successfully");
-        }catch (EntityNotFoundException e){
+        } catch (EntityNotFoundException e) {
             return notFoundException(e);
-        } catch (Exception e){
+        } catch (Exception e) {
             return serverErrorException(e);
         }
     }

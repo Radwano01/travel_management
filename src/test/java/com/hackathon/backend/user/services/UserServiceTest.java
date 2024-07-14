@@ -1,9 +1,6 @@
 package com.hackathon.backend.user.services;
 
-import com.hackathon.backend.dto.userDto.AuthResponseDto;
-import com.hackathon.backend.dto.userDto.EditUserDto;
-import com.hackathon.backend.dto.userDto.LoginUserDto;
-import com.hackathon.backend.dto.userDto.RegisterUserDto;
+import com.hackathon.backend.dto.userDto.*;
 import com.hackathon.backend.entities.user.RoleEntity;
 import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.user.RoleRepository;
@@ -25,6 +22,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -63,6 +62,15 @@ class UserServiceTest {
     void registerUser() throws ExecutionException, InterruptedException {
         //given
         RegisterUserDto registerUserDto = new RegisterUserDto();
+        registerUserDto.setEmail("testemail");
+        registerUserDto.setUsername("testusername");
+        registerUserDto.setPassword("Testpassword1!");
+        registerUserDto.setImage("testimage");
+        registerUserDto.setFullName("testname");
+        registerUserDto.setCountry("testcountry");
+        registerUserDto.setPhoneNumber("testphonenumber");
+        registerUserDto.setAddress("testaddress");
+        registerUserDto.setDateOfBirth(LocalDate.now());
         RoleEntity role = new RoleEntity();
 
         //behavior
@@ -196,6 +204,70 @@ class UserServiceTest {
         assertTrue(userEntity.isVerificationStatus());
 
         verify(userUtils, times(1)).findUserByEmail(email);
+        verify(userUtils, times(1)).save(userEntity);
+    }
+
+    @Test
+    void testGetUserDetails() throws ExecutionException, InterruptedException {
+        // given
+        long userId = 1L;
+        UserEntity userEntity = new UserEntity();
+        userEntity.setUsername("testuser");
+        userEntity.setEmail("test@example.com");
+        userEntity.setImage("test-image.jpg");
+        userEntity.setVerificationStatus(true);
+        userEntity.setFullName("Test User");
+        userEntity.setCountry("Testland");
+        userEntity.setPhoneNumber("123456789");
+        userEntity.setAddress("123 Test St");
+        userEntity.setDateOfBirth(LocalDate.of(2000, 1, 1));
+
+        //behavior
+        when(userUtils.findById(userId)).thenReturn(userEntity);
+
+        // when
+        CompletableFuture<ResponseEntity<?>> responseFuture = userService.getUserDetails(userId);
+        ResponseEntity<?> responseEntity = responseFuture.get();
+
+        // then
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        UserDto returnedUserDto = (UserDto) responseEntity.getBody();
+
+        assertNotNull(returnedUserDto);
+        assertEquals(userEntity.getUsername(), returnedUserDto.getUsername());
+        assertEquals(userEntity.getEmail(), returnedUserDto.getEmail());
+        assertEquals(userEntity.getImage(), returnedUserDto.getImage());
+        assertEquals(userEntity.isVerificationStatus(), returnedUserDto.isVerificationStatus());
+        assertEquals(userEntity.getFullName(), returnedUserDto.getFullName());
+        assertEquals(userEntity.getCountry(), returnedUserDto.getCountry());
+        assertEquals(userEntity.getPhoneNumber(), returnedUserDto.getPhoneNumber());
+        assertEquals(userEntity.getAddress(), returnedUserDto.getAddress());
+        assertEquals(userEntity.getDateOfBirth(), returnedUserDto.getDateOfBirth());
+
+        verify(userUtils, times(1)).findById(userId);
+    }
+
+    @Test
+    void editUserDetails() throws ExecutionException, InterruptedException {
+        // given
+        long userId = 1L;
+        EditUserDetailsDto editUserDetailsDto = new EditUserDetailsDto();
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(userId);
+
+        //behavior
+        when(userUtils.findById(userId)).thenReturn(userEntity);
+        when(userUtils.checkHelper(editUserDetailsDto)).thenReturn(true);
+
+        // when
+        CompletableFuture<ResponseEntity<?>> response = userService.editUserDetails(userId, editUserDetailsDto);
+
+        // then
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
+        assertEquals("User Details edited successfully", response.get().getBody());
+        verify(userUtils, times(1)).findById(userId);
+        verify(userUtils, times(1)).editHelper(userEntity, editUserDetailsDto);
         verify(userUtils, times(1)).save(userEntity);
     }
 }
