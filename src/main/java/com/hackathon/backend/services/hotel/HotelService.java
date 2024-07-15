@@ -3,7 +3,6 @@ package com.hackathon.backend.services.hotel;
 import com.hackathon.backend.dto.hotelDto.EditHotelDto;
 import com.hackathon.backend.dto.hotelDto.PostHotelDto;
 import com.hackathon.backend.dto.hotelDto.GetHotelDto;
-import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
@@ -12,7 +11,6 @@ import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
-import com.hackathon.backend.utilities.country.CountryUtils;
 import com.hackathon.backend.utilities.country.PlaceUtils;
 import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
 import com.hackathon.backend.utilities.hotel.HotelUtils;
@@ -59,10 +57,10 @@ public class HotelService {
     }
 
     @Transactional
-    public ResponseEntity<String> createHotel(int countryId,
+    public ResponseEntity<String> createHotel(int placeId,
                                               @NonNull PostHotelDto postHotelDto) {
         try {
-            PlaceEntity place = placeUtils.findById(countryId);
+            PlaceEntity place = placeUtils.findById(placeId);
 
             String hotelImageName = s3Service.uploadFile(postHotelDto.getMainImage());
 

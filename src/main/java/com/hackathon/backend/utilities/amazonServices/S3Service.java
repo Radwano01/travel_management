@@ -1,10 +1,7 @@
 package com.hackathon.backend.utilities.amazonServices;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -53,12 +50,19 @@ public class S3Service {
         return fileName;
     }
 
-    public void deleteFile(String fileName){
-        try{
-            amazonS3.deleteObject(new DeleteObjectRequest(BUCKET_NAME, fileName));
-        }catch (Exception e){
+    public boolean deleteFile(String fileName) {
+        try {
+            DeleteObjectRequest deleteRequest = new DeleteObjectRequest(BUCKET_NAME, fileName);
+            amazonS3.deleteObject(deleteRequest);
+
+            return true;
+        } catch (AmazonS3Exception e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return false;
     }
 }
 

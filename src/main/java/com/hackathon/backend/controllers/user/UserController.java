@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -52,13 +53,8 @@ public class UserController {
 
     @PutMapping(path="${USER_EDIT_PATH}")
     public CompletableFuture<ResponseEntity<?>> editUserDetails(@PathVariable("userId") long userId,
-                                                                @RequestParam(name = "password", required = false) String password,
-                                                                @RequestParam(name = "image", required = false) MultipartFile image){
-        EditUserDto editUserDto = new EditUserDto(
-                password,
-                image
-        );
-        return userService.editUser(userId,editUserDto);
+                                                                @RequestBody EditUserDto editUserDto){
+        return userService.editUser(userId, editUserDto);
 
     }
 
@@ -75,7 +71,8 @@ public class UserController {
                 editUserDetailsDto.getCountry(),
                 editUserDetailsDto.getPhoneNumber(),
                 editUserDetailsDto.getAddress(),
-                editUserDetailsDto.getDateOfBirth()
+                editUserDetailsDto.getDateOfBirth(),
+                editUserDetailsDto.getImage()
         );
         return userService.editUserDetails(userId, userDetailsDto);
     }

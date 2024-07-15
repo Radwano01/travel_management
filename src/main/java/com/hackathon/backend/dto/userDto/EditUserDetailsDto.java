@@ -15,16 +15,19 @@ public class EditUserDetailsDto {
     private String phoneNumber;
     private String address;
     private LocalDate dateOfBirth;
+    private String image;
 
     public EditUserDetailsDto(String fullName,
                               String country,
                               String phoneNumber,
                               String address,
-                              LocalDate dateOfBirth) {
+                              LocalDate dateOfBirth,
+                              String image) {
         this.fullName = fullName;
         this.country = country;
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.dateOfBirth = dateOfBirth;
+        this.image = image;
     }
 }

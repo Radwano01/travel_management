@@ -193,8 +193,13 @@ public class UserService {
                 return CompletableFuture.completedFuture((badRequestException("This account has verified already")));
             }
 
+            String verificationUrl = verifyLink + "/" + user.getEmail() + "/" + token;
             String subject = "Email Verification From Tourism Project";
-            String message = "Please Click to the link to verify your account: "+verifyLink+user.getEmail()+"/"+token;
+            String message = "<html><body>"
+                    + "<h1>Email Verification</h1>"
+                    + "<p>Please click the link below to verify your account:</p>"
+                    + "<a href=\"" + verificationUrl + "\">Verify Email</a>"
+                    + "</body></html>";
 
             userUtils.sendMessageToEmail(
                     userUtils.prepareTheMessageEmail(user.getEmail(), subject, message)

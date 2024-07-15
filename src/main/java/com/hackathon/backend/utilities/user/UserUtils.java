@@ -88,8 +88,7 @@ public class UserUtils {
     }
 
     public boolean checkHelper(EditUserDto editUserDto){
-        return  editUserDto.getImage() != null ||
-                editUserDto.getPassword() != null;
+        return  editUserDto.getPassword() != null;
     }
 
     public boolean checkHelper(EditUserDetailsDto editUserDetailsDto){
@@ -97,20 +96,14 @@ public class UserUtils {
                 editUserDetailsDto.getCountry() != null ||
                 editUserDetailsDto.getPhoneNumber() != null ||
                 editUserDetailsDto.getAddress() != null ||
-                editUserDetailsDto.getDateOfBirth() != null;
+                editUserDetailsDto.getDateOfBirth() != null ||
+                editUserDetailsDto.getImage() != null;
     }
 
     public void editHelper(UserEntity user,
                            EditUserDto editUserDto) {
         if (editUserDto.getPassword() != null) {
             user.setPassword(passwordEncoder.encode(editUserDto.getPassword()));
-        }
-        if(editUserDto.getImage() != null){
-            if(user.getImage() != null) {
-                s3Service.deleteFile(user.getImage());
-            }
-            String userImageName = s3Service.uploadFile(editUserDto.getImage());
-            user.setImage(userImageName);
         }
     }
 
@@ -130,6 +123,12 @@ public class UserUtils {
         }
         if (editUserDetailsDto.getDateOfBirth() != null) {
             user.setDateOfBirth(editUserDetailsDto.getDateOfBirth());
+        }
+        if (editUserDetailsDto.getImage() != null && !editUserDetailsDto.getImage().isEmpty()) {
+            if (user.getImage() != null && !user.getImage().isEmpty()) {
+                s3Service.deleteFile(user.getImage());
+            }
+            user.setImage(editUserDetailsDto.getImage());
         }
     }
 }

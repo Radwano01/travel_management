@@ -14,6 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Objects;
+
 @RestController
 @RequestMapping(path = "${BASE_API}")
 public class S3amazonController {
@@ -25,16 +30,25 @@ public class S3amazonController {
     private String BUCKET_NAME;
 
     @PostMapping("${UPLOAD_IMAGE_API}")
-    public ResponseEntity<String> uploadFileApi(@RequestParam("file") MultipartFile file) {
-        String fileUrl = "";
+    public String uploadFileApi(@RequestParam("file") MultipartFile file) {
+        String fileName = "";
         try {
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            amazonS3.putObject(new PutObjectRequest(BUCKET_NAME, fileName, file.getInputStream(), new ObjectMetadata())
+            File convertedFile = convertMultiPartFileToFile(file);
+            fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            amazonS3.putObject(new PutObjectRequest(BUCKET_NAME, fileName, convertedFile)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
-            fileUrl = amazonS3.getUrl(BUCKET_NAME, fileName).toString();
+            convertedFile.delete();
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
         }
-        return new ResponseEntity<>(fileUrl, HttpStatus.OK);
+        return fileName;
+    }
+
+    private File convertMultiPartFileToFile(MultipartFile file) throws IOException {
+        File convertedFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
+        try(FileOutputStream fos = new FileOutputStream(convertedFile)){
+            fos.write(file.getBytes());
+        }
+        return convertedFile;
     }
 }

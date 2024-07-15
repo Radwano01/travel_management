@@ -143,27 +143,23 @@ class UserServiceTest {
         long userId = 1L;
 
         EditUserDto editUserDto = new EditUserDto(
-                "Password123!",
-                new MockMultipartFile("newImage1", "image.jpg", "image/jpeg", "image data".getBytes())
+                "Password123!"
         );
 
         UserEntity userEntity = new UserEntity();
         userEntity.setId(userId);
         userEntity.setPassword("Password12345!");
-        userEntity.setImage("oldImage");
 
         // Mock behavior
         when(userUtils.findById(userId)).thenReturn(userEntity);
         when(userUtils.checkHelper(editUserDto)).thenReturn(true);
         when(passwordEncoder.encode(editUserDto.getPassword())).thenReturn("encodedNewPassword123!!");
-        when(s3Service.uploadFile(any(MockMultipartFile.class))).thenReturn("newImageUrl");
 
         doAnswer(invocation -> {
             UserEntity entity = invocation.getArgument(0);
             EditUserDto dto = invocation.getArgument(1);
 
             entity.setPassword(passwordEncoder.encode(dto.getPassword()));
-            entity.setImage(s3Service.uploadFile(dto.getImage()));
 
             return null;
         }).when(userUtils).editHelper(any(UserEntity.class), any(EditUserDto.class));
@@ -175,9 +171,6 @@ class UserServiceTest {
         assertEquals("user updated successfully", response.get().getBody());
         assertEquals(HttpStatus.OK, response.get().getStatusCode());
         assertEquals("encodedNewPassword123!!", userEntity.getPassword());
-        assertEquals("newImageUrl", userEntity.getImage());
-
-        verify(s3Service, times(1)).uploadFile(editUserDto.getImage());
         verify(userUtils, times(1)).save(userEntity);
     }
 
