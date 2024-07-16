@@ -16,6 +16,7 @@ import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,7 +114,7 @@ public class PlaneSeatBookingService {
                            String arrivalAirport,
                            String arrivalAirportCode,
                            String reservationName,
-                           LocalDateTime bookedDate) {
+                           LocalDateTime bookedDate) throws MessagingException {
         String subject = "Flight Booking Confirmation";
         String message = String.format("""
         Dear %s,

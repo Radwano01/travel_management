@@ -6,10 +6,13 @@ import com.hackathon.backend.dto.userDto.EditUserDto;
 import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.user.UserRepository;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -75,16 +78,17 @@ public class UserUtils {
         userRepository.delete(user);
     }
 
-    public SimpleMailMessage prepareTheMessageEmail(String email, String subject, String message){
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(email);
-        mailMessage.setSubject(subject);
-        mailMessage.setText(message);
-        return mailMessage;
+    public MimeMessage prepareTheMessageEmail(String email, String subject, String message) throws MessagingException {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+        helper.setTo(email);
+        helper.setSubject(subject);
+        helper.setText(message, true);
+        return mimeMessage;
     }
 
-    public void sendMessageToEmail(SimpleMailMessage simpleMailMessage){
-        javaMailSender.send(simpleMailMessage);
+    public void sendMessageToEmail(MimeMessage mimeMessage){
+        javaMailSender.send(mimeMessage);
     }
 
     public boolean checkHelper(EditUserDto editUserDto){
