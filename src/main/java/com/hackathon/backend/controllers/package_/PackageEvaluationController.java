@@ -32,14 +32,12 @@ public class PackageEvaluationController {
 
     @PutMapping(path = "${EDIT_PACKAGE_EVALUATION_PATH}")
     public ResponseEntity<String> editComment(@PathVariable("commentId") long commentId,
-                                         @RequestBody EditPackageEvaluationDto editPackageEvaluationDto){
+                                              @RequestBody EditPackageEvaluationDto editPackageEvaluationDto){
         return packageEvaluationService.editComment(commentId, editPackageEvaluationDto);
     }
 
     @DeleteMapping(path = "${REMOVE_PACKAGE_EVALUATION_PATH}")
-    public ResponseEntity<String> removeComment(@PathVariable("packageId") int packageId,
-                                           @PathVariable("userId") long userId,
-                                           @PathVariable("commentId") long commentId){
-        return packageEvaluationService.removeComment(packageId, userId, commentId);
+    public ResponseEntity<String> removeComment(@PathVariable("commentId") long commentId){
+        return packageEvaluationService.removeComment(commentId);
     }
 }

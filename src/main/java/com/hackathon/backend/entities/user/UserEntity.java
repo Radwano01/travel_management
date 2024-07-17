@@ -42,7 +42,7 @@ public class UserEntity {
     private RoleEntity role;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<HotelEvaluationEntity> evaluations = new ArrayList<>();
+    private List<HotelEvaluationEntity> hotelEvaluations = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<PackageEvaluationEntity> packageEvaluations = new ArrayList<>();

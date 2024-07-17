@@ -1,9 +1,6 @@
 package com.hackathon.backend.controllers.user;
 
-import com.hackathon.backend.dto.userDto.EditUserDetailsDto;
-import com.hackathon.backend.dto.userDto.EditUserDto;
-import com.hackathon.backend.dto.userDto.LoginUserDto;
-import com.hackathon.backend.dto.userDto.RegisterUserDto;
+import com.hackathon.backend.dto.userDto.*;
 import com.hackathon.backend.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -75,5 +72,15 @@ public class UserController {
                 editUserDetailsDto.getImage()
         );
         return userService.editUserDetails(userId, userDetailsDto);
+    }
+
+    @PostMapping(path = "${VERIFY_USER_PHONE_NUMBER_PATH}")
+    public void verifyPhoneNumber(@RequestBody String phoneNumber){
+        userService.sendSms(phoneNumber);
+    }
+
+    @PostMapping("${VERIFY_USER_PHONE_NUMBER_CODE_PATH}")
+    public boolean verifyCode(@RequestBody VerifyPhoneNumberDto verifyPhoneNumberDto) {
+        return userService.verifyCode(verifyPhoneNumberDto.getPhoneNumber(), verifyPhoneNumberDto.getCode());
     }
 }

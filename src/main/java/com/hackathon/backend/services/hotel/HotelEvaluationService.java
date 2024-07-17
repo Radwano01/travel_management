@@ -13,8 +13,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
@@ -35,7 +37,7 @@ public class HotelEvaluationService {
         this.hotelUtils = hotelUtils;
     }
 
-
+    @Async("commentTaskExecutor")
     @Transactional
     public ResponseEntity<String> addComment(long hotelId, long userId,
                                         @NonNull HotelEvaluationDto
@@ -54,8 +56,13 @@ public class HotelEvaluationService {
                     user
 
             );
+            hotelEvaluationUtils.save(hotelEvaluation);
+
             hotel.getEvaluations().add(hotelEvaluation);
             hotelEvaluationUtils.save(hotelEvaluation);
+
+            user.getHotelEvaluations().add(hotelEvaluation);
+            userUtils.save(user);
             return ResponseEntity.ok("Comment added successfully");
         }catch (EntityNotFoundException e){
             return notFoundException(e);
@@ -68,15 +75,22 @@ public class HotelEvaluationService {
         try{
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
             List<HotelEvaluationEntity> hotelEvaluations = hotel.getEvaluations();
-            List<HotelEvaluationDto> hotelEvaluationDto = hotelEvaluations.stream()
-                    .map((evaluation)-> new HotelEvaluationDto(
-                            evaluation.getId(),
-                            evaluation.getComment(),
-                            evaluation.getRate(),
-                            evaluation.getUser().getUsername(),
-                            evaluation.getUser().getImage()
-                    )).toList();
-            return ResponseEntity.ok(hotelEvaluationDto);
+
+            List<HotelEvaluationDto> hotelEvaluationDtos = new ArrayList<>();
+
+            for(HotelEvaluationEntity hotelEvaluation:hotelEvaluations){
+                HotelEvaluationDto hotelEvaluationDto = new HotelEvaluationDto(
+                        hotelEvaluation.getId(),
+                        hotelEvaluation.getComment(),
+                        hotelEvaluation.getRate(),
+                        hotelEvaluation.getUser().getId(),
+                        hotelEvaluation.getUser().getUsername(),
+                        hotelEvaluation.getUser().getImage()
+                );
+                hotelEvaluationDtos.add(hotelEvaluationDto);
+            }
+
+            return ResponseEntity.ok(hotelEvaluationDtos);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){
@@ -84,6 +98,7 @@ public class HotelEvaluationService {
         }
     }
 
+    @Async("commentTaskExecutor")
     @Transactional
     public ResponseEntity<String> editComment(long commentId,
                                          EditHotelEvaluationDto editHotelEvaluationDto) {
@@ -102,24 +117,25 @@ public class HotelEvaluationService {
         }
     }
 
+    @Async("commentTaskExecutor")
     @Transactional
-    public ResponseEntity<String> removeComment(long hotelId,
-                                           long userId,
-                                           long commentId) {
+    public ResponseEntity<String> removeComment(long commentId) {
         try {
-            HotelEntity hotel = hotelUtils.findHotelById(hotelId);
-            UserEntity user = userUtils.findById(userId);
             HotelEvaluationEntity hotelEvaluation = hotelEvaluationUtils.findById(commentId);
-            if(hotel != null && user != null && hotelEvaluation != null){
-                hotel.getEvaluations().remove(hotelEvaluation);
-                user.getEvaluations().remove(hotelEvaluation);
-                hotelUtils.save(hotel);
-                userUtils.save(user);
-                hotelEvaluationUtils.delete(hotelEvaluation);
-                return ResponseEntity.ok("Comment deleted successfully");
-            }else{
-                return notFoundException("Hotel or User or Hotel Evaluation not found");
+            if(hotelEvaluation == null) {
+                return badRequestException("Comment is not found");
             }
+            HotelEntity hotel = hotelEvaluation.getHotel();
+            UserEntity user = hotelEvaluation.getUser();
+
+            hotel.getEvaluations().remove(hotelEvaluation);
+            hotelUtils.save(hotel);
+
+            user.getHotelEvaluations().remove(hotelEvaluation);
+            userUtils.save(user);
+
+            hotelEvaluationUtils.delete(hotelEvaluation);
+            return ResponseEntity.ok("Comment deleted successfully");
         } catch (EntityNotFoundException e) {
             return notFoundException(e);
         } catch (Exception e) {

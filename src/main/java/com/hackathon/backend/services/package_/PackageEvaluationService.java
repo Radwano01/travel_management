@@ -13,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class PackageEvaluationService {
         this.packageEvaluationUtils = packageEvaluationUtils;
     }
 
+    @Async("commentTaskExecutor")
     @Transactional
     public ResponseEntity<String> addComment(int packageId,
                                         long userId,
@@ -51,8 +53,12 @@ public class PackageEvaluationService {
                     packageEntity
 
             );
+            packageEvaluationUtils.save(packageEvaluation);
+
             packageEntity.getPackageEvaluations().add(packageEvaluation);
             packageUtils.save(packageEntity);
+
+            user.getPackageEvaluations().add(packageEvaluation);
             userUtils.save(user);
             return ResponseEntity.ok("Comment added successfully");
         } catch (EntityNotFoundException e) {
@@ -65,33 +71,36 @@ public class PackageEvaluationService {
     public ResponseEntity<?> getComments(int packageId) {
         try {
             PackageEntity packageEntity = packageUtils.findById(packageId);
+
             List<PackageEvaluationEntity> packageEvaluations = packageEntity.getPackageEvaluations();
-            List<PackageEvaluationDto> packageEvaluationDtos = packageEvaluations.stream()
-                    .map((evaluation) -> {
-                        if (evaluation.getUser() != null) {
-                            return new PackageEvaluationDto(
-                                    evaluation.getId(),
-                                    evaluation.getComment(),
-                                    evaluation.getRate(),
-                                    evaluation.getUser().getUsername(),
-                                    evaluation.getUser().getImage()
-                            );
-                        } else {
-                            return null;
-                        }
-                    }).collect(Collectors.toList());
-            return ResponseEntity.ok(packageEvaluationDtos);
+
+
+            List<PackageEvaluationDto> packageEvaluationDtoList = new ArrayList<>();
+
+            for(PackageEvaluationEntity packageEvaluation:packageEvaluations){
+                PackageEvaluationDto packageEvaluationDto = new PackageEvaluationDto(
+                        packageEvaluation.getId(),
+                        packageEvaluation.getComment(),
+                        packageEvaluation.getRate(),
+                        packageEvaluation.getUser().getId(),
+                        packageEvaluation.getUser().getUsername(),
+                        packageEvaluation.getUser().getImage()
+                );
+                packageEvaluationDtoList.add(packageEvaluationDto);
+            }
+
+            return ResponseEntity.ok(packageEvaluationDtoList);
         } catch (EntityNotFoundException e) {
-            return notFoundException(e);
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return serverErrorException(e);
         }
     }
 
-
+    @Async("commentTaskExecutor")
     @Transactional
     public ResponseEntity<String> editComment(long commentId,
-                                         EditPackageEvaluationDto editPackageEvaluationDto) {
+                                              EditPackageEvaluationDto editPackageEvaluationDto) {
         try {
             if(!packageEvaluationUtils.checkHelper(editPackageEvaluationDto)){
                 return badRequestException("you sent an empty data to change");
@@ -107,32 +116,25 @@ public class PackageEvaluationService {
         }
     }
 
+    @Async("commentTaskExecutor")
     @Transactional
-    public ResponseEntity<String> removeComment(int packageId, long userId, long commentId) {
+    public ResponseEntity<String> removeComment(long commentId) {
         try {
-            PackageEntity packageEntity = packageUtils.findById(packageId);
-            UserEntity user = userUtils.findById(userId);
             PackageEvaluationEntity packageEvaluation = packageEvaluationUtils.findById(commentId);
-
-            if (packageEntity != null && user != null && packageEvaluation != null) {
-                if (packageEntity.getPackageEvaluations() == null) {
-                    packageEntity.setPackageEvaluations(new ArrayList<>());
-                }
-
-                packageEntity.getPackageEvaluations().remove(packageEvaluation);
-
-                if (user.getPackageEvaluations() == null) {
-                    user.setPackageEvaluations(new ArrayList<>());
-                }
-                user.getPackageEvaluations().remove(packageEvaluation);
-
-                packageUtils.save(packageEntity);
-                userUtils.save(user);
-                packageEvaluationUtils.delete(packageEvaluation);
-                return ResponseEntity.ok("Comment deleted successfully");
-            } else {
-                return ResponseEntity.ok("Comment not found");
+            if(packageEvaluation == null){
+                return badRequestException("Comment is not found");
             }
+            PackageEntity packageEntity = packageEvaluation.getPackageEntity();
+            UserEntity user = packageEvaluation.getUser();
+
+            packageEntity.getPackageEvaluations().remove(packageEvaluation);
+            packageUtils.save(packageEntity);
+
+            user.getPackageEvaluations().remove(packageEvaluation);
+            userUtils.save(user);
+
+            packageEvaluationUtils.delete(packageEvaluation);
+            return ResponseEntity.ok("Comment deleted successfully");
         } catch (EntityNotFoundException e) {
             return notFoundException(e);
         } catch (Exception e) {

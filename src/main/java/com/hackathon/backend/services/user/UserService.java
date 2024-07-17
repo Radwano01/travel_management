@@ -1,5 +1,6 @@
 package com.hackathon.backend.services.user;
 
+import com.hackathon.backend.config.TwilioConfig;
 import com.hackathon.backend.dto.userDto.*;
 import com.hackathon.backend.entities.user.RoleEntity;
 import com.hackathon.backend.entities.user.UserEntity;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,6 +38,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JWTGenerator jwtGenerator;
     private final S3Service s3Service;
+    private final TwilioConfig twilioConfig;
 
     @Value("${VERIFY_LINK_TO_USER}")
     private String verifyLink;
@@ -48,13 +49,15 @@ public class UserService {
                        RoleRepository roleRepository,
                        PasswordEncoder passwordEncoder,
                        JWTGenerator jwtGenerator,
-                       S3Service s3Service) {
+                       S3Service s3Service,
+                       TwilioConfig twilioConfig) {
         this.authenticationManager = authenticationManager;
         this.userUtils = userUtils;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtGenerator = jwtGenerator;
         this.s3Service = s3Service;
+        this.twilioConfig = twilioConfig;
     }
 
     @Async("userServiceTaskExecutor")
@@ -253,5 +256,13 @@ public class UserService {
         }catch (Exception e){
             return CompletableFuture.completedFuture(serverErrorException(e));
         }
+    }
+
+    public void sendSms(String phoneNumber){
+        twilioConfig.sendSms(phoneNumber);
+    }
+
+    public boolean verifyCode(String phoneNumber, String code) {
+        return twilioConfig.checkVerificationCode(phoneNumber, code);
     }
 }

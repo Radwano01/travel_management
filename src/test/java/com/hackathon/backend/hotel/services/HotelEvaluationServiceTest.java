@@ -153,12 +153,10 @@ class HotelEvaluationServiceTest {
         HotelEvaluationEntity hotelEvaluation = new HotelEvaluationEntity("testComment", 4, hotel, user);
 
         //behavior
-        when(hotelUtils.findHotelById(hotelId)).thenReturn(hotel);
-        when(userUtils.findById(userId)).thenReturn(user);
         when(hotelEvaluationUtils.findById(commentId)).thenReturn(hotelEvaluation);
 
         //when
-        ResponseEntity<?> response = hotelEvaluationService.removeComment(hotelId, userId, commentId);
+        ResponseEntity<?> response = hotelEvaluationService.removeComment(commentId);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());

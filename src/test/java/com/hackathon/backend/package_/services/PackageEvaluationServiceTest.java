@@ -152,12 +152,10 @@ class PackageEvaluationServiceTest {
         PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity("testComment", 4, user, packageEntity);
 
         //behavior
-        when(packageUtils.findById(packageId)).thenReturn(packageEntity);
-        when(userUtils.findById(userId)).thenReturn(user);
         when(packageEvaluationUtils.findById(commentId)).thenReturn(packageEvaluation);
 
         //when
-        ResponseEntity<?> response = packageEvaluationService.removeComment(packageId, userId, commentId);
+        ResponseEntity<?> response = packageEvaluationService.removeComment(commentId);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());

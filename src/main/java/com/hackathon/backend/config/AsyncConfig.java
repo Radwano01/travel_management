@@ -34,4 +34,15 @@ public class AsyncConfig {
         executor.initialize();
         return executor;
     }
+
+    @Bean(name = "commentTaskExecutor")
+    public ThreadPoolTaskExecutor commentTaskExecutor(){
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(10);
+        executor.setMaxPoolSize(100);
+        executor.setQueueCapacity(200);
+        executor.setThreadNamePrefix("Async-");
+        executor.initialize();
+        return executor;
+    }
 }
