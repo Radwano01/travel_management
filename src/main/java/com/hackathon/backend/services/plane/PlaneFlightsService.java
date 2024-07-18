@@ -40,6 +40,7 @@ public class PlaneFlightsService {
         this.airPortsUtils = airPortsUtils;
     }
 
+    @Transactional
     public ResponseEntity<String> addFlight(long planeId, long departureAirPortId,
                                             long destinationAirPortId, FlightDto flightDto) {
         try {
@@ -126,8 +127,12 @@ public class PlaneFlightsService {
     public ResponseEntity<String> deleteFlight(long flightId) {
         try {
             PlaneFlightsEntity planeFlights = planeFlightsUtils.findById(flightId);
+
             if (planeFlights != null) {
-                planeFlightsUtils.deleteById(flightId);
+                PlaneEntity plane = planeFlights.getPlane();
+                plane.setStatus(true);
+                planeUtils.save(plane);
+                planeFlightsUtils.delete(planeFlights);
                 return ResponseEntity.ok("flight deleted successfully");
             } else {
                 return notFoundException("flight not found");
@@ -148,13 +153,12 @@ public class PlaneFlightsService {
         LocalDateTime currentDateTime = LocalDateTime.now();
 
         for (PlaneFlightsEntity flight : flights) {
-            if (flight.getAvailableSeats() == 0) {
-                planeFlightsUtils.deleteById(flight.getId());
-                continue;
-            }
 
             LocalDateTime endTime = flight.getArrivalTime();
             if (currentDateTime.isAfter(endTime)) {
+                PlaneEntity plane = flight.getPlane();
+                plane.setStatus(true);
+                planeUtils.save(plane);
                 planeFlightsUtils.deleteById(flight.getId());
             }
         }

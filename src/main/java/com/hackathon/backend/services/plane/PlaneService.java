@@ -1,12 +1,11 @@
 package com.hackathon.backend.services.plane;
 
-
 import com.hackathon.backend.dto.planeDto.EditPlaneDto;
 import com.hackathon.backend.dto.planeDto.GetPlaneDto;
 import com.hackathon.backend.dto.planeDto.PlaneDto;
 import com.hackathon.backend.entities.plane.PlaneEntity;
+import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
 import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
-import com.hackathon.backend.repositories.plane.PlaneSeatsRepository;
 import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
 import com.hackathon.backend.utilities.plane.PlaneSeatsUtils;
 import com.hackathon.backend.utilities.plane.PlaneUtils;
@@ -18,7 +17,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
@@ -79,7 +77,7 @@ public class PlaneService{
             PlaneEntity planeEntity = planeUtils.findPlaneById(planeId);
             planeUtils.editHelper(planeEntity, editPlaneDto);
             planeUtils.save(planeEntity);
-            return ResponseEntity.ok("Plane updated Successfully");
+            return ResponseEntity.ok("Plane updated successfully");
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         } catch (Exception e){
@@ -91,14 +89,25 @@ public class PlaneService{
     public ResponseEntity<String> deletePlane(long planeId) {
         try{
             PlaneEntity plane = planeUtils.findById(planeId);
+            if (plane == null) {
+                return notFoundException("Plane not found");
+            }
 
-            for(PlaneSeatsEntity planeSeats:plane.getPlaneSeats()){
+            for (PlaneSeatsEntity planeSeats : plane.getPlaneSeats()) {
                 planeSeatsUtils.delete(planeSeats);
             }
-            planeFlightsUtils.delete(plane.getFlight());
+
+            PlaneFlightsEntity flight = plane.getFlight();
+            if (flight != null) {
+                planeFlightsUtils.delete(flight);
+            }
+
             planeUtils.delete(plane);
+
             return ResponseEntity.ok("Plane deleted successfully");
-        }catch (Exception e){
+        }catch (EntityNotFoundException e){
+            return notFoundException(e);
+        } catch (Exception e){
             return serverErrorException(e);
         }
     }
