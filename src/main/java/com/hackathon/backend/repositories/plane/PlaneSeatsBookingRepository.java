@@ -10,4 +10,5 @@ import java.util.List;
 
 @Repository
 public interface PlaneSeatsBookingRepository extends JpaRepository<PlaneSeatsBookingEntity, Long> {
+    List<PlaneSeatsBookingEntity> findByUserId(long userId);
 }

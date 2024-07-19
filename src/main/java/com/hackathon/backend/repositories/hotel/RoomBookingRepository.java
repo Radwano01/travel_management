@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface RoomBookingRepository extends JpaRepository<RoomBookingEntity, Long> {
     List<RoomBookingEntity> findAllByEndTime(LocalDateTime nowTime);
+
+    List<RoomBookingEntity> findByUserId(long userId);
 }

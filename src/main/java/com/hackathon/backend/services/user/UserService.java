@@ -3,9 +3,17 @@ package com.hackathon.backend.services.user;
 import com.hackathon.backend.config.TwilioConfig;
 import com.hackathon.backend.dto.userDto.*;
 import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
+import com.hackathon.backend.entities.hotel.RoomBookingEntity;
+import com.hackathon.backend.entities.package_.PackageBookingEntity;
 import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
+import com.hackathon.backend.entities.plane.PlaneSeatsBookingEntity;
 import com.hackathon.backend.entities.user.RoleEntity;
 import com.hackathon.backend.entities.user.UserEntity;
+import com.hackathon.backend.repositories.hotel.RoomBookingRepository;
+import com.hackathon.backend.repositories.package_.PackageBookingRepository;
+import com.hackathon.backend.repositories.plane.PlaneFlightsRepository;
+import com.hackathon.backend.repositories.plane.PlaneSeatsBookingRepository;
+import com.hackathon.backend.repositories.plane.PlaneSeatsRepository;
 import com.hackathon.backend.repositories.user.RoleRepository;
 import com.hackathon.backend.security.JWTGenerator;
 import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
@@ -28,6 +36,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.*;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
@@ -45,6 +54,9 @@ public class UserService {
     private final TwilioConfig twilioConfig;
     private final HotelEvaluationUtils hotelEvaluationUtils;
     private final PackageEvaluationUtils packageEvaluationUtils;
+    private final RoomBookingRepository roomBookingRepository;
+    private final PackageBookingRepository packageBookingRepository;
+    private final PlaneSeatsBookingRepository planeSeatsBookingRepository;
 
     @Value("${VERIFY_LINK_TO_USER}")
     private String verifyLink;
@@ -58,7 +70,10 @@ public class UserService {
                        S3Service s3Service,
                        TwilioConfig twilioConfig,
                        HotelEvaluationUtils hotelEvaluationUtils,
-                       PackageEvaluationUtils packageEvaluationUtils) {
+                       PackageEvaluationUtils packageEvaluationUtils,
+                       RoomBookingRepository roomBookingRepository,
+                       PackageBookingRepository packageBookingRepository,
+                       PlaneSeatsBookingRepository planeSeatsBookingRepository) {
         this.authenticationManager = authenticationManager;
         this.userUtils = userUtils;
         this.roleRepository = roleRepository;
@@ -67,8 +82,10 @@ public class UserService {
         this.s3Service = s3Service;
         this.twilioConfig = twilioConfig;
         this.hotelEvaluationUtils = hotelEvaluationUtils;
-
         this.packageEvaluationUtils = packageEvaluationUtils;
+        this.roomBookingRepository = roomBookingRepository;
+        this.packageBookingRepository = packageBookingRepository;
+        this.planeSeatsBookingRepository = planeSeatsBookingRepository;
     }
 
     @Async("userServiceTaskExecutor")
@@ -159,6 +176,30 @@ public class UserService {
                     packageEvaluationUtils.delete(packageEvaluation);
                 }
             }
+
+            List<RoomBookingEntity> roomBookingEntities = roomBookingRepository.findByUserId(userId);
+
+            if(roomBookingEntities != null){
+                for(RoomBookingEntity roomBookingEntity:roomBookingEntities){
+                    roomBookingRepository.delete(roomBookingEntity);
+                }
+            }
+
+            List<PackageBookingEntity> packageBookingEntities = packageBookingRepository.findByUserId(userId);
+
+            if(packageBookingEntities != null){
+                for(PackageBookingEntity packageBookingEntity:packageBookingEntities){
+                    packageBookingRepository.delete(packageBookingEntity);
+                }
+            }
+
+            List<PlaneSeatsBookingEntity> planeFlightsEntities = planeSeatsBookingRepository.findByUserId(userId);
+            if(planeFlightsEntities != null){
+                for(PlaneSeatsBookingEntity planeFlights:planeFlightsEntities){
+                    planeSeatsBookingRepository.delete(planeFlights);
+                }
+            }
+
             s3Service.deleteFile(user.getImage());
             userUtils.delete(user);
             return CompletableFuture.completedFuture((ResponseEntity.ok("Account deleted successfully")));

@@ -41,10 +41,10 @@ public class UserEntity {
     @JoinColumn(name="role_id")
     private RoleEntity role;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<HotelEvaluationEntity> hotelEvaluations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<PackageEvaluationEntity> packageEvaluations = new ArrayList<>();
 
     public UserEntity(String username, String email,
