@@ -3,6 +3,9 @@ package com.hackathon.backend.user.services;
 import com.hackathon.backend.dto.userDto.*;
 import com.hackathon.backend.entities.user.RoleEntity;
 import com.hackathon.backend.entities.user.UserEntity;
+import com.hackathon.backend.repositories.hotel.RoomBookingRepository;
+import com.hackathon.backend.repositories.package_.PackageBookingRepository;
+import com.hackathon.backend.repositories.plane.PlaneSeatsBookingRepository;
 import com.hackathon.backend.repositories.user.RoleRepository;
 import com.hackathon.backend.security.JWTGenerator;
 import com.hackathon.backend.services.user.UserService;
@@ -23,6 +26,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -54,6 +58,15 @@ class UserServiceTest {
 
     @Mock
     S3Service s3Service;
+
+    @Mock
+    RoomBookingRepository roomBookingRepository;
+
+    @Mock
+    PackageBookingRepository packageBookingRepository;
+
+    @Mock
+    PlaneSeatsBookingRepository planeSeatsBookingRepository;
 
     @InjectMocks
     private UserService userService;
@@ -124,8 +137,11 @@ class UserServiceTest {
         userEntity.setId(userId);
         userEntity.setImage("image_url");
 
-        //behavior
+        // Mock behavior
         when(userUtils.findById(userId)).thenReturn(userEntity);
+        when(roomBookingRepository.findByUserId(userId)).thenReturn(Collections.emptyList());
+        when(packageBookingRepository.findByUserId(userId)).thenReturn(Collections.emptyList());
+        when(planeSeatsBookingRepository.findByUserId(userId)).thenReturn(Collections.emptyList());
 
         //when
         CompletableFuture<ResponseEntity<?>> response = userService.deleteUser(userId);
