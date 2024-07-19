@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class RoomPaymentDto {
     private String reservationName;
-    private int price;
     private String paymentIntent;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private int price;
 }

@@ -2,10 +2,14 @@ package com.hackathon.backend.services.user;
 
 import com.hackathon.backend.config.TwilioConfig;
 import com.hackathon.backend.dto.userDto.*;
+import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
+import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
 import com.hackathon.backend.entities.user.RoleEntity;
 import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.user.RoleRepository;
 import com.hackathon.backend.security.JWTGenerator;
+import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
+import com.hackathon.backend.utilities.package_.PackageEvaluationUtils;
 import com.hackathon.backend.utilities.user.UserUtils;
 import com.hackathon.backend.utilities.amazonServices.S3Service;
 import jakarta.persistence.EntityNotFoundException;
@@ -39,6 +43,8 @@ public class UserService {
     private final JWTGenerator jwtGenerator;
     private final S3Service s3Service;
     private final TwilioConfig twilioConfig;
+    private final HotelEvaluationUtils hotelEvaluationUtils;
+    private final PackageEvaluationUtils packageEvaluationUtils;
 
     @Value("${VERIFY_LINK_TO_USER}")
     private String verifyLink;
@@ -50,7 +56,9 @@ public class UserService {
                        PasswordEncoder passwordEncoder,
                        JWTGenerator jwtGenerator,
                        S3Service s3Service,
-                       TwilioConfig twilioConfig) {
+                       TwilioConfig twilioConfig,
+                       HotelEvaluationUtils hotelEvaluationUtils,
+                       PackageEvaluationUtils packageEvaluationUtils) {
         this.authenticationManager = authenticationManager;
         this.userUtils = userUtils;
         this.roleRepository = roleRepository;
@@ -58,6 +66,9 @@ public class UserService {
         this.jwtGenerator = jwtGenerator;
         this.s3Service = s3Service;
         this.twilioConfig = twilioConfig;
+        this.hotelEvaluationUtils = hotelEvaluationUtils;
+
+        this.packageEvaluationUtils = packageEvaluationUtils;
     }
 
     @Async("userServiceTaskExecutor")
@@ -138,6 +149,16 @@ public class UserService {
     public CompletableFuture<ResponseEntity<?>> deleteUser(long userId) {
         try{
             UserEntity user = userUtils.findById(userId);
+            if(user.getHotelEvaluations() != null){
+                for(HotelEvaluationEntity hotelEvaluation:user.getHotelEvaluations()){
+                    hotelEvaluationUtils.delete(hotelEvaluation);
+                }
+            }
+            if(user.getPackageEvaluations() != null){
+                for(PackageEvaluationEntity packageEvaluation:user.getPackageEvaluations()){
+                    packageEvaluationUtils.delete(packageEvaluation);
+                }
+            }
             s3Service.deleteFile(user.getImage());
             userUtils.delete(user);
             return CompletableFuture.completedFuture((ResponseEntity.ok("Account deleted successfully")));

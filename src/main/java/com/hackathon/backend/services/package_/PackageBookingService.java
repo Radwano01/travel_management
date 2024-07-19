@@ -22,6 +22,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
 
 import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
@@ -91,12 +92,16 @@ public class PackageBookingService {
         }
     }
 
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @Async("bookingTaskExecutor")
     private void sendEmail(String email,
                            String packageName,
                            String country,
                            String reservationName,
                            LocalDateTime bookedDate) throws MessagingException {
+        String formattedBookedDate = bookedDate.format(DATE_TIME_FORMATTER);
+
         String subject = "Package Booking Confirmation";
         String message = String.format("""
         Dear %s,
@@ -113,7 +118,7 @@ public class PackageBookingService {
 
         Best regards,
         The Travel Agency Team
-        """, reservationName, packageName, country, bookedDate);
+        """, reservationName, packageName, country, formattedBookedDate);
 
         userUtils.sendMessageToEmail(userUtils.prepareTheMessageEmail(email, subject, message));
     }

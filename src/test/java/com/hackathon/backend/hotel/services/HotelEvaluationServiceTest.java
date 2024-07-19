@@ -18,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -38,7 +40,7 @@ class HotelEvaluationServiceTest {
     HotelEvaluationService hotelEvaluationService;
 
     @Test
-    void addComment() {
+    void addComment() throws ExecutionException, InterruptedException {
         //given
         long hotelId = 1L;
         long userId = 1L;
@@ -57,14 +59,14 @@ class HotelEvaluationServiceTest {
         when(hotelEvaluationUtils.existsCommentByUserId(userId)).thenReturn(false);
 
         //when
-        ResponseEntity<?> response = hotelEvaluationService.addComment(hotelId, userId, hotelEvaluationDto);
+        CompletableFuture<ResponseEntity<String>> response = hotelEvaluationService.addComment(hotelId, userId, hotelEvaluationDto);
 
         //then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
     }
 
     @Test
-    void getComments() {
+    void getComments() throws ExecutionException, InterruptedException {
         //given
         long hotelId = 1;
 
@@ -93,10 +95,10 @@ class HotelEvaluationServiceTest {
         when(hotelUtils.findHotelById(hotelId)).thenReturn(hotel);
 
         //when
-        ResponseEntity<?> response = hotelEvaluationService.getComments(hotelId);
-        List<HotelEvaluationDto> responseData = (List<HotelEvaluationDto>) response.getBody();
+        CompletableFuture<ResponseEntity<?>> response = hotelEvaluationService.getComments(hotelId);
+        List<HotelEvaluationDto> responseData = (List<HotelEvaluationDto>) response.get().getBody();
         //then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
         assertNotNull(responseData);
         assertEquals(hotelEvaluation.getComment(), responseData.get(0).getComment());
         assertEquals(hotelEvaluation.getRate(), responseData.get(0).getRate());
@@ -105,7 +107,7 @@ class HotelEvaluationServiceTest {
     }
 
     @Test
-    void editComment() {
+    void editComment() throws ExecutionException, InterruptedException {
         // given
         long commentId = 1L;
         EditHotelEvaluationDto editHotelEvaluationDto = new EditHotelEvaluationDto();
@@ -128,17 +130,17 @@ class HotelEvaluationServiceTest {
         }).when(hotelEvaluationUtils).save(any(HotelEvaluationEntity.class));
 
         // when
-        ResponseEntity<?> response = hotelEvaluationService.editComment(commentId, editHotelEvaluationDto);
+        CompletableFuture<ResponseEntity<String>> response = hotelEvaluationService.editComment(commentId, editHotelEvaluationDto);
 
         // then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
         assertEquals(editHotelEvaluationDto.getComment(), hotelEvaluation.getComment());
         assertEquals(editHotelEvaluationDto.getRate(), hotelEvaluation.getRate());
         verify(hotelEvaluationUtils).save(hotelEvaluation);
     }
 
     @Test
-    void removeComment() {
+    void removeComment() throws ExecutionException, InterruptedException {
         //given
         long hotelId = 1L;
         long userId = 1L;
@@ -156,10 +158,10 @@ class HotelEvaluationServiceTest {
         when(hotelEvaluationUtils.findById(commentId)).thenReturn(hotelEvaluation);
 
         //when
-        ResponseEntity<?> response = hotelEvaluationService.removeComment(commentId);
+        CompletableFuture<ResponseEntity<String>> response = hotelEvaluationService.removeComment(commentId);
 
         //then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
         verify(hotelUtils).save(hotel);
         verify(userUtils).save(user);
         verify(hotelEvaluationUtils).delete(hotelEvaluation);

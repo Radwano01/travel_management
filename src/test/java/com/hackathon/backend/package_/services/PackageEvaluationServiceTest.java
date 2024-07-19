@@ -2,6 +2,7 @@ package com.hackathon.backend.package_.services;
 
 import com.hackathon.backend.dto.packageDto.EditPackageEvaluationDto;
 import com.hackathon.backend.dto.packageDto.PackageEvaluationDto;
+import com.hackathon.backend.dto.packageDto.PostPackageEvaluationDto;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
 import com.hackathon.backend.entities.user.UserEntity;
@@ -18,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -38,14 +41,14 @@ class PackageEvaluationServiceTest {
     PackageEvaluationService packageEvaluationService;
 
     @Test
-    void addComment() {
+    void addComment() throws ExecutionException, InterruptedException {
         //given
         int packageId = 1;
         long userId = 1L;
 
-        PackageEvaluationDto packageEvaluationDto = new PackageEvaluationDto();
-        packageEvaluationDto.setComment("testComment");
-        packageEvaluationDto.setRate(4);
+        PostPackageEvaluationDto postPackageEvaluationDto = new PostPackageEvaluationDto();
+        postPackageEvaluationDto.setComment("testComment");
+        postPackageEvaluationDto.setRate(4);
 
         PackageEntity packageEntity = new PackageEntity();
         packageEntity.setId(packageId);
@@ -57,14 +60,14 @@ class PackageEvaluationServiceTest {
         when(userUtils.findById(userId)).thenReturn(user);
 
         //when
-        ResponseEntity<?> response = packageEvaluationService.addComment(packageId, userId, packageEvaluationDto);
+        CompletableFuture<ResponseEntity<String>> response = packageEvaluationService.addComment(packageId, userId, postPackageEvaluationDto);
 
         //then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
     }
 
     @Test
-    void getComments() {
+    void getComments() throws ExecutionException, InterruptedException {
         //given
         int packageId = 1;
 
@@ -89,10 +92,10 @@ class PackageEvaluationServiceTest {
         when(packageUtils.findById(packageId)).thenReturn(packageEntity);
 
         //when
-        ResponseEntity<?> response = packageEvaluationService.getComments(packageId);
-        List<PackageEvaluationDto> responseData = (List<PackageEvaluationDto>) response.getBody();
+        CompletableFuture<ResponseEntity<?>> response = packageEvaluationService.getComments(packageId);
+        List<PackageEvaluationDto> responseData = (List<PackageEvaluationDto>) response.get().getBody();
         //then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
         assertNotNull(responseData);
         assertEquals(packageEvaluation.getComment(), responseData.get(0).getComment());
         assertEquals(packageEvaluation.getRate(), responseData.get(0).getRate());
@@ -101,7 +104,7 @@ class PackageEvaluationServiceTest {
     }
 
     @Test
-    void editComment() {
+    void editComment() throws ExecutionException, InterruptedException {
         // given
         long commentId = 1L;
         EditPackageEvaluationDto editPackageEvaluationDto = new EditPackageEvaluationDto();
@@ -127,17 +130,17 @@ class PackageEvaluationServiceTest {
         }).when(packageEvaluationUtils).editHelper(any(PackageEvaluationEntity.class), any(EditPackageEvaluationDto.class));
 
         // when
-        ResponseEntity<?> response = packageEvaluationService.editComment(commentId, editPackageEvaluationDto);
+        CompletableFuture<ResponseEntity<String>> response = packageEvaluationService.editComment(commentId, editPackageEvaluationDto);
 
         // then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
         assertEquals(editPackageEvaluationDto.getComment(), packageEvaluation.getComment());
         assertEquals(editPackageEvaluationDto.getRate(), packageEvaluation.getRate());
         verify(packageEvaluationUtils).save(packageEvaluation);
     }
 
     @Test
-    void removeComment() {
+    void removeComment() throws ExecutionException, InterruptedException {
         //given
         int packageId = 1;
         long userId = 1L;
@@ -155,10 +158,10 @@ class PackageEvaluationServiceTest {
         when(packageEvaluationUtils.findById(commentId)).thenReturn(packageEvaluation);
 
         //when
-        ResponseEntity<?> response = packageEvaluationService.removeComment(commentId);
+        CompletableFuture<ResponseEntity<String>> response = packageEvaluationService.removeComment(commentId);
 
         //then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.get().getStatusCode());
         verify(packageUtils).save(packageEntity);
         verify(userUtils).save(user);
         verify(packageEvaluationUtils).delete(packageEvaluation);

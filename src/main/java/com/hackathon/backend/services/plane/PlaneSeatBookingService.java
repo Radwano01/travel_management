@@ -28,6 +28,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
@@ -61,7 +62,7 @@ public class PlaneSeatBookingService {
             boolean userVerification = user.isVerificationStatus();
             if(!userVerification) {
                 return CompletableFuture.completedFuture
-                        ((ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is Not Verified yet!")));
+                        ((badRequestException("User is Not Verified yet!")));
             }
             PlaneFlightsEntity flightsEntity = planeFlightsUtils.findById(flightId);
             if(flightsEntity.getAvailableSeats() == 0){
@@ -73,7 +74,7 @@ public class PlaneSeatBookingService {
                     flightsEntity.setAvailableSeats(flightsEntity.getAvailableSeats() - 1);
                     LocalDateTime bookedDate = LocalDateTime.now();
                     for(PlaneSeatsEntity seat:flightsEntity.getPlane().getPlaneSeats()){
-                        if(!seat.isStatus()){
+                        if(seat.isStatus()){
                             PlaneSeatsBookingEntity planeSeatsBookingEntity = new PlaneSeatsBookingEntity(
                                     user,
                                     seat,
@@ -82,11 +83,18 @@ public class PlaneSeatBookingService {
                                     bookedDate
                             );
                             planeSeatsBookingRepository.save(planeSeatsBookingEntity);
-                            sendEmail(user.getEmail(), flightsEntity.getId(),
-                                    flightsEntity.getDepartureTime(), flightsEntity.getArrivalTime(),
-                                    flightsEntity.getDepartureAirPort().getAirPortName(), flightsEntity.getDestinationAirPort().getAirPortName(),
-                                    flightsEntity.getDepartureAirPort().getAirPortCode(), flightsEntity.getDestinationAirPort().getAirPortCode(),
-                                    flightPaymentDto.getReservationName(), bookedDate);
+                            seat.setStatus(false);
+                            sendEmail(
+                                    user.getEmail(),
+                                    flightsEntity.getId(),
+                                    flightsEntity.getDepartureTime(),
+                                    flightsEntity.getArrivalTime(),
+                                    flightsEntity.getDepartureAirPort().getAirPortName(),
+                                    flightsEntity.getDestinationAirPort().getAirPortName(),
+                                    flightsEntity.getDepartureAirPort().getAirPortCode(),
+                                    flightsEntity.getDestinationAirPort().getAirPortCode(),
+                                    flightPaymentDto.getReservationName(),
+                                    bookedDate);
                         }
                     }
                     return CompletableFuture.completedFuture((ResponseEntity.ok("Visa booked successfully")));
@@ -104,6 +112,8 @@ public class PlaneSeatBookingService {
         }
     }
 
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @Async("bookingTaskExecutor")
     private void sendEmail(String email,
                            long flightNumber,
@@ -114,30 +124,35 @@ public class PlaneSeatBookingService {
                            String arrivalAirport,
                            String arrivalAirportCode,
                            String reservationName,
-                           LocalDateTime bookedDate) throws MessagingException {
+                           LocalDateTime bookedDate) throws MessagingException{
+        String formattedDepartureTime = departureTime.format(DATE_TIME_FORMATTER);
+        String formattedDestinationTime = destinationTime.format(DATE_TIME_FORMATTER);
+        String formattedBookedDate = bookedDate.format(DATE_TIME_FORMATTER);
+
         String subject = "Flight Booking Confirmation";
         String message = String.format("""
-        Dear %s,
-
-        Your flight booking has been confirmed. Here are the details of your booking:
-
-        Flight Number: %s
-        Departure Time: %s
-        Destination Time: %s
-        Departure Airport: %s (%s)
-        Arrival Airport: %s (%s)
-        Booked Date: %s
-
-        Thank you for choosing our service. We look forward to flying with you.
-
-        Best regards,
-        The Airline Team
-        """, reservationName, flightNumber, departureTime, destinationTime,
-                departureAirport, departureAirportCode, arrivalAirport,
-                arrivalAirportCode, bookedDate);
+            Dear %s,
+    
+            Your flight booking has been confirmed. Here are the details of your booking:
+    
+            Flight Number: %s
+            Departure Time: %s
+            Destination Time: %s
+            Departure Airport: %s (%s)
+            Arrival Airport: %s (%s)
+            Booked Date: %s
+    
+            Thank you for choosing our service. We look forward to flying with you.
+    
+            Best regards,
+            The Airline Team
+            """,reservationName, flightNumber, formattedDepartureTime,
+                formattedDestinationTime, departureAirport, departureAirportCode,
+                arrivalAirport, arrivalAirportCode, formattedBookedDate);
 
         userUtils.sendMessageToEmail(userUtils.prepareTheMessageEmail(email, subject, message));
     }
+
 
     private PaymentIntent createPayment(String paymentIntentCode, int price) throws StripeException {
         Stripe.apiKey = stripeSecretKey;

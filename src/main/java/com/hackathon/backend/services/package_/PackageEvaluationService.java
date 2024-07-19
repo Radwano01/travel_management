@@ -2,6 +2,7 @@ package com.hackathon.backend.services.package_;
 
 import com.hackathon.backend.dto.packageDto.EditPackageEvaluationDto;
 import com.hackathon.backend.dto.packageDto.PackageEvaluationDto;
+import com.hackathon.backend.dto.packageDto.PostPackageEvaluationDto;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
 import com.hackathon.backend.entities.user.UserEntity;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
@@ -40,15 +42,15 @@ public class PackageEvaluationService {
 
     @Async("commentTaskExecutor")
     @Transactional
-    public ResponseEntity<String> addComment(int packageId,
-                                        long userId,
-                                        @NonNull PackageEvaluationDto packageEvaluationDto) {
+    public CompletableFuture<ResponseEntity<String>> addComment(int packageId,
+                                                                long userId,
+                                                                @NonNull PostPackageEvaluationDto postPackageEvaluationDto) {
         try {
             PackageEntity packageEntity = packageUtils.findById(packageId);
             UserEntity user = userUtils.findById(userId);
             PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity(
-                    packageEvaluationDto.getComment(),
-                    packageEvaluationDto.getRate(),
+                    postPackageEvaluationDto.getComment(),
+                    postPackageEvaluationDto.getRate(),
                     user,
                     packageEntity
 
@@ -60,15 +62,15 @@ public class PackageEvaluationService {
 
             user.getPackageEvaluations().add(packageEvaluation);
             userUtils.save(user);
-            return ResponseEntity.ok("Comment added successfully");
+            return CompletableFuture.completedFuture(ResponseEntity.ok("Comment added successfully"));
         } catch (EntityNotFoundException e) {
-            return notFoundException(e);
+            return CompletableFuture.completedFuture(notFoundException(e));
         } catch (Exception e) {
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture(serverErrorException(e));
         }
     }
 
-    public ResponseEntity<?> getComments(int packageId) {
+    public CompletableFuture<ResponseEntity<?>> getComments(int packageId) {
         try {
             PackageEntity packageEntity = packageUtils.findById(packageId);
 
@@ -89,40 +91,40 @@ public class PackageEvaluationService {
                 packageEvaluationDtoList.add(packageEvaluationDto);
             }
 
-            return ResponseEntity.ok(packageEvaluationDtoList);
+            return CompletableFuture.completedFuture(ResponseEntity.ok(packageEvaluationDtoList));
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return CompletableFuture.completedFuture(ResponseEntity.notFound().build());
         } catch (Exception e) {
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture(serverErrorException(e));
         }
     }
 
     @Async("commentTaskExecutor")
     @Transactional
-    public ResponseEntity<String> editComment(long commentId,
+    public CompletableFuture<ResponseEntity<String>> editComment(long commentId,
                                               EditPackageEvaluationDto editPackageEvaluationDto) {
         try {
             if(!packageEvaluationUtils.checkHelper(editPackageEvaluationDto)){
-                return badRequestException("you sent an empty data to change");
+                return CompletableFuture.completedFuture(badRequestException("you sent an empty data to change"));
             }
             PackageEvaluationEntity packageEvaluation = packageEvaluationUtils.findById(commentId);
             packageEvaluationUtils.editHelper(packageEvaluation, editPackageEvaluationDto);
             packageEvaluationUtils.save(packageEvaluation);
-            return ResponseEntity.ok("Comment updated successfully");
+            return CompletableFuture.completedFuture(ResponseEntity.ok("Comment updated successfully"));
         } catch (EntityNotFoundException e) {
-            return notFoundException(e);
+            return CompletableFuture.completedFuture(notFoundException(e));
         } catch (Exception e) {
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture(serverErrorException(e));
         }
     }
 
     @Async("commentTaskExecutor")
     @Transactional
-    public ResponseEntity<String> removeComment(long commentId) {
+    public CompletableFuture<ResponseEntity<String>> removeComment(long commentId) {
         try {
             PackageEvaluationEntity packageEvaluation = packageEvaluationUtils.findById(commentId);
             if(packageEvaluation == null){
-                return badRequestException("Comment is not found");
+                return CompletableFuture.completedFuture(badRequestException("Comment is not found"));
             }
             PackageEntity packageEntity = packageEvaluation.getPackageEntity();
             UserEntity user = packageEvaluation.getUser();
@@ -134,11 +136,11 @@ public class PackageEvaluationService {
             userUtils.save(user);
 
             packageEvaluationUtils.delete(packageEvaluation);
-            return ResponseEntity.ok("Comment deleted successfully");
+            return CompletableFuture.completedFuture(ResponseEntity.ok("Comment deleted successfully"));
         } catch (EntityNotFoundException e) {
-            return notFoundException(e);
+            return CompletableFuture.completedFuture(notFoundException(e));
         } catch (Exception e) {
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture(serverErrorException(e));
         }
     }
 }

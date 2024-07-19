@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.CompletableFuture;
+
 @RestController
 @RequestMapping(path = "${BASE_API}")
 public class HotelEvaluationController {
@@ -19,25 +21,25 @@ public class HotelEvaluationController {
     }
 
     @PostMapping(path = "${ADD_HOTEL_EVALUATION_PATH}")
-    public ResponseEntity<String> addComment(@PathVariable("hotelId") long hotelId,
-                                        @PathVariable("userId") long userId,
-                                        @RequestBody HotelEvaluationDto hotelEvaluationDto){
+    public CompletableFuture<ResponseEntity<String>> addComment(@PathVariable("hotelId") long hotelId,
+                                                                @PathVariable("userId") long userId,
+                                                                @RequestBody HotelEvaluationDto hotelEvaluationDto){
         return hotelEvaluationService.addComment(hotelId, userId, hotelEvaluationDto);
     }
 
     @GetMapping(path = "${GET_HOTEL_EVALUATION_PATH}")
-    public ResponseEntity<?> getComments(@PathVariable("hotelId") long hotelId){
+    public CompletableFuture<ResponseEntity<?>> getComments(@PathVariable("hotelId") long hotelId){
         return hotelEvaluationService.getComments(hotelId);
     }
 
     @PutMapping(path = "${EDIT_HOTEL_EVALUATION_PATH}")
-    public ResponseEntity<String> editComment(@PathVariable("commentId") long commentId,
+    public CompletableFuture<ResponseEntity<String>> editComment(@PathVariable("commentId") long commentId,
                                               @RequestBody EditHotelEvaluationDto editHotelEvaluationDto){
         return hotelEvaluationService.editComment(commentId, editHotelEvaluationDto);
     }
 
     @DeleteMapping(path = "${REMOVE_HOTEL_EVALUATION_PATH}")
-    public ResponseEntity<String> deleteComment(@PathVariable("commentId") long commentId){
+    public CompletableFuture<ResponseEntity<String>> deleteComment(@PathVariable("commentId") long commentId){
         return hotelEvaluationService.removeComment(commentId);
     }
 }

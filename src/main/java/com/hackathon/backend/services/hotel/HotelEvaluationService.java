@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
@@ -39,13 +40,13 @@ public class HotelEvaluationService {
 
     @Async("commentTaskExecutor")
     @Transactional
-    public ResponseEntity<String> addComment(long hotelId, long userId,
-                                        @NonNull HotelEvaluationDto
+    public CompletableFuture<ResponseEntity<String>> addComment(long hotelId, long userId,
+                                                                @NonNull HotelEvaluationDto
                                                 hotelEvaluationDto) {
         try{
             boolean existsUser = hotelEvaluationUtils.existsCommentByUserId(userId);
             if(existsUser){
-                return alreadyValidException("This user already has a comment");
+                return CompletableFuture.completedFuture(alreadyValidException("This user already has a comment"));
             }
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
             UserEntity user = userUtils.findById(userId);
@@ -63,15 +64,15 @@ public class HotelEvaluationService {
 
             user.getHotelEvaluations().add(hotelEvaluation);
             userUtils.save(user);
-            return ResponseEntity.ok("Comment added successfully");
+            return CompletableFuture.completedFuture(ResponseEntity.ok("Comment added successfully"));
         }catch (EntityNotFoundException e){
-            return notFoundException(e);
+            return CompletableFuture.completedFuture(notFoundException(e));
         }catch (Exception e){
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture(serverErrorException(e));
         }
     }
 
-    public ResponseEntity<?> getComments(long hotelId){
+    public CompletableFuture<ResponseEntity<?>> getComments(long hotelId){
         try{
             HotelEntity hotel = hotelUtils.findHotelById(hotelId);
             List<HotelEvaluationEntity> hotelEvaluations = hotel.getEvaluations();
@@ -90,40 +91,40 @@ public class HotelEvaluationService {
                 hotelEvaluationDtos.add(hotelEvaluationDto);
             }
 
-            return ResponseEntity.ok(hotelEvaluationDtos);
+            return CompletableFuture.completedFuture(ResponseEntity.ok(hotelEvaluationDtos));
         }catch (EntityNotFoundException e){
-            return notFoundException(e);
+            return CompletableFuture.completedFuture(notFoundException(e));
         }catch (Exception e){
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture(serverErrorException(e));
         }
     }
 
     @Async("commentTaskExecutor")
     @Transactional
-    public ResponseEntity<String> editComment(long commentId,
+    public CompletableFuture<ResponseEntity<String>> editComment(long commentId,
                                          EditHotelEvaluationDto editHotelEvaluationDto) {
         try{
             if(!hotelEvaluationUtils.checkHelper(editHotelEvaluationDto)){
-                return badRequestException("you sent an empty data to change");
+                return CompletableFuture.completedFuture(badRequestException("you sent an empty data to change"));
             }
             HotelEvaluationEntity hotelEvaluation = hotelEvaluationUtils.findById(commentId);
             hotelEvaluationUtils.editHelper(hotelEvaluation, editHotelEvaluationDto);
             hotelEvaluationUtils.save(hotelEvaluation);
-            return ResponseEntity.ok("Comment updated successfully");
+            return CompletableFuture.completedFuture(ResponseEntity.ok("Comment updated successfully"));
         }catch (EntityNotFoundException e){
-            return notFoundException(e);
+            return CompletableFuture.completedFuture(notFoundException(e));
         }catch (Exception e){
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture(serverErrorException(e));
         }
     }
 
     @Async("commentTaskExecutor")
     @Transactional
-    public ResponseEntity<String> removeComment(long commentId) {
+    public CompletableFuture<ResponseEntity<String>> removeComment(long commentId) {
         try {
             HotelEvaluationEntity hotelEvaluation = hotelEvaluationUtils.findById(commentId);
             if(hotelEvaluation == null) {
-                return badRequestException("Comment is not found");
+                return CompletableFuture.completedFuture(badRequestException("Comment is not found"));
             }
             HotelEntity hotel = hotelEvaluation.getHotel();
             UserEntity user = hotelEvaluation.getUser();
@@ -135,11 +136,11 @@ public class HotelEvaluationService {
             userUtils.save(user);
 
             hotelEvaluationUtils.delete(hotelEvaluation);
-            return ResponseEntity.ok("Comment deleted successfully");
+            return CompletableFuture.completedFuture(ResponseEntity.ok("Comment deleted successfully"));
         } catch (EntityNotFoundException e) {
-            return notFoundException(e);
+            return CompletableFuture.completedFuture(notFoundException(e));
         } catch (Exception e) {
-            return serverErrorException(e);
+            return CompletableFuture.completedFuture(serverErrorException(e));
         }
     }
 

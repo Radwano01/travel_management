@@ -172,6 +172,7 @@ class PlaneFlightsServiceTest {
 
         PlaneFlightsEntity planeFlights = new PlaneFlightsEntity();
         planeFlights.setId(flightId);
+        planeFlights.setPlane(new PlaneEntity());
 
         //behavior
         when(planeFlightsUtils.findById(flightId)).thenReturn(planeFlights);
@@ -182,6 +183,6 @@ class PlaneFlightsServiceTest {
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(planeFlightsUtils).findById(flightId);
-        verify(planeFlightsUtils).deleteById(flightId);
+        verify(planeFlightsUtils).delete(planeFlights);
     }
 }

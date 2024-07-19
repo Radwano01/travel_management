@@ -25,6 +25,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -107,7 +108,7 @@ public class RoomBookingService {
         Stripe.apiKey = stripeSecretKey;
         PaymentIntentCreateParams.Builder paramsBuilder = new PaymentIntentCreateParams.Builder()
                 .setCurrency("USD")
-                .setAmount((long) amount)
+                .setAmount((long) amount * 100)
                 .addPaymentMethodType("card")
                 .setPaymentMethod(paymentIntentCode)
                 .setConfirm(true)
@@ -115,6 +116,8 @@ public class RoomBookingService {
                 .setErrorOnRequiresAction(true);
         return PaymentIntent.create(paramsBuilder.build());
     }
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Async("bookingTaskExecutor")
     private void sendEmail(String email,
@@ -124,6 +127,10 @@ public class RoomBookingService {
                            String hotelName,
                            String hotelAddress,
                            LocalDateTime bookedDate) throws MessagingException {
+        String formattedStartTime = startTime.format(DATE_TIME_FORMATTER);
+        String formattedEndTime = endTime.format(DATE_TIME_FORMATTER);
+        String formattedBookedDate = bookedDate.format(DATE_TIME_FORMATTER);
+
         String subject = "Booking Confirmation";
         String message = String.format("""
             Dear %s,
@@ -139,7 +146,7 @@ public class RoomBookingService {
             Thank you for choosing our service. We look forward to hosting you.
 
             Best regards,
-            The Hotel Team""", reservationName, hotelName, hotelAddress, startTime, endTime, bookedDate);
+            The Hotel Team""", reservationName, hotelName, hotelAddress, formattedStartTime, formattedEndTime, formattedBookedDate);
 
         userUtils.sendMessageToEmail(userUtils.prepareTheMessageEmail(email, subject, message));
     }
