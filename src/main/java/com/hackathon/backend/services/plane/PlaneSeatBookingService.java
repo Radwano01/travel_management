@@ -3,113 +3,114 @@ package com.hackathon.backend.services.plane;
 import com.hackathon.backend.dto.payment.FlightPaymentDto;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
-import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
 import com.hackathon.backend.entities.plane.PlaneSeatsBookingEntity;
 import com.hackathon.backend.entities.user.UserEntity;
-import com.hackathon.backend.repositories.plane.PlaneRepository;
+import com.hackathon.backend.repositories.plane.PlaneFlightsRepository;
 import com.hackathon.backend.repositories.plane.PlaneSeatsBookingRepository;
-import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
-import com.hackathon.backend.utilities.plane.PlaneUtils;
-import com.hackathon.backend.utilities.user.UserUtils;
-import com.hackathon.backend.utilities.plane.PlaneSeatsUtils;
+import com.hackathon.backend.repositories.user.UserRepository;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.CompletableFuture;
 
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class PlaneSeatBookingService {
 
-    private final UserUtils userUtils;
-    private final PlaneFlightsUtils planeFlightsUtils;
+    private final PlaneFlightsRepository planeFlightsRepository;
     private final PlaneSeatsBookingRepository planeSeatsBookingRepository;
+    private final UserRepository userRepository;
+    private final JavaMailSender javaMailSender;
 
     @Value("${STRIPE_SECRET_KEY}")
     private String stripeSecretKey;
 
     @Autowired
-    public PlaneSeatBookingService(UserUtils userUtils,
-                                   PlaneFlightsUtils planeFlightsUtils,
-                                   PlaneSeatsBookingRepository planeSeatsBookingRepository) {
-        this.userUtils = userUtils;
-        this.planeFlightsUtils = planeFlightsUtils;
+    public PlaneSeatBookingService(PlaneFlightsRepository planeFlightsRepository,
+                                   PlaneSeatsBookingRepository planeSeatsBookingRepository,
+                                   UserRepository userRepository,
+                                   JavaMailSender javaMailSender) {
+        this.planeFlightsRepository = planeFlightsRepository;
         this.planeSeatsBookingRepository = planeSeatsBookingRepository;
+        this.userRepository = userRepository;
+        this.javaMailSender = javaMailSender;
     }
 
     @Async("bookingTaskExecutor")
     @Transactional
-    public CompletableFuture<ResponseEntity<String>> payment(long userId,
-                                                             long flightId,
-                                                             FlightPaymentDto flightPaymentDto){
-        try{
-            UserEntity user = userUtils.findById(userId);
-            boolean userVerification = user.isVerificationStatus();
-            if(!userVerification) {
-                return CompletableFuture.completedFuture
-                        ((badRequestException("User is Not Verified yet!")));
-            }
-            PlaneFlightsEntity flightsEntity = planeFlightsUtils.findById(flightId);
-            if(flightsEntity.getAvailableSeats() == 0){
-                return CompletableFuture.completedFuture(notFoundException("there is no seats for this flights"));
-            }
-            try {
-                PaymentIntent paymentIntent = createPayment(flightPaymentDto.getPaymentIntent(), flightsEntity.getPrice());
-                if (paymentIntent.getStatus().equals("succeeded")) {
-                    flightsEntity.setAvailableSeats(flightsEntity.getAvailableSeats() - 1);
-                    LocalDateTime bookedDate = LocalDateTime.now();
-                    for(PlaneSeatsEntity seat:flightsEntity.getPlane().getPlaneSeats()){
-                        if(seat.isStatus()){
-                            PlaneSeatsBookingEntity planeSeatsBookingEntity = new PlaneSeatsBookingEntity(
-                                    user,
-                                    seat,
-                                    flightsEntity,
-                                    flightPaymentDto.getReservationName(),
-                                    bookedDate
-                            );
-                            planeSeatsBookingRepository.save(planeSeatsBookingEntity);
-                            seat.setStatus(false);
-                            sendEmail(
-                                    user.getEmail(),
-                                    flightsEntity.getId(),
-                                    flightsEntity.getDepartureTime(),
-                                    flightsEntity.getArrivalTime(),
-                                    flightsEntity.getDepartureAirPort().getAirPortName(),
-                                    flightsEntity.getDestinationAirPort().getAirPortName(),
-                                    flightsEntity.getDepartureAirPort().getAirPortCode(),
-                                    flightsEntity.getDestinationAirPort().getAirPortCode(),
-                                    flightPaymentDto.getReservationName(),
-                                    bookedDate);
-                        }
-                    }
-                    return CompletableFuture.completedFuture((ResponseEntity.ok("Visa booked successfully")));
-                } else {
-                    return CompletableFuture.completedFuture((ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
-                            .body("Payment failed. Please check your payment details and try again.")));
-                }
-            } catch (Exception e) {
-                return CompletableFuture.completedFuture((serverErrorException(e)));
-            }
-        }catch (EntityNotFoundException e){
-            return CompletableFuture.completedFuture((notFoundException(e)));
-        } catch (Exception e){
-            return CompletableFuture.completedFuture((serverErrorException(e)));
+    public ResponseEntity<String> payment(long userId,
+                                          long flightId,
+                                          FlightPaymentDto flightPaymentDto){
+        UserEntity user = getUserById(userId);
+
+        if(!user.isVerificationStatus()) {
+            return badRequestException("User is Not Verified yet!");
         }
+
+        PlaneFlightsEntity flightsEntity = getFlightById(flightId);
+        PlaneEntity plane = flightsEntity.getPlane();
+        try {
+            PaymentIntent paymentIntent = createPayment(flightPaymentDto.getPaymentIntent(), flightsEntity.getPrice());
+            if (paymentIntent.getStatus().equals("succeeded")) {
+                plane.setNumSeats(plane.getNumSeats() - 1);
+                plane.setPaidSeats(plane.getPaidSeats() + 1);
+
+                LocalDateTime bookedDate = LocalDateTime.now();
+
+                PlaneSeatsBookingEntity planeSeatsBookingEntity = new PlaneSeatsBookingEntity(
+                        user,
+                        flightsEntity,
+                        flightPaymentDto.getReservationName(),
+                        bookedDate
+                );
+                planeSeatsBookingRepository.save(planeSeatsBookingEntity);
+                sendEmail(
+                        user.getEmail(),
+                        flightsEntity.getId(),
+                        flightsEntity.getDepartureTime(),
+                        flightsEntity.getArrivalTime(),
+                        flightsEntity.getDepartureAirPort().getAirPortName(),
+                        flightsEntity.getDestinationAirPort().getAirPortName(),
+                        flightsEntity.getDepartureAirPort().getAirPortCode(),
+                        flightsEntity.getDestinationAirPort().getAirPortCode(),
+                        flightPaymentDto.getReservationName(),
+                        bookedDate
+                );
+
+                return ResponseEntity.ok("Visa booked successfully");
+            } else {
+                return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
+                        .body("Payment failed. Please check your payment details and try again.");
+            }
+        } catch (Exception e) {
+            return serverErrorException(e);
+        }
+    }
+
+    private PlaneFlightsEntity getFlightById(long flightId) {
+        return planeFlightsRepository.findById(flightId)
+                .orElseThrow(()-> new EntityNotFoundException("No such flight has this id"));
+    }
+
+    private UserEntity getUserById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(()-> new EntityNotFoundException("User id not found"));
     }
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -150,9 +151,21 @@ public class PlaneSeatBookingService {
                 formattedDestinationTime, departureAirport, departureAirportCode,
                 arrivalAirport, arrivalAirportCode, formattedBookedDate);
 
-        userUtils.sendMessageToEmail(userUtils.prepareTheMessageEmail(email, subject, message));
+        sendMessageToEmail(prepareTheMessageEmail(email, subject, message));
     }
 
+    private MimeMessage prepareTheMessageEmail(String email, String subject, String message) throws MessagingException {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+        helper.setTo(email);
+        helper.setSubject(subject);
+        helper.setText(message, true);
+        return mimeMessage;
+    }
+
+    private void sendMessageToEmail(MimeMessage mimeMessage){
+        javaMailSender.send(mimeMessage);
+    }
 
     private PaymentIntent createPayment(String paymentIntentCode, int price) throws StripeException {
         Stripe.apiKey = stripeSecretKey;

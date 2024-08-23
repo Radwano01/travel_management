@@ -22,10 +22,8 @@ public class PlaneEntity {
 
     private String planeCompanyName;
     private int numSeats;
+    private int paidSeats = 0;
     private boolean status = true;
-
-    @OneToMany(mappedBy = "plane", fetch = FetchType.EAGER)
-    private List<PlaneSeatsEntity> planeSeats = new ArrayList<>();
 
     @OneToOne(mappedBy = "plane", fetch = FetchType.LAZY)
     private PlaneFlightsEntity flight;
@@ -33,5 +31,16 @@ public class PlaneEntity {
     public PlaneEntity(String planeCompanyName, int numSeats) {
         this.planeCompanyName = planeCompanyName;
         this.numSeats = numSeats;
+    }
+
+    @Override
+    public String toString() {
+        return "PlaneEntity{" +
+                "id=" + id +
+                ", planeCompanyName='" + planeCompanyName + '\'' +
+                ", numSeats=" + numSeats +
+                ", paidSeats=" + paidSeats +
+                ", status=" + status +
+                '}';
     }
 }

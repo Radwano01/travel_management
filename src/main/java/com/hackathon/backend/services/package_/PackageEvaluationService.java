@@ -2,145 +2,147 @@ package com.hackathon.backend.services.package_;
 
 import com.hackathon.backend.dto.packageDto.EditPackageEvaluationDto;
 import com.hackathon.backend.dto.packageDto.PackageEvaluationDto;
-import com.hackathon.backend.dto.packageDto.PostPackageEvaluationDto;
+import com.hackathon.backend.dto.packageDto.CreatePackageEvaluationDto;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
 import com.hackathon.backend.entities.user.UserEntity;
-import com.hackathon.backend.utilities.user.UserUtils;
-import com.hackathon.backend.utilities.package_.PackageEvaluationUtils;
-import com.hackathon.backend.utilities.package_.PackageUtils;
+import com.hackathon.backend.repositories.package_.PackageRepository;
+import com.hackathon.backend.repositories.user.UserRepository;
 import io.micrometer.common.lang.NonNull;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
+import static com.hackathon.backend.libs.MyLib.checkIfSentEmptyData;
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class PackageEvaluationService {
 
-    private final PackageUtils packageUtils;
-    private final UserUtils userUtils;
-    private final PackageEvaluationUtils packageEvaluationUtils;
+    private final PackageRepository packageRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public PackageEvaluationService(PackageUtils packageUtils,
-                                    UserUtils userUtils,
-                                    PackageEvaluationUtils packageEvaluationUtils) {
-        this.packageUtils = packageUtils;
-        this.userUtils = userUtils;
-        this.packageEvaluationUtils = packageEvaluationUtils;
+    public PackageEvaluationService(PackageRepository packageRepository,
+                                    UserRepository userRepository) {
+        this.packageRepository = packageRepository;
+        this.userRepository = userRepository;
     }
 
     @Async("commentTaskExecutor")
     @Transactional
-    public CompletableFuture<ResponseEntity<String>> addComment(int packageId,
-                                                                long userId,
-                                                                @NonNull PostPackageEvaluationDto postPackageEvaluationDto) {
-        try {
-            PackageEntity packageEntity = packageUtils.findById(packageId);
-            UserEntity user = userUtils.findById(userId);
-            PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity(
-                    postPackageEvaluationDto.getComment(),
-                    postPackageEvaluationDto.getRate(),
-                    user,
-                    packageEntity
+    public CompletableFuture<ResponseEntity<?>> addComment(int packageId, long userId,
+                                                           @NonNull CreatePackageEvaluationDto createPackageEvaluationDto) {
+        PackageEntity packageEntity = getPackageById(packageId);
 
-            );
-            packageEvaluationUtils.save(packageEvaluation);
-
-            packageEntity.getPackageEvaluations().add(packageEvaluation);
-            packageUtils.save(packageEntity);
-
-            user.getPackageEvaluations().add(packageEvaluation);
-            userUtils.save(user);
-            return CompletableFuture.completedFuture(ResponseEntity.ok("Comment added successfully"));
-        } catch (EntityNotFoundException e) {
-            return CompletableFuture.completedFuture(notFoundException(e));
-        } catch (Exception e) {
-            return CompletableFuture.completedFuture(serverErrorException(e));
+        ResponseEntity<String> checkResult = checkIfUserAlreadyCommented(packageEntity, userId);
+        if(!checkResult.getStatusCode().equals(HttpStatus.OK)){
+            return CompletableFuture.completedFuture(checkResult);
         }
+
+        UserEntity user = getUserById(userId);
+
+        prepareANDSetEvaluationPackage(createPackageEvaluationDto, packageEntity, user);
+
+        packageRepository.save(packageEntity);
+
+        return CompletableFuture.completedFuture(ResponseEntity.ok("Comment added successfully"));
+    }
+
+    private PackageEntity getPackageById(int packageId){
+        return packageRepository.findById(packageId)
+                .orElseThrow(()-> new EntityNotFoundException("No such package has this id"));
+    }
+
+    private UserEntity getUserById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(()-> new EntityNotFoundException("User id not found"));
+    }
+
+    private ResponseEntity<String> checkIfUserAlreadyCommented(PackageEntity packageEntity, long userId){
+        for(PackageEvaluationEntity packageEvaluation : packageEntity.getPackageEvaluations()){
+            if(packageEvaluation.getUser().getId() == userId){
+                return badRequestException("This user has already commented on this hotel");
+            }
+        }
+        return ResponseEntity.ok("OK");
+    }
+
+    private void prepareANDSetEvaluationPackage(CreatePackageEvaluationDto createPackageEvaluationDto,
+                                                PackageEntity packageEntity, UserEntity userEntity){
+        PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity(
+                createPackageEvaluationDto.getComment(),
+                createPackageEvaluationDto.getRate(),
+                userEntity,
+                packageEntity
+
+        );
+
+        packageEntity.getPackageEvaluations().add(packageEvaluation);
     }
 
     public CompletableFuture<ResponseEntity<?>> getComments(int packageId) {
-        try {
-            PackageEntity packageEntity = packageUtils.findById(packageId);
+        return CompletableFuture.completedFuture
+                (ResponseEntity.ok(packageRepository.findAllEvaluationsPackageByPackageId(packageId)));
+    }
 
-            List<PackageEvaluationEntity> packageEvaluations = packageEntity.getPackageEvaluations();
+    @Async("commentTaskExecutor")
+    @Transactional
+    public CompletableFuture<ResponseEntity<?>> editComment(int packageId, long commentId,
+                              EditPackageEvaluationDto editPackageEvaluationDto) {
+        if(!checkIfSentEmptyData(editPackageEvaluationDto)){
+            return CompletableFuture.completedFuture(badRequestException("you sent an empty data to change"));
+        }
 
+        PackageEntity packageEntity = getPackageById(packageId);
 
-            List<PackageEvaluationDto> packageEvaluationDtoList = new ArrayList<>();
+        PackageEvaluationEntity packageEvaluation = getPackageEvaluationFromPackage(packageEntity, commentId);
 
-            for(PackageEvaluationEntity packageEvaluation:packageEvaluations){
-                PackageEvaluationDto packageEvaluationDto = new PackageEvaluationDto(
-                        packageEvaluation.getId(),
-                        packageEvaluation.getComment(),
-                        packageEvaluation.getRate(),
-                        packageEvaluation.getUser().getId(),
-                        packageEvaluation.getUser().getUsername(),
-                        packageEvaluation.getUser().getImage()
-                );
-                packageEvaluationDtoList.add(packageEvaluationDto);
-            }
+        updateToNewData(packageEvaluation, editPackageEvaluationDto);
 
-            return CompletableFuture.completedFuture(ResponseEntity.ok(packageEvaluationDtoList));
-        } catch (EntityNotFoundException e) {
-            return CompletableFuture.completedFuture(ResponseEntity.notFound().build());
-        } catch (Exception e) {
-            return CompletableFuture.completedFuture(serverErrorException(e));
+        packageRepository.save(packageEntity);
+
+        return CompletableFuture.completedFuture(ResponseEntity.ok(packageEvaluation.toString()));
+    }
+
+    private PackageEvaluationEntity getPackageEvaluationFromPackage(PackageEntity packageEntity, long commentId){
+        Optional<PackageEvaluationEntity> packageEvaluation = packageEntity.getPackageEvaluations()
+                .stream().filter((data) -> data.getId() == commentId).findFirst();
+
+        return packageEvaluation.orElse(null);
+    }
+
+    private void updateToNewData(PackageEvaluationEntity packageEvaluation,
+                           EditPackageEvaluationDto editPackageEvaluationDto){
+        if (editPackageEvaluationDto.getComment() != null) {
+            packageEvaluation.setComment(editPackageEvaluationDto.getComment());
+        }
+        if (editPackageEvaluationDto.getRate() >= 0 && editPackageEvaluationDto.getRate() <= 5) {
+            packageEvaluation.setRate(editPackageEvaluationDto.getRate());
         }
     }
 
     @Async("commentTaskExecutor")
     @Transactional
-    public CompletableFuture<ResponseEntity<String>> editComment(long commentId,
-                                              EditPackageEvaluationDto editPackageEvaluationDto) {
-        try {
-            if(!packageEvaluationUtils.checkHelper(editPackageEvaluationDto)){
-                return CompletableFuture.completedFuture(badRequestException("you sent an empty data to change"));
-            }
-            PackageEvaluationEntity packageEvaluation = packageEvaluationUtils.findById(commentId);
-            packageEvaluationUtils.editHelper(packageEvaluation, editPackageEvaluationDto);
-            packageEvaluationUtils.save(packageEvaluation);
-            return CompletableFuture.completedFuture(ResponseEntity.ok("Comment updated successfully"));
-        } catch (EntityNotFoundException e) {
-            return CompletableFuture.completedFuture(notFoundException(e));
-        } catch (Exception e) {
-            return CompletableFuture.completedFuture(serverErrorException(e));
-        }
-    }
+    public CompletableFuture<ResponseEntity<?>> removeComment(int packageId, long commentId) {
+        PackageEntity packageEntity = getPackageById(packageId);
 
-    @Async("commentTaskExecutor")
-    @Transactional
-    public CompletableFuture<ResponseEntity<String>> removeComment(long commentId) {
-        try {
-            PackageEvaluationEntity packageEvaluation = packageEvaluationUtils.findById(commentId);
-            if(packageEvaluation == null){
-                return CompletableFuture.completedFuture(badRequestException("Comment is not found"));
-            }
-            PackageEntity packageEntity = packageEvaluation.getPackageEntity();
-            UserEntity user = packageEvaluation.getUser();
+        PackageEvaluationEntity packageEvaluation = getPackageEvaluationFromPackage(packageEntity, commentId);
 
-            packageEntity.getPackageEvaluations().remove(packageEvaluation);
-            packageUtils.save(packageEntity);
+        packageEntity.getPackageEvaluations().remove(packageEvaluation);
 
-            user.getPackageEvaluations().remove(packageEvaluation);
-            userUtils.save(user);
+        packageEntity.getPackageEvaluations().remove(packageEvaluation);
 
-            packageEvaluationUtils.delete(packageEvaluation);
-            return CompletableFuture.completedFuture(ResponseEntity.ok("Comment deleted successfully"));
-        } catch (EntityNotFoundException e) {
-            return CompletableFuture.completedFuture(notFoundException(e));
-        } catch (Exception e) {
-            return CompletableFuture.completedFuture(serverErrorException(e));
-        }
+        packageRepository.save(packageEntity);
+
+        return CompletableFuture.completedFuture(ResponseEntity.ok("Comment deleted successfully"));
     }
 }

@@ -2,7 +2,6 @@ package com.hackathon.backend.entities.package_.packageFeatures;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
-import com.hackathon.backend.entities.package_.PackageEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,11 +10,11 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "benefits")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "benefits")
 public class BenefitEntity{
 
     @Id
@@ -23,7 +22,6 @@ public class BenefitEntity{
     private int id;
     private String benefit;
 
-    @JsonIgnore
     @ManyToMany(mappedBy = "benefits", fetch = FetchType.LAZY)
     private List<PackageDetailsEntity> packageDetails = new ArrayList<>();
 

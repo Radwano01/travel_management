@@ -14,21 +14,42 @@ import static org.junit.jupiter.api.Assertions.*;
 class HotelFeaturesRepositoryTest {
 
     @Autowired
-    HotelFeaturesRepository hotelFeaturesRepository;
+    private HotelFeaturesRepository hotelFeaturesRepository;
+
+    @BeforeEach
+    void setUp() {
+        // Create and save a HotelFeaturesEntity instance
+        HotelFeaturesEntity feature = new HotelFeaturesEntity();
+        feature.setHotelFeatures("Free WiFi");
+        hotelFeaturesRepository.save(feature);
+    }
+
+    @AfterEach
+    void tearDown() {
+        hotelFeaturesRepository.deleteAll();
+    }
 
     @Test
-    void existsHotelFeatureByHotelFeatures() {
+    void itShouldReturnExistHotelFeatureByHotelFeature() {
         //given
-        HotelFeaturesEntity hotelFeatures = new HotelFeaturesEntity("testFeature");
-        hotelFeatures.setId(1);
-        hotelFeaturesRepository.save(hotelFeatures);
+        String featureToCheck = "Free WiFi";
 
         //when
-        boolean response = hotelFeaturesRepository.existsHotelFeatureByHotelFeatures("testFeature");
+        boolean response = hotelFeaturesRepository.existsHotelFeatureByHotelFeatures(featureToCheck);
 
         //then
         assertTrue(response);
+    }
 
-        hotelFeaturesRepository.deleteAll();
+    @Test
+    void itShouldReturnNotFoundHotelFeatureByHotelFeature() {
+        //given
+        String featureToCheck = "Non-existent Feature";
+
+        //when
+        boolean response = hotelFeaturesRepository.existsHotelFeatureByHotelFeatures(featureToCheck);
+
+        //then
+        assertFalse(response);
     }
 }

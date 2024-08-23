@@ -1,89 +1,97 @@
 package com.hackathon.backend.services.package_.packageFeatures;
 
 
+import com.hackathon.backend.dto.packageDto.features.CreateBenefitDto;
+import com.hackathon.backend.dto.packageDto.features.EditBenefitDto;
+import com.hackathon.backend.dto.packageDto.features.GetBenefitDto;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.packageFeatures.BenefitEntity;
-import com.hackathon.backend.utilities.package_.PackageDetailsUtils;
-import com.hackathon.backend.utilities.package_.features.BenefitUtils;
+import com.hackathon.backend.repositories.package_.PackageDetailsRepository;
+import com.hackathon.backend.repositories.package_.packageFeatures.BenefitRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.hackathon.backend.libs.MyLib.checkIfSentEmptyData;
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class BenefitService{
 
-    private final BenefitUtils benefitUtils;
-    private final PackageDetailsUtils packageDetailsUtils;
+    private final BenefitRepository benefitRepository;
+    private final PackageDetailsRepository packageDetailsRepository;
 
     @Autowired
-    public BenefitService(BenefitUtils benefitUtils,
-                          PackageDetailsUtils packageDetailsUtils){
-        this.benefitUtils = benefitUtils;
-        this.packageDetailsUtils = packageDetailsUtils;
+    public BenefitService(BenefitRepository benefitRepository,
+                          PackageDetailsRepository packageDetailsRepository){
+        this.benefitRepository = benefitRepository;
+        this.packageDetailsRepository = packageDetailsRepository;
     }
 
-    public ResponseEntity<String> createBenefit(String benefit){
-        try{
-            if(benefitUtils.existsByBenefit(benefit)) {
-                return alreadyValidException("Benefit already exists");
-            }
-            BenefitEntity benefitEntity = new BenefitEntity(
-                benefit
-            );
-            benefitUtils.save(benefitEntity);
-            return ResponseEntity.ok("Benefit created successfully");
-        }catch(Exception e){
-            return serverErrorException(e);
+    public ResponseEntity<String> createBenefit(CreateBenefitDto createBenefitDto){
+        String benefit = createBenefitDto.getBenefit().trim();
+
+        ResponseEntity<String> checkResult = checkIfBenefitAlreadyExist(benefit);
+        if(!checkResult.getStatusCode().equals(HttpStatus.OK)){
+            return checkResult;
         }
+
+        benefitRepository.save(new BenefitEntity(benefit));
+
+        return ResponseEntity.ok("Benefit created successfully" + benefit);
     }
 
-    public ResponseEntity<?> getBenefits(){
-        try{
-            List<BenefitEntity> benefits = benefitUtils.findAll();
-            return ResponseEntity.ok(benefits);
-        }catch(Exception e){
-            return serverErrorException(e);
+    private ResponseEntity<String> checkIfBenefitAlreadyExist(String benefit){
+        boolean existsBenefit = benefitRepository.existsBenefitByBenefit(benefit);
+
+        if(existsBenefit){
+            return alreadyValidException("Hotel Feature already exists");
         }
+        return ResponseEntity.ok("OK");
+    }
+
+    public ResponseEntity<List<GetBenefitDto>> getBenefits(){
+        return ResponseEntity.ok(benefitRepository.findAllBenefits());
     }
 
     @Transactional
-    public ResponseEntity<String> editBenefit(int benefitId,
-                                         String benefit){
-        try{
-            if(benefit == null){
-                return badRequestException("you sent an empty data to change");
-            }
-            BenefitEntity benefitEntity = benefitUtils.findById(benefitId);
-            benefitEntity.setBenefit(benefit);
-            benefitUtils.save(benefitEntity);
-            return ResponseEntity.ok("Benefit edit successfully");
-        }catch(EntityNotFoundException e){
-            return notFoundException(e);
-        }catch(Exception e){
-            return serverErrorException(e);
+    public ResponseEntity<String> editBenefit(int benefitId, EditBenefitDto editBenefitDto){
+        if(!checkIfSentEmptyData(editBenefitDto)){
+            return badRequestException("you sent an empty data to change");
         }
+
+        String benefit = editBenefitDto.getBenefit().trim();
+
+        BenefitEntity benefitEntity = findBenefitById(benefitId);
+
+        benefitEntity.setBenefit(benefit);
+
+        benefitRepository.save(benefitEntity);
+
+        return ResponseEntity.ok("Benefit edit successfully" + benefit);
+    }
+
+    private BenefitEntity findBenefitById(int benefitId) {
+        return benefitRepository.findById(benefitId)
+                .orElseThrow(()-> new EntityNotFoundException("No such benefit has this id"));
     }
 
     @Transactional
     public ResponseEntity<String> deleteBenefit(int benefitId) {
-        try {
-            BenefitEntity benefitEntity = benefitUtils.findById(benefitId);
-            for (PackageDetailsEntity packageDetails : benefitEntity.getPackageDetails()) {
-                packageDetails.getBenefits().remove(benefitEntity);
-                packageDetailsUtils.save(packageDetails);
-            }
-            benefitUtils.delete(benefitEntity);
-            return ResponseEntity.ok("Benefit deleted successfully");
-        } catch (EntityNotFoundException e) {
-            return notFoundException(e);
-        } catch (Exception e) {
-            return serverErrorException(e);
+        BenefitEntity benefitEntity = findBenefitById(benefitId);
+
+        for (PackageDetailsEntity packageDetails : benefitEntity.getPackageDetails()) {
+            packageDetails.getBenefits().remove(benefitEntity);
+            packageDetailsRepository.save(packageDetails);
         }
+
+        benefitRepository.delete(benefitEntity);
+
+        return ResponseEntity.ok("Benefit deleted successfully");
     }
 }

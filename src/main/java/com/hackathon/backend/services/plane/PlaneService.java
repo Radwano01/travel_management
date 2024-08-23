@@ -1,114 +1,97 @@
 package com.hackathon.backend.services.plane;
 
+import com.hackathon.backend.dto.planeDto.CreatePlaneDto;
 import com.hackathon.backend.dto.planeDto.EditPlaneDto;
 import com.hackathon.backend.dto.planeDto.GetPlaneDto;
-import com.hackathon.backend.dto.planeDto.PlaneDto;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
-import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
-import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
-import com.hackathon.backend.utilities.plane.PlaneSeatsUtils;
-import com.hackathon.backend.utilities.plane.PlaneUtils;
+import com.hackathon.backend.repositories.plane.PlaneRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.hackathon.backend.libs.MyLib.checkIfSentEmptyData;
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class PlaneService{
-
-    private final PlaneSeatsUtils planeSeatsUtils;
-    private final PlaneUtils planeUtils;
-    private final PlaneFlightsUtils planeFlightsUtils;
+    private final PlaneRepository planeRepository;
 
     @Autowired
-    public PlaneService(PlaneSeatsUtils planeSeatsUtils,
-                        PlaneUtils planeUtils,
-                        PlaneFlightsUtils planeFlightsUtils){
-        this.planeSeatsUtils = planeSeatsUtils;
-        this.planeUtils = planeUtils;
-        this.planeFlightsUtils = planeFlightsUtils;
+    public PlaneService(PlaneRepository planeRepository){
+        this.planeRepository = planeRepository;
     }
 
-    public ResponseEntity<String> createPlane(@NonNull PlaneDto planeDto) {
-        try{
-            PlaneEntity planeEntity = new PlaneEntity(
-                    planeDto.getPlaneCompanyName(),
-                    planeDto.getNumSeats()
-            );
+    public ResponseEntity<String> createPlane(@NonNull CreatePlaneDto createPlaneDto) {
+        PlaneEntity planeEntity = preparePlaneEntityANDAddToDB(createPlaneDto);
 
-
-            for(int i = 0; i < planeDto.getNumSeats(); i++){
-                PlaneSeatsEntity planeSeats = new PlaneSeatsEntity();
-                planeSeatsUtils.save(planeSeats);
-                planeEntity.getPlaneSeats().add(planeSeats);
-            }
-            planeUtils.save(planeEntity);
-            return ResponseEntity.ok("Plane Name created Successfully");
-        }catch (Exception e){
-            return serverErrorException(e);
-        }
+        return ResponseEntity.ok(planeEntity.toString());
     }
 
-    public ResponseEntity<?> getPlanes(){
-        try{
-            List<GetPlaneDto> plane = planeUtils.findAllPlanes();
-            return ResponseEntity.ok(plane);
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        }catch (Exception e){
-            return serverErrorException(e);
-        }
+    private PlaneEntity getPlaneById(long planeId){
+        return planeRepository.findById(planeId)
+                .orElseThrow(()-> new EntityNotFoundException("No such plane has this id"));
+    }
+
+    private PlaneEntity preparePlaneEntityANDAddToDB(CreatePlaneDto createPlaneDto){
+        PlaneEntity plane = new PlaneEntity(
+                createPlaneDto.getPlaneCompanyName(),
+                createPlaneDto.getNumSeats()
+        );
+
+        planeRepository.save(plane);
+
+        return plane;
+    }
+
+    public ResponseEntity<List<GetPlaneDto>> getPlanes(){
+        return ResponseEntity.ok(planeRepository.findAllPlanes());
     }
 
     @Transactional
-    public ResponseEntity<String> editPlane(long planeId,
-                                       EditPlaneDto editPlaneDto){
-        try{
-            if(!planeUtils.checkHelper(editPlaneDto)){
-                return badRequestException("you sent an empty data to change");
-            }
-            PlaneEntity planeEntity = planeUtils.findPlaneById(planeId);
-            planeUtils.editHelper(planeEntity, editPlaneDto);
-            planeUtils.save(planeEntity);
-            return ResponseEntity.ok("Plane updated successfully");
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        } catch (Exception e){
-            return serverErrorException(e);
+    public ResponseEntity<String> editPlane(long planeId, EditPlaneDto editPlaneDto){
+        if(!checkIfSentEmptyData(editPlaneDto)){
+            return badRequestException("you sent an empty data to change");
+        }
+
+        PlaneEntity planeEntity = getPlaneById(planeId);
+
+        updateToNewData(planeEntity, editPlaneDto);
+
+        planeRepository.save(planeEntity);
+
+        return ResponseEntity.ok(planeEntity.toString());
+    }
+
+    private void updateToNewData(PlaneEntity plane, EditPlaneDto editPlaneDto) {
+        if(editPlaneDto.getStatus() != null){
+            plane.setStatus(editPlaneDto.getStatus());
+        }
+        if(editPlaneDto.getPlaneCompanyName() != null){
+            plane.setPlaneCompanyName(editPlaneDto.getPlaneCompanyName());
+        }
+        if(editPlaneDto.getNumSeats() != null){
+            plane.setNumSeats(editPlaneDto.getNumSeats());
         }
     }
 
     @Transactional
     public ResponseEntity<String> deletePlane(long planeId) {
-        try{
-            PlaneEntity plane = planeUtils.findById(planeId);
-            if (plane == null) {
-                return notFoundException("Plane not found");
-            }
+        PlaneEntity plane = getPlaneById(planeId);
 
-            for (PlaneSeatsEntity planeSeats : plane.getPlaneSeats()) {
-                planeSeatsUtils.delete(planeSeats);
-            }
-
-            PlaneFlightsEntity flight = plane.getFlight();
-            if (flight != null) {
-                planeFlightsUtils.delete(flight);
-            }
-
-            planeUtils.delete(plane);
-
-            return ResponseEntity.ok("Plane deleted successfully");
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        } catch (Exception e){
-            return serverErrorException(e);
+        PlaneFlightsEntity flight = plane.getFlight();
+        if (flight != null) {
+            return alreadyValidException("You can't delete a plane that has flight" + flight);
         }
+
+        planeRepository.delete(plane);
+
+        return ResponseEntity.ok("Plane deleted successfully");
     }
 }

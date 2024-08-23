@@ -3,16 +3,16 @@ package com.hackathon.backend.services.hotel;
 import com.hackathon.backend.dto.payment.RoomPaymentDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.RoomBookingEntity;
-import com.hackathon.backend.entities.hotel.RoomEntity;
 import com.hackathon.backend.entities.user.UserEntity;
+import com.hackathon.backend.repositories.hotel.HotelRepository;
 import com.hackathon.backend.repositories.hotel.RoomBookingRepository;
-import com.hackathon.backend.utilities.user.UserUtils;
-import com.hackathon.backend.utilities.hotel.HotelUtils;
+import com.hackathon.backend.repositories.user.UserRepository;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +20,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -37,19 +37,21 @@ import static com.hackathon.backend.utilities.ErrorUtils.*;
 public class RoomBookingService {
 
     private final RoomBookingRepository roomBookingRepository;
-    private final HotelUtils hotelUtils;
-    private final UserUtils userUtils;
+    private final HotelRepository hotelRepository;
+    private final UserRepository userRepository;
+    private final JavaMailSender javaMailSender;
 
     @Value("${STRIPE_SECRET_KEY}")
     private String stripeSecretKey;
 
     @Autowired
     public RoomBookingService(RoomBookingRepository roomBookingRepository,
-                              HotelUtils hotelUtils,
-                              UserUtils userUtils) {
+                              HotelRepository hotelRepository, UserRepository userRepository,
+                              JavaMailSender javaMailSender) {
         this.roomBookingRepository = roomBookingRepository;
-        this.hotelUtils = hotelUtils;
-        this.userUtils = userUtils;
+        this.hotelRepository = hotelRepository;
+        this.userRepository = userRepository;
+        this.javaMailSender = javaMailSender;
     }
 
     @Async("bookingTaskExecutor")
@@ -58,50 +60,62 @@ public class RoomBookingService {
                                                              long hotelId,
                                                              RoomPaymentDto roomPaymentDto) {
         try {
-            UserEntity user = userUtils.findById(userId);
+            UserEntity user = getUserById(userId);
             boolean userVerification = user.isVerificationStatus();
             if (!userVerification) {
                 return CompletableFuture.completedFuture(badRequestException("User is Not Verified yet!"));
             }
 
-            HotelEntity hotel = hotelUtils.findHotelById(hotelId);
-            for (RoomEntity room : hotel.getRooms()) {
-                if (!room.isStatus()) {
-                    try {
-                        PaymentIntent paymentIntent = createPayment(roomPaymentDto.getPaymentIntent(), roomPaymentDto.getPrice());
-                        if (paymentIntent.getStatus().equals("succeeded")) {
-                            room.setStatus(true);
-                            LocalDateTime bookedDate = LocalDateTime.now();
-                            RoomBookingEntity roomBookingEntity = new RoomBookingEntity(
-                                    user,
-                                    hotel,
-                                    roomPaymentDto.getStartTime(),
-                                    roomPaymentDto.getEndTime(),
-                                    roomPaymentDto.getReservationName(),
-                                    bookedDate
-                            );
-                            roomBookingRepository.save(roomBookingEntity);
-                            sendEmail(user.getEmail(), roomPaymentDto.getReservationName(),
-                                    roomPaymentDto.getStartTime(), roomPaymentDto.getEndTime(),
-                                    hotel.getHotelName(), hotel.getAddress(),
-                                    bookedDate);
-                            return CompletableFuture.completedFuture
-                                    (ResponseEntity.ok("Room booked successfully, Now! you can check your book in your Email."));
-                        } else {
-                            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
-                                    .body("Payment failed. Please check your payment details and try again."));
-                        }
-                    } catch (Exception e) {
-                        return CompletableFuture.completedFuture(serverErrorException(e));
-                    }
-                }
+            HotelEntity hotel = findHotelById(hotelId);
+            if(hotel.getHotelRoomsCount() == 0){
+                return CompletableFuture.completedFuture(badRequestException("There is no empty room to book"));
             }
-            return CompletableFuture.completedFuture(notFoundException("Invalid rooms in this hotel"));
+
+            try {
+                PaymentIntent paymentIntent = createPayment(roomPaymentDto.getPaymentIntent(), roomPaymentDto.getPrice());
+                if (paymentIntent.getStatus().equals("succeeded")) {
+                    hotel.setHotelRoomsCount(hotel.getHotelRoomsCount() - 1);
+                    hotel.setPaidRoomsCount(hotel.getHotelRoomsCount() + 1);
+
+                    LocalDateTime bookedDate = LocalDateTime.now();
+                    RoomBookingEntity roomBookingEntity = new RoomBookingEntity(
+                            user,
+                            hotel,
+                            roomPaymentDto.getStartTime(),
+                            roomPaymentDto.getEndTime(),
+                            roomPaymentDto.getReservationName(),
+                            bookedDate
+                    );
+                    roomBookingRepository.save(roomBookingEntity);
+                    sendEmail(user.getEmail(), roomPaymentDto.getReservationName(),
+                            roomPaymentDto.getStartTime(), roomPaymentDto.getEndTime(),
+                            hotel.getHotelName(), hotel.getAddress(),
+                            bookedDate);
+                    return CompletableFuture.completedFuture
+                            (ResponseEntity.ok("Room booked successfully, Now! you can check your book in your Email."));
+                } else {
+                    return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
+                            .body("Payment failed. Please check your payment details and try again."));
+                }
+            } catch (Exception e) {
+                return CompletableFuture.completedFuture(serverErrorException(e));
+            }
+
         } catch (EntityNotFoundException e) {
             return CompletableFuture.completedFuture(notFoundException(e));
         } catch (Exception e) {
             return CompletableFuture.completedFuture(serverErrorException(e));
         }
+    }
+
+    private UserEntity getUserById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(()-> new EntityNotFoundException("User id not found"));
+    }
+
+    private HotelEntity findHotelById(long hotelId){
+        return hotelRepository.findById(hotelId)
+                .orElseThrow(()-> new EntityNotFoundException("Hotel id not found"));
     }
 
     private PaymentIntent createPayment(String paymentIntentCode, int amount) throws StripeException {
@@ -148,7 +162,20 @@ public class RoomBookingService {
             Best regards,
             The Hotel Team""", reservationName, hotelName, hotelAddress, formattedStartTime, formattedEndTime, formattedBookedDate);
 
-        userUtils.sendMessageToEmail(userUtils.prepareTheMessageEmail(email, subject, message));
+        sendMessageToEmail(prepareTheMessageEmail(email, subject, message));
+    }
+
+    private MimeMessage prepareTheMessageEmail(String email, String subject, String message) throws MessagingException {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+        helper.setTo(email);
+        helper.setSubject(subject);
+        helper.setText(message, true);
+        return mimeMessage;
+    }
+
+    private void sendMessageToEmail(MimeMessage mimeMessage){
+        javaMailSender.send(mimeMessage);
     }
 
     @Scheduled(fixedRate = 60000)

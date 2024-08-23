@@ -32,4 +32,8 @@ public class ErrorUtils {
     public static ResponseEntity<String> badRequestException(String message){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
     }
+
+    public static ResponseEntity<IllegalAccessException> badRequestException(IllegalAccessException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
+    }
 }

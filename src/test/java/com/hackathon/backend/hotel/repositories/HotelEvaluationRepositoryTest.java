@@ -18,51 +18,57 @@ import static org.junit.jupiter.api.Assertions.*;
 class HotelEvaluationRepositoryTest {
 
     @Autowired
-    HotelRepository hotelRepository;
+    private HotelEvaluationRepository hotelEvaluationRepository;
 
     @Autowired
-    HotelEvaluationRepository hotelEvaluationRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private HotelRepository hotelRepository;
 
-    long userId;
+    private UserEntity testUser;
+    private HotelEntity testHotel;
 
     @BeforeEach
-    public void setUp() {
-        HotelEntity hotel = new HotelEntity();
-        hotelRepository.save(hotel);
+    void setUp() {
+        // Create and save a user
+        testUser = new UserEntity();
+        testUser.setUsername("testUser");
+        testUser.setImage("testUserImage.jpg");
+        userRepository.save(testUser);
 
-        UserEntity user = new UserEntity();
-        userRepository.save(user);
-        userId = user.getId();
+        // Create and save a hotel
+        testHotel = new HotelEntity();
+        testHotel.setHotelName("Test Hotel");
+        hotelRepository.save(testHotel);
 
-        HotelEvaluationEntity evaluation = new HotelEvaluationEntity();
-        evaluation.setHotel(hotel);
-        evaluation.setUser(user);
-        evaluation.setComment("testComment");
-        evaluation.setRate(2);
-
-        hotel.getEvaluations().add(evaluation);
-
-        hotelEvaluationRepository.save(evaluation);
-        hotelRepository.save(hotel);
+        // Create and save a hotel evaluation
+        HotelEvaluationEntity testEvaluation = new HotelEvaluationEntity(
+                "test comment",
+                5,
+                testHotel,
+                testUser
+        );
+        hotelEvaluationRepository.save(testEvaluation);
     }
 
     @AfterEach
-    void tearDown(){
+    void tearDown() {
         hotelEvaluationRepository.deleteAll();
-        hotelRepository.deleteAll();
         userRepository.deleteAll();
+        hotelRepository.deleteAll();
     }
 
     @Test
-    void testExistsCommentByUserId() {
+    void itShouldReturnHotelEvaluationByUserId() {
+        // When
+        HotelEvaluationEntity response = hotelEvaluationRepository.findHotelEvaluationByUserId(testUser.getId());
 
-        //when
-        boolean response = hotelEvaluationRepository.existsCommentByUserId(userId);
-
-        //then
-        assertTrue(response);
+        // Then
+        assertNotNull(response);
+        assertEquals(testUser.getId(), response.getUser().getId());
+        assertEquals(testHotel.getHotelName(), response.getHotel().getHotelName());
+        assertEquals("test comment", response.getComment());
+        assertEquals(5, response.getRate());
     }
 }

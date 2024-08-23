@@ -1,26 +1,17 @@
 package com.hackathon.backend.hotel.services;
 
+import com.hackathon.backend.dto.hotelDto.CreateHotelDto;
 import com.hackathon.backend.dto.hotelDto.EditHotelDto;
-import com.hackathon.backend.dto.hotelDto.PostHotelDto;
 import com.hackathon.backend.dto.hotelDto.GetHotelDto;
-import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
-import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
-import com.hackathon.backend.entities.hotel.RoomEntity;
-import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
-import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
+import com.hackathon.backend.repositories.country.PlaceRepository;
+import com.hackathon.backend.repositories.hotel.HotelRepository;
 import com.hackathon.backend.services.hotel.HotelService;
-import com.hackathon.backend.utilities.amazonServices.S3Service;
-import com.hackathon.backend.utilities.country.CountryUtils;
-import com.hackathon.backend.utilities.country.PlaceUtils;
-import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
-import com.hackathon.backend.utilities.hotel.HotelUtils;
-import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
-import com.hackathon.backend.utilities.hotel.RoomUtils;
-import com.hackathon.backend.utilities.hotel.features.HotelFeaturesUtils;
-import com.hackathon.backend.utilities.hotel.features.RoomFeaturesUtils;
+import com.hackathon.backend.utilities.S3Service;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,42 +20,25 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class HotelServiceTest {
 
     @Mock
-    PlaceUtils placeUtils;
+    PlaceRepository placeRepository;
 
     @Mock
-    HotelUtils hotelUtils;
-
-    @Mock
-    RoomDetailsUtils roomDetailsUtils;
-
-    @Mock
-    RoomUtils roomUtils;
-
-    @Mock
-    HotelEvaluationUtils hotelEvaluationUtils;
-
-    @Mock
-    HotelFeaturesUtils hotelFeaturesUtils;
-
-    @Mock
-    RoomFeaturesUtils roomFeaturesUtils;
+    HotelRepository hotelRepository;
 
     @Mock
     S3Service s3Service;
@@ -72,142 +46,176 @@ class HotelServiceTest {
     @InjectMocks
     HotelService hotelService;
 
+    PlaceEntity place;
+    HotelEntity hotel;
+
+    CreateHotelDto createHotelDto;
+
+    EditHotelDto editHotelDto;
+
+    @BeforeEach
+    void setUp() {
+        createHotelDto = new CreateHotelDto(
+                "Random Hotel Name", // hotelName
+                new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", "random-image-content".getBytes()),
+                "This is a randomly generated hotel description.",
+                120,
+                "123 Random Street, Random City, Random Country",
+                4,
+                new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", "random-image-content".getBytes()),
+                new MockMultipartFile("imageTwo", "imageTwo.jpg", "image/jpeg", "random-image-content".getBytes()),
+                new MockMultipartFile("imageThree", "imageThree.jpg", "image/jpeg", "random-image-content".getBytes()),
+                new MockMultipartFile("imageFour", "imageFour.jpg", "image/jpeg", "random-image-content".getBytes()),
+                "This is a description for the room in the random hotel.",
+                250
+        );
+
+        editHotelDto = new EditHotelDto(
+                "Updated Hotel Name",
+                new MockMultipartFile("mainImage", "updatedMainImage.jpg", "image/jpeg", "updated-image-content".getBytes()),
+                "Updated description",
+                150,
+                "456 Updated Street, Updated City, Updated Country",
+                400,
+                5
+        );
+
+        hotel = new HotelEntity(
+                createHotelDto.getHotelName(),
+                "mainImage",
+                createHotelDto.getDescription(),
+                createHotelDto.getHotelRoomsCount(),
+                createHotelDto.getAddress(),
+                createHotelDto.getRate(),
+                place
+        );
+        hotel.setId(1);
+
+
+        place = new PlaceEntity();
+        place.setId(1);
+        place.getHotels().add(hotel);
+    }
+
+    @AfterEach
+    void tearDown() {
+        placeRepository.deleteAll();
+        hotelRepository.deleteAll();
+    }
 
     @Test
     void createHotel() {
-        // given
-        int countryId = 1;
-        PlaceEntity place = new PlaceEntity();
-        place.setId(countryId);
+        //given
+        int placeId = 1;
 
-        PostHotelDto h = new PostHotelDto(
-                "testHotel",
-                new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]),
-                "testDesc",
-                10,
-                "testAddress",
-                0,
-                new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", new byte[0]),
-                new MockMultipartFile("imageTwo", "imageTwo.jpg", "image/jpeg", new byte[0]),
-                new MockMultipartFile("imageThree", "imageThree.jpg", "image/jpeg", new byte[0]),
-                new MockMultipartFile("imageFour", "imageFour.jpg", "image/jpeg", new byte[0]),
-                "testDesc",
-                100
-        );
+        //behavior
+        when(placeRepository.findById(placeId)).thenReturn(Optional.ofNullable(place));
 
-        // Mock the behavior
-        when(placeUtils.findById(countryId)).thenReturn(place);
-        when(roomDetailsUtils.existsById(anyLong())).thenReturn(true);
+        //when
+        ResponseEntity<String> response = hotelService.createHotel(placeId, createHotelDto);
 
-        // when
-        ResponseEntity<?> response = hotelService.createHotel(countryId, h);
-
-        // then
+        //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
 
+        verify(s3Service, times(1)).uploadFile(createHotelDto.getMainImage());
+        verify(s3Service, times(1)).uploadFile(createHotelDto.getImageOne());
+        verify(s3Service, times(1)).uploadFile(createHotelDto.getImageTwo());
+        verify(s3Service, times(1)).uploadFile(createHotelDto.getImageThree());
+    }
 
     @Test
     void getHotels() {
         // given
-        int countryId = 1;
+        int placeId = 1;
         int page = 0;
         int size = 10;
-        List<GetHotelDto> hotelList = Collections.singletonList(new GetHotelDto(
-                1L, "testName", "testImage", "testDesc", "testAddress", 3
-        ));
+        GetHotelDto getHotelDto = new GetHotelDto();
+        getHotelDto.setHotelName(hotel.getHotelName());
+        List<GetHotelDto> hotelDtos = List.of(getHotelDto);
+        Page<GetHotelDto> pageImpl = new PageImpl<>(hotelDtos, PageRequest.of(page, size), hotelDtos.size());
 
-        when(hotelUtils.findByPlaceId(countryId, PageRequest.of(page, size))).thenReturn(hotelList);
+        // behavior
+        when(placeRepository.findHotelByPlaceId(placeId, PageRequest.of(page, size)))
+                .thenReturn(pageImpl);
 
-        try {
-            // Call the method
-            ResponseEntity<?> responseEntity = hotelService.getHotels(countryId, page, size);
+        // when
+        ResponseEntity<List<GetHotelDto>> response = hotelService.getHotels(placeId, page, size);
 
-            List<GetHotelDto> expected = (List<GetHotelDto>) responseEntity.getBody();
-            // Verify the response
-            assertEquals(HttpStatus.OK, responseEntity.getStatusCode(), "Expected status code 200");
-            assertEquals(hotelList.get(0).getHotelName(), expected.get(0).getHotelName());
-            assertEquals(hotelList.get(0).getMainImage(), expected.get(0).getMainImage());
-            assertEquals(hotelList.get(0).getDescription(), expected.get(0).getDescription());
-            assertEquals(hotelList.get(0).getAddress(), expected.get(0).getAddress());
-            assertEquals(hotelList.get(0).getRate(), expected.get(0).getRate());
-
-            // Verify interactions
-            verify(hotelUtils, times(1)).findByPlaceId(eq(countryId), any(Pageable.class));
-            verifyNoMoreInteractions(hotelUtils);
-        } catch (Exception e) {
-            // Print the stack trace for debugging
-            e.printStackTrace();
-            throw e;
-        }
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().size());
+        assertEquals(hotel.getHotelName(), response.getBody().get(0).getHotelName());
     }
+
 
 
     @Test
     void editHotel() {
         // given
+        int placeId = 1;
         long hotelId = 1L;
-        EditHotelDto editHotelDto = new EditHotelDto();
-        editHotelDto.setHotelName("new");
-
-        HotelEntity mockHotel = new HotelEntity();
-        mockHotel.setHotelName("old");
 
         // behavior
-        when(hotelUtils.checkHelper(editHotelDto)).thenReturn(true);
-        when(hotelUtils.findHotelById(hotelId)).thenReturn(mockHotel);
-
-        doAnswer(invocation -> {
-            HotelEntity hotelEntity = invocation.getArgument(0);
-            EditHotelDto dto = invocation.getArgument(1);
-
-            hotelEntity.setHotelName(dto.getHotelName());
-
-            return null;
-        }).when(hotelUtils).editHelper(any(HotelEntity.class), any(EditHotelDto.class));
+        when(placeRepository.findById(placeId)).thenReturn(Optional.of(place));
 
         // when
-        ResponseEntity<?> response = hotelService.editHotel(hotelId, editHotelDto);
+        ResponseEntity<String> response = hotelService.editHotel(placeId, hotelId, editHotelDto);
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("new", mockHotel.getHotelName());
+        assertTrue(Objects.requireNonNull(response.getBody()).contains("Updated Hotel Name"));
+        assertTrue(response.getBody().contains("Updated description"));
+
+        verify(s3Service, times(1)).uploadFile(editHotelDto.getMainImage());
     }
 
     @Test
-    void deleteHotel() {
-        //given
-        long hotelId = 1L;
-        HotelEntity hotel = new HotelEntity();
-        hotel.setId(hotelId);
-        PlaceEntity place = new PlaceEntity();
-        hotel.setPlace(place);
+    void editHotel_withEmptyData_shouldReturnBadRequest() {
+        // Given
+        int placeId = 1;
+        long hotelId = 1;
+        EditHotelDto editHotelDto = new EditHotelDto();
 
+        // When
+        ResponseEntity<String> response = hotelService.editHotel(placeId, hotelId, editHotelDto);
+
+        // Then
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+
+
+    @Test
+    void deleteHotel() {
+        // given
+        int placeId = 1;
+        long hotelId = 1L;
+
+        // Initialize the RoomDetailsEntity for the hotel
         RoomDetailsEntity roomDetails = new RoomDetailsEntity();
-        List<HotelFeaturesEntity> hotelFeatures = new ArrayList<>();
-        List<RoomFeaturesEntity> roomFeatures = new ArrayList<>();
-        roomDetails.setHotelFeatures(hotelFeatures);
-        roomDetails.setRoomFeatures(roomFeatures);
+        roomDetails.setImageOne("testImageOne.png");
+        roomDetails.setImageTwo("testImageTwo.png");
+        roomDetails.setImageThree("testImageThree.png");
         hotel.setRoomDetails(roomDetails);
 
-        List<RoomEntity> rooms = new ArrayList<>();
-        hotel.setRooms(rooms);
-        List<HotelEvaluationEntity> evaluations = new ArrayList<>();
-        hotel.setEvaluations(evaluations);
+        // behavior
+        when(placeRepository.findById(placeId)).thenReturn(Optional.of(place));
 
-        //behavior
-        when(hotelUtils.findHotelById(hotelId)).thenReturn(hotel);
+        // when
+        ResponseEntity<String> response = hotelService.deleteHotel(placeId, hotelId);
 
-        //when
-        ResponseEntity<?> response = hotelService.deleteHotel(hotelId);
-
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(roomUtils, times(rooms.size())).delete(any(RoomEntity.class));
-        verify(hotelEvaluationUtils, times(evaluations.size())).delete(any(HotelEvaluationEntity.class));
-        verify(hotelFeaturesUtils, times(hotelFeatures.size())).save(any(HotelFeaturesEntity.class));
-        verify(roomFeaturesUtils, times(roomFeatures.size())).save(any(RoomFeaturesEntity.class));
-        verify(roomDetailsUtils).delete(roomDetails);
-        verify(hotelUtils).delete(hotel);
+        assertFalse(place.getHotels().contains(hotel));
+        assertEquals("Hotel deleted Successfully", response.getBody());
+
+        // Verify that the images were deleted using the S3 service
+        verify(s3Service, times(1)).deleteFile(hotel.getMainImage());
+        verify(s3Service, times(1)).deleteFile(roomDetails.getImageOne());
+        verify(s3Service, times(1)).deleteFile(roomDetails.getImageTwo());
+        verify(s3Service, times(1)).deleteFile(roomDetails.getImageThree());
     }
+
+
 }

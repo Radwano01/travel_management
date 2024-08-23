@@ -6,13 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
-import java.util.Date;
 
-@Entity
-@Table(name = "roomBooking")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "roomBooking")
 public class RoomBookingEntity {
 
     @Id
@@ -27,7 +26,6 @@ public class RoomBookingEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "hotel_id")
     private HotelEntity hotel;
-
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;

@@ -8,11 +8,11 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name="roles")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name="roles")
 public class RoleEntity {
 
     @Id
@@ -27,5 +27,12 @@ public class RoleEntity {
 
     public RoleEntity(String role){
         this.role = role;
+    }
+
+    @Override
+    public String toString() {
+        return "RoleEntity{" +
+                "role='" + role + '\'' +
+                '}';
     }
 }

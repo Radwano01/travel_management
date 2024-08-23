@@ -14,7 +14,7 @@ public class GetFlightDto {
     private long id;
     private String planeCompanyName;
     private int price;
-    private int availableSeats;
+
     private String departureAirPort;
     private String departureAirPortCode;
 
@@ -32,8 +32,7 @@ public class GetFlightDto {
                         String destinationAirPort,
                         String destinationAirPortCode,
                         LocalDateTime departureTime,
-                        LocalDateTime arrivalTime,
-                        int availableSeats) {
+                        LocalDateTime arrivalTime) {
         this.id = id;
         this.planeCompanyName = planeCompanyName;
         this.price = price;
@@ -43,6 +42,5 @@ public class GetFlightDto {
         this.destinationAirPortCode = destinationAirPortCode;
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
-        this.availableSeats = availableSeats;
     }
 }

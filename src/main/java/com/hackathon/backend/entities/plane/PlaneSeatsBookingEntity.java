@@ -8,11 +8,11 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "planeSeatsBooking")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "planeSeatsBooking")
 public class PlaneSeatsBookingEntity {
 
     @Id
@@ -24,10 +24,6 @@ public class PlaneSeatsBookingEntity {
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "plane_seat_id")
-    private PlaneSeatsEntity planeSeat;
-
-    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "flight_id")
     private PlaneFlightsEntity flight;
 
@@ -35,12 +31,10 @@ public class PlaneSeatsBookingEntity {
     private LocalDateTime bookedDate;
 
     public PlaneSeatsBookingEntity(UserEntity user,
-                                   PlaneSeatsEntity planeSeat,
                                    PlaneFlightsEntity flight,
                                    String reservationName,
                                    LocalDateTime bookedDate) {
         this.user = user;
-        this.planeSeat = planeSeat;
         this.flight = flight;
         this.reservationName = reservationName;
         this.bookedDate = bookedDate;

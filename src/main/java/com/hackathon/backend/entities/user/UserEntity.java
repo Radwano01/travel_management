@@ -12,11 +12,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name="users")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name="users")
 public class UserEntity {
 
     @Id
@@ -62,5 +62,23 @@ public class UserEntity {
         this.address = address;
         this.dateOfBirth = dateOfBirth;
         this.role = role;
+    }
+
+    @Override
+    public String toString() {
+        return "UserEntity{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", verificationStatus=" + verificationStatus +
+                ", image='" + image + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", country='" + country + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", address='" + address + '\'' +
+                ", dateOfBirth=" + dateOfBirth +
+                ", role=" + role +
+                '}';
     }
 }

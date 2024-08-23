@@ -31,5 +31,4 @@ public class GetHotelDto {
         this.address = address;
         this.rate = rate;
     }
-
 }

@@ -5,11 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name="placeDetails")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name="placeDetails")
 public class PlaceDetailsEntity {
 
     @Id
@@ -35,5 +35,16 @@ public class PlaceDetailsEntity {
         this.imageThree = imageThree;
         this.description = description;
         this.place = place;
+    }
+
+    @Override
+    public String toString() {
+        return "PlaceDetailsEntity{" +
+                "id=" + id +
+                ", imageOne='" + imageOne + '\'' +
+                ", imageTwo='" + imageTwo + '\'' +
+                ", imageThree='" + imageThree + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 }

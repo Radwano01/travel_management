@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface HotelEvaluationRepository extends JpaRepository<HotelEvaluationEntity, Long> {
-    boolean existsCommentByUserId(long userId);
+    HotelEvaluationEntity findHotelEvaluationByUserId(long userId);
 }

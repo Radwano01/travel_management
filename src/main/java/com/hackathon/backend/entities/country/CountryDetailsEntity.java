@@ -1,16 +1,14 @@
 package com.hackathon.backend.entities.country;
 
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-@Entity
-@Table(name = "countryDetails")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "countryDetails")
 public class CountryDetailsEntity {
 
     @Id
@@ -24,7 +22,7 @@ public class CountryDetailsEntity {
     @Column(length = 2000)
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id")
     private CountryEntity country;
 
@@ -38,5 +36,16 @@ public class CountryDetailsEntity {
         this.imageThree = imageThree;
         this.description = description;
         this.country = country;
+    }
+
+    @Override
+    public String toString() {
+        return "CountryDetailsEntity{" +
+                "id=" + id +
+                ", imageOne='" + imageOne + '\'' +
+                ", imageTwo='" + imageTwo + '\'' +
+                ", imageThree='" + imageThree + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 }

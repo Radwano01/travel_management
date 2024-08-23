@@ -1,6 +1,5 @@
 package com.hackathon.backend.entities.hotel;
 
-import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -10,11 +9,12 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "hotels")
+
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "hotels")
 public class HotelEntity {
 
 
@@ -30,6 +30,7 @@ public class HotelEntity {
     private String description;
 
     private int hotelRoomsCount;
+    private int paidRoomsCount = 0;
 
     private int rate;
 
@@ -38,13 +39,10 @@ public class HotelEntity {
     private PlaceEntity place;
 
 
-    @OneToOne(mappedBy = "hotel", fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "hotel", fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
     private RoomDetailsEntity roomDetails;
 
-    @OneToMany(mappedBy = "hotel", fetch = FetchType.LAZY)
-    private List<RoomEntity> rooms = new ArrayList<>();
-
-    @OneToMany(mappedBy = "hotel", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "hotel", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     private List<HotelEvaluationEntity> evaluations = new ArrayList<>();;
 
     public HotelEntity(String hotelName, String mainImage,
@@ -58,6 +56,20 @@ public class HotelEntity {
         this.address = address;
         this.rate = rate;
         this.place = place;
+    }
 
+    @Override
+    public String toString() {
+        return "HotelEntity{" +
+                "id=" + id +
+                ", hotelName='" + hotelName + '\'' +
+                ", mainImage='" + mainImage + '\'' +
+                ", address='" + address + '\'' +
+                ", description='" + description + '\'' +
+                ", hotelRoomsCount=" + hotelRoomsCount +
+                ", hotelRoomsCount=" + paidRoomsCount +
+                ", rate=" + rate +
+                ", roomDetails=" + roomDetails +
+                '}';
     }
 }

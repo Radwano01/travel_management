@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class UserDto {
 
+    private long id;
     private String username;
     private String email;
     private String image;
@@ -21,11 +22,12 @@ public class UserDto {
     private String address;
     private LocalDate dateOfBirth;
 
-    public UserDto(String username, String email,
+    public UserDto(long id, String username, String email,
                    String image, boolean verificationStatus,
                    String fullName, String country,
                    String phoneNumber, String address,
                    LocalDate dateOfBirth) {
+        this.id = id;
         this.username = username;
         this.email = email;
         this.image = image;

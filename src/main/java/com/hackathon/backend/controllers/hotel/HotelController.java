@@ -1,18 +1,17 @@
 package com.hackathon.backend.controllers.hotel;
 
+import com.hackathon.backend.dto.hotelDto.CreateHotelDto;
 import com.hackathon.backend.dto.hotelDto.EditHotelDto;
-import com.hackathon.backend.dto.hotelDto.GetHotelDto;
-import com.hackathon.backend.dto.hotelDto.PostHotelDto;
-import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.services.hotel.HotelService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.print.Pageable;
+import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
+import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
+
 
 @RestController
 @RequestMapping(path = "${BASE_API}")
@@ -25,66 +24,50 @@ public class HotelController {
     }
 
     @PostMapping(path = "${CREATE_HOTEL_PATH}")
-    public ResponseEntity<String> createHotel(@PathVariable("placeId") int placeId,
-                                         @RequestParam("hotelName") String hotelName,
-                                         @RequestParam("mainImage") MultipartFile mainImage,
-                                         @RequestParam("description") String description,
-                                         @RequestParam("hotelRoomsCount") int hotelRoomsCount,
-                                         @RequestParam("address") String address,
-                                         @RequestParam("rate") int rate,
-                                         @RequestParam("imageOne") MultipartFile imageOne,
-                                         @RequestParam("imageTwo") MultipartFile imageTwo,
-                                         @RequestParam("imageThree") MultipartFile imageThree,
-                                         @RequestParam("imageFour") MultipartFile imageFour,
-                                         @RequestParam("roomDescription") String roomDescription,
-                                         @RequestParam("price") int price){
-        PostHotelDto h = new PostHotelDto(
-                hotelName,
-                mainImage,
-                description,
-                hotelRoomsCount,
-                address,
-                rate,
-                imageOne,
-                imageTwo,
-                imageThree,
-                imageFour,
-                roomDescription,
-                price
-        );
-        return hotelService.createHotel(placeId, h);
+    public ResponseEntity<?> createHotel(@PathVariable("placeId") int placeId,
+                                         @ModelAttribute CreateHotelDto createHotelDto){
+        try {
+            return hotelService.createHotel(placeId, createHotelDto);
+        }catch (EntityNotFoundException e) {
+            return notFoundException(e);
+        } catch (Exception e) {
+            return serverErrorException(e);
+        }
     }
 
     @GetMapping(path = "${GET_HOTELS_PATH}")
     public ResponseEntity<?> getHotels(@PathVariable("placeId") int placeId,
                                        @RequestParam("page") int page,
                                        @RequestParam("size") int size){
-        return hotelService.getHotels(placeId, page, size);
+        try {
+            return hotelService.getHotels(placeId, page, size);
+        }catch (Exception e) {
+            return serverErrorException(e);
+        }
     }
 
     @PutMapping(path = "${EDIT_HOTEL_PATH}")
-    public ResponseEntity<String> editHotel(@PathVariable("hotelId") long hotelId,
-                                           @RequestParam(name = "hotelName", required = false) String hotelName,
-                                           @RequestParam(name = "mainImage", required = false) MultipartFile mainImage,
-                                           @RequestParam(name = "description", required = false) String description,
-                                           @RequestParam(name = "hotelRoomsCount", required = false) Integer hotelRoomsCount,
-                                           @RequestParam(name = "address", required = false) String address,
-                                           @RequestParam(name = "price", required = false) Integer price,
-                                           @RequestParam(name = "rate", required = false) Integer rate){
-        EditHotelDto editHotelDto = new EditHotelDto(
-                hotelName,
-                mainImage,
-                description,
-                hotelRoomsCount,
-                address,
-                price,
-                rate
-        );
-        return hotelService.editHotel(hotelId, editHotelDto);
+    public ResponseEntity<String> editHotel(@PathVariable("placeId") int placeId,
+                                            @PathVariable("hotelId") long hotelId,
+                                            @ModelAttribute EditHotelDto editHotelDto){
+        try {
+            return hotelService.editHotel(placeId, hotelId, editHotelDto);
+        }catch (EntityNotFoundException e) {
+            return notFoundException(e);
+        } catch (Exception e){
+            return serverErrorException(e);
+        }
     }
 
     @DeleteMapping(path = "${DELETE_HOTEL_PATH}")
-    public ResponseEntity<String> deleteHotel(@PathVariable("hotelId") long hotelId){
-        return hotelService.deleteHotel(hotelId);
+    public ResponseEntity<?> deleteHotel(@PathVariable("placeId") int placeId,
+                                         @PathVariable("hotelId") long hotelId){
+        try {
+            return hotelService.deleteHotel(placeId, hotelId);
+        }catch (EntityNotFoundException e) {
+            return notFoundException(e);
+        } catch (Exception e) {
+            return serverErrorException(e);
+        }
     }
 }

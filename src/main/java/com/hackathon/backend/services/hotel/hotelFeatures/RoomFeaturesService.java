@@ -1,10 +1,10 @@
 package com.hackathon.backend.services.hotel.hotelFeatures;
 
 
+import com.hackathon.backend.dto.hotelDto.features.RoomFeatureDto;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
-import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
-import com.hackathon.backend.utilities.hotel.features.RoomFeaturesUtils;
+import com.hackathon.backend.repositories.hotel.hotelFeatures.RoomFeaturesRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,18 +14,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.hackathon.backend.libs.MyLib.checkIfSentEmptyData;
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class RoomFeaturesService {
-    private final RoomDetailsUtils roomDetailsUtils;
-    private final RoomFeaturesUtils roomFeaturesUtils;
+    private final RoomFeaturesRepository roomFeaturesRepository;
 
     @Autowired
-    public RoomFeaturesService(RoomDetailsUtils roomDetailsUtils,
-                               RoomFeaturesUtils roomFeaturesUtils){
-        this.roomDetailsUtils = roomDetailsUtils;
-        this.roomFeaturesUtils = roomFeaturesUtils;
+    public RoomFeaturesService(RoomFeaturesRepository roomFeaturesRepository){
+        this.roomFeaturesRepository = roomFeaturesRepository;
     }
 
     //room features
@@ -33,66 +31,64 @@ public class RoomFeaturesService {
     // because there is many to many with join table
 
 
-    public ResponseEntity<String> createRoomFeature(String roomFeature) {
-        try{
-            String feature = roomFeature.trim();
-            boolean existsRoomFeature = roomFeaturesUtils.existsRoomFeatureByRoomFeatures(feature);
-            if(existsRoomFeature){
-                return new ResponseEntity<>("Room Feature already exists", HttpStatus.CONFLICT);
-            }
-            RoomFeaturesEntity roomFeatures = new RoomFeaturesEntity(
-                    roomFeature
-            );
-            roomFeaturesUtils.save(roomFeatures);
-            return ResponseEntity.ok("Room feature created successfully");
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        }catch (Exception e){
-            return serverErrorException(e);
+    public ResponseEntity<String> createRoomFeature(RoomFeatureDto roomFeatureDto) {
+        String roomFeature = roomFeatureDto.getRoomFeature().trim();
+
+        ResponseEntity<String> checkResult = checkIfFeatureAlreadyExist(roomFeature);
+        if(!checkResult.getStatusCode().equals(HttpStatus.OK)){
+            return checkResult;
         }
+
+        roomFeaturesRepository.save(new RoomFeaturesEntity(roomFeature));
+
+        return ResponseEntity.ok("Room feature created successfully " + roomFeature);
     }
 
-    public ResponseEntity<?> getRoomFeatures() {
-        try{
-            List<RoomFeaturesEntity> roomFeatures = roomFeaturesUtils.findAll();
-            return ResponseEntity.ok(roomFeatures);
-        }catch (Exception e){
-            return serverErrorException(e);
-        }
+    public ResponseEntity<List<RoomFeaturesEntity>> getRoomFeatures() {
+        return ResponseEntity.ok(roomFeaturesRepository.findAll());
     }
 
     @Transactional
-    public ResponseEntity<String> editRoomFeature(int featureId,
-                                             String roomFeature){
-        try{
-            if(roomFeature == null){
-                return badRequestException("you sent an empty data to change");
-            }
-            RoomFeaturesEntity roomFeatures = roomFeaturesUtils.findById(featureId);
-            roomFeatures.setRoomFeatures(roomFeature);
-            roomFeaturesUtils.save(roomFeatures);
-            return ResponseEntity.ok("Room Feature edited successfully");
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        }catch (Exception e){
-            return serverErrorException(e);
+    public ResponseEntity<String> editRoomFeature(int featureId, RoomFeatureDto roomFeatureDto){
+        if(!checkIfSentEmptyData(roomFeatureDto)){
+            return badRequestException("you sent an empty data to change");
         }
+
+        String roomFeature = roomFeatureDto.getRoomFeature().trim();
+
+        RoomFeaturesEntity roomFeatures = findRoomFeatureById(featureId);
+
+        roomFeatures.setRoomFeatures(roomFeature);
+
+        roomFeaturesRepository.save(roomFeatures);
+
+        return ResponseEntity.ok("Room Feature edited successfully " + roomFeature);
     }
 
     @Transactional
     public ResponseEntity<String> deleteRoomFeature(int featureId) {
-        try {
-            RoomFeaturesEntity roomFeatures = roomFeaturesUtils.findById(featureId);
-            for (RoomDetailsEntity roomDetails : roomFeatures.getRoomDetails()) {
-                roomDetails.getRoomFeatures().remove(roomFeatures);
-                roomDetailsUtils.save(roomDetails);
-            }
-            roomFeaturesUtils.delete(roomFeatures);
-            return ResponseEntity.ok("Room feature deleted successfully");
-        } catch (EntityNotFoundException e) {
-            return notFoundException(e);
-        } catch (Exception e) {
-            return serverErrorException(e);
+        RoomFeaturesEntity roomFeatures = findRoomFeatureById(featureId);
+
+        for (RoomDetailsEntity roomDetails : roomFeatures.getRoomDetails()) {
+            roomDetails.getRoomFeatures().remove(roomFeatures);
         }
+
+        roomFeaturesRepository.delete(roomFeatures);
+
+        return ResponseEntity.ok("Room feature deleted successfully");
+    }
+
+    private RoomFeaturesEntity findRoomFeatureById(int featureId){
+        return roomFeaturesRepository.findById(featureId)
+                .orElseThrow(() -> new EntityNotFoundException("No such feature has this id"));
+    }
+
+    private ResponseEntity<String> checkIfFeatureAlreadyExist(String feature){
+        boolean existsHotelFeature = roomFeaturesRepository.existsRoomFeatureByRoomFeatures(feature);
+
+        if(existsHotelFeature){
+            return alreadyValidException("Hotel Feature already exists");
+        }
+        return ResponseEntity.ok("OK");
     }
 }

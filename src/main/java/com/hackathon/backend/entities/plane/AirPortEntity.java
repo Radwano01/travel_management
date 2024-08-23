@@ -8,11 +8,11 @@ import lombok.Setter;
 
 import java.util.List;
 
-@Entity
-@Table(name = "airports")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "airports")
 public class AirPortEntity {
 
     @Id
@@ -39,6 +39,15 @@ public class AirPortEntity {
         this.airPortName = airPortName;
         this.airPortCode = airPortCode;
         this.place = place;
+    }
+
+    @Override
+    public String toString() {
+        return "AirPortEntity{" +
+                "id=" + id +
+                ", airPortName='" + airPortName + '\'' +
+                ", airPortCode='" + airPortCode + '\'' +
+                '}';
     }
 }
 

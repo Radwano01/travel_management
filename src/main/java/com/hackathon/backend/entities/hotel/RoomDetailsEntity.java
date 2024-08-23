@@ -45,7 +45,7 @@ public class RoomDetailsEntity {
     @JoinTable(name = "roomFeaturesRelation",
             joinColumns = @JoinColumn(name = "room_details_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "feature_id", referencedColumnName = "id"))
-    private List<RoomFeaturesEntity> roomFeatures = new ArrayList<>();;
+    private List<RoomFeaturesEntity> roomFeatures = new ArrayList<>();
 
     public RoomDetailsEntity(String imageOne, String imageTwo,
                              String imageThree, String imageFour,
@@ -69,5 +69,18 @@ public class RoomDetailsEntity {
         this.imageFour = imageFour;
         this.description = description;
         this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return "RoomDetailsEntity{" +
+                "id=" + id +
+                ", imageOne='" + imageOne + '\'' +
+                ", imageTwo='" + imageTwo + '\'' +
+                ", imageThree='" + imageThree + '\'' +
+                ", imageFour='" + imageFour + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                '}';
     }
 }

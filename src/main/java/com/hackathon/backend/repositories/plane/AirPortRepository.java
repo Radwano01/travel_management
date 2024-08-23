@@ -11,15 +11,4 @@ import java.util.Optional;
 
 @Repository
 public interface AirPortRepository extends JpaRepository<AirPortEntity, Long> {
-    Optional<AirPortEntity> findAirPortByAirPortName(String airport);
-
-    boolean existsAirPortByAirPortName(String airPortName);
-
-    void deleteById(long airPortId);
-
-    boolean existsAirPortByAirPortCode(String airPortCode);
-
-    @Query("SELECT new com.hackathon.backend.dto.planeDto.GetAirPortDto" +
-            "(a.id, a.airPortName, a.airPortCode) FROM AirPortEntity a WHERE a.place.id = :placeId")
-    Optional<List<GetAirPortDto>> findByPlaceId(int placeId);
 }

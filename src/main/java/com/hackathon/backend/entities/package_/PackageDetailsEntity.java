@@ -10,11 +10,11 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "packageDetails")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "packageDetails")
 public class PackageDetailsEntity {
 
     @Id
@@ -47,11 +47,22 @@ public class PackageDetailsEntity {
                                 String imageTwo,
                                 String imageThree,
                                 String description,
-                                PackageEntity packageOffer){
+                                PackageEntity packageEntity){
         this.imageOne = imageOne;
         this.imageTwo = imageTwo;
         this.imageThree = imageThree;
         this.description = description;
-        this.packageOffer = packageOffer;
+        this.packageOffer = packageEntity;
+    }
+
+    @Override
+    public String toString() {
+        return "PackageDetailsEntity{" +
+                "id=" + id +
+                ", imageOne='" + imageOne + '\'' +
+                ", imageTwo='" + imageTwo + '\'' +
+                ", imageThree='" + imageThree + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 }

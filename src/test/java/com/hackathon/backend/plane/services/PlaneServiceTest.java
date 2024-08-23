@@ -1,15 +1,12 @@
 package com.hackathon.backend.plane.services;
 
+import com.hackathon.backend.dto.planeDto.CreatePlaneDto;
 import com.hackathon.backend.dto.planeDto.EditPlaneDto;
 import com.hackathon.backend.dto.planeDto.GetPlaneDto;
-import com.hackathon.backend.dto.planeDto.PlaneDto;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
-import com.hackathon.backend.entities.plane.PlaneSeatsEntity;
+import com.hackathon.backend.repositories.plane.PlaneRepository;
 import com.hackathon.backend.services.plane.PlaneService;
-import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
-import com.hackathon.backend.utilities.plane.PlaneSeatsUtils;
-import com.hackathon.backend.utilities.plane.PlaneUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,133 +17,133 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PlaneServiceTest {
 
     @Mock
-    PlaneUtils planeUtils;
-
-    @Mock
-    PlaneSeatsUtils planeSeatsUtils;
-
-    @Mock
-    PlaneFlightsUtils planeFlightsUtils;
+    private PlaneRepository planeRepository;
 
     @InjectMocks
-    PlaneService planeService;
+    private PlaneService planeService;
 
     @Test
-    void createPlane() {
-        //given
-        PlaneDto planeDto = new PlaneDto();
-        planeDto.setPlaneCompanyName("testPlane");
-        planeDto.setNumSeats(100);
-
-        //when
-        ResponseEntity<?> response = planeService.createPlane(planeDto);
-
-        //then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
-
-    @Test
-    void getPlanes(){
-        //given
-        List<GetPlaneDto> ls = new ArrayList<>();
-        GetPlaneDto getPlaneDto = new GetPlaneDto();
-        getPlaneDto.setPlaneCompanyName("test");
-        getPlaneDto.setStatus(true);
-
-        ls.add(getPlaneDto);
-
-        PlaneEntity plane = new PlaneEntity();
-        plane.setId(1L);
-        plane.setNumSeats(100);
-        plane.setPlaneCompanyName("test");
-        planeUtils.save(plane);
-
-        //behavior
-        when(planeUtils.findAllPlanes()).thenReturn(ls);
-
-        //when
-        ResponseEntity<?> response = planeService.getPlanes();
-
-        List<GetPlaneDto> planes = (List<GetPlaneDto>) response.getBody();
-
-        //then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(plane.getPlaneCompanyName(), planes.get(0).getPlaneCompanyName());
-        assertEquals(plane.isStatus(), planes.get(0).isStatus());
-    }
-
-    @Test
-    void editPlane() {
+    void createPlane_ShouldReturnPlaneDetails() {
         // given
-        long planeId = 1;
-
-        PlaneEntity plane = new PlaneEntity();
-        plane.setId(planeId);
-        plane.setPlaneCompanyName("testPlane");
-        plane.setNumSeats(100);
-
-        EditPlaneDto editPlaneDto = new EditPlaneDto();
-        editPlaneDto.setPlaneCompanyName("testPlane1");
-        editPlaneDto.setNumSeats(101);
+        CreatePlaneDto createPlaneDto = new CreatePlaneDto();
+        createPlaneDto.setPlaneCompanyName("Airways");
+        createPlaneDto.setNumSeats(150);
+        PlaneEntity planeEntity = new PlaneEntity("Airways", 150);
 
         // behavior
-        when(planeUtils.findPlaneById(planeId)).thenReturn(plane);
-        when(planeUtils.checkHelper(any(EditPlaneDto.class))).thenReturn(true);
-
-        doAnswer(invocation -> {
-            PlaneEntity planeEntity = invocation.getArgument(0);
-            EditPlaneDto dto = invocation.getArgument(1);
-
-            planeEntity.setPlaneCompanyName(dto.getPlaneCompanyName());
-            planeEntity.setNumSeats(dto.getNumSeats());
-
-            return null;
-        }).when(planeUtils).editHelper(any(PlaneEntity.class), any(EditPlaneDto.class));
+        when(planeRepository.save(any(PlaneEntity.class))).thenReturn(planeEntity);
 
         // when
-        ResponseEntity<?> response = planeService.editPlane(planeId, editPlaneDto);
+        ResponseEntity<String> response = planeService.createPlane(createPlaneDto);
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(editPlaneDto.getPlaneCompanyName(), plane.getPlaneCompanyName());
-        assertEquals(editPlaneDto.getNumSeats(), plane.getNumSeats());
-        verify(planeUtils).findPlaneById(planeId);
-        verify(planeUtils).save(plane);
+        assertEquals(planeEntity.toString(), response.getBody());
     }
 
     @Test
-    void deletePlane() {
-        //given
-        long planeId = 1L;
-        PlaneEntity plane = new PlaneEntity();
-        plane.setId(planeId);
+    void getPlanes_ShouldReturnListOfPlanes() {
+        // given
+        List<GetPlaneDto> planeDtos = new ArrayList<>();
+        GetPlaneDto planeDto = new GetPlaneDto();
+        planeDtos.add(planeDto);
 
-        PlaneSeatsEntity planeSeatsEntity = new PlaneSeatsEntity();
-        plane.getPlaneSeats().add(planeSeatsEntity);
+        // behavior
+        when(planeRepository.findAllPlanes()).thenReturn(planeDtos);
 
-        PlaneFlightsEntity planeFlightsEntity = new PlaneFlightsEntity();
-        plane.setFlight(planeFlightsEntity);
+        // when
+        ResponseEntity<List<GetPlaneDto>> response = planeService.getPlanes();
 
-        //behavior
-        when(planeUtils.findById(planeId)).thenReturn(plane);
-
-        //when
-        ResponseEntity<?> response = planeService.deletePlane(planeId);
-
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(planeUtils).findById(planeId);
-        verify(planeSeatsUtils).delete(planeSeatsEntity);
-        verify(planeFlightsUtils).delete(planeFlightsEntity);
-        verify(planeUtils).delete(plane);
+        assertEquals(planeDtos, response.getBody());
+    }
+
+    @Test
+    void editPlane_ShouldReturnUpdatedPlaneDetails() {
+        // given
+        long planeId = 1;
+        EditPlaneDto editPlaneDto = new EditPlaneDto();
+        editPlaneDto.setPlaneCompanyName("New Airways");
+        editPlaneDto.setStatus(true);
+        editPlaneDto.setNumSeats(200);
+        PlaneEntity planeEntity = new PlaneEntity("Old Airways", 100);
+        planeEntity.setId(planeId);
+
+        // behavior
+        when(planeRepository.findById(planeId)).thenReturn(Optional.of(planeEntity));
+        when(planeRepository.save(any(PlaneEntity.class))).thenReturn(planeEntity);
+
+        // when
+        ResponseEntity<String> response = planeService.editPlane(planeId, editPlaneDto);
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(planeEntity.toString(), response.getBody());
+        assertEquals("New Airways", planeEntity.getPlaneCompanyName());
+        assertTrue(planeEntity.isStatus());
+        assertEquals(200, planeEntity.getNumSeats());
+    }
+
+    @Test
+    void editPlane_ShouldReturnBadRequest_WhenNoDataIsSent() {
+        // given
+        long planeId = 1;
+        EditPlaneDto editPlaneDto = new EditPlaneDto();
+
+        // when
+        ResponseEntity<String> response = planeService.editPlane(planeId, editPlaneDto);
+
+        // then
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("you sent an empty data to change", response.getBody());
+    }
+
+    @Test
+    void deletePlane_ShouldReturnSuccess_WhenPlaneIsDeleted() {
+        // given
+        long planeId = 1;
+        PlaneEntity planeEntity = new PlaneEntity("Airways", 150);
+        planeEntity.setId(planeId);
+
+        // behavior
+        when(planeRepository.findById(planeId)).thenReturn(Optional.of(planeEntity));
+        when(planeRepository.findById(planeId)).thenReturn(Optional.of(planeEntity));
+        when(planeRepository.findById(planeId)).thenReturn(Optional.of(planeEntity));
+
+        // when
+        ResponseEntity<String> response = planeService.deletePlane(planeId);
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Plane deleted successfully", response.getBody());
+    }
+
+    @Test
+    void deletePlane_ShouldReturnAlreadyValidException_WhenPlaneHasFlight() {
+        // given
+        long planeId = 1;
+        PlaneEntity planeEntity = new PlaneEntity("Airways", 150);
+        planeEntity.setId(planeId);
+        planeEntity.setFlight(new PlaneFlightsEntity()); // Simulating that the plane has a flight
+
+        // behavior
+        when(planeRepository.findById(planeId)).thenReturn(Optional.of(planeEntity));
+
+        // when
+        ResponseEntity<String> response = planeService.deletePlane(planeId);
+
+        // then
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("You can't delete a plane that has flight" + planeEntity.getFlight(), response.getBody());
     }
 }

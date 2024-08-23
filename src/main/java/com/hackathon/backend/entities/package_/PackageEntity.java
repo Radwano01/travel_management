@@ -1,6 +1,5 @@
 package com.hackathon.backend.entities.package_;
 
-
 import com.hackathon.backend.entities.country.CountryEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -10,11 +9,11 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "package")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "package")
 public class PackageEntity{
 
     @Id
@@ -30,10 +29,10 @@ public class PackageEntity{
     @JoinColumn(name = "country_id")
     private CountryEntity country;
 
-    @OneToOne(mappedBy = "packageOffer", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "packageOffer", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     private PackageDetailsEntity packageDetails;
 
-    @OneToMany(mappedBy = "packageEntity", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "packageEntity", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     private List<PackageEvaluationEntity> packageEvaluations = new ArrayList<>();
 
 
@@ -47,5 +46,18 @@ public class PackageEntity{
         this.mainImage = mainImage;
         this.rate = rate;
         this.country = country;
+    }
+
+    @Override
+    public String toString() {
+        return "PackageEntity{" +
+                "id=" + id +
+                ", packageName='" + packageName + '\'' +
+                ", price=" + price +
+                ", mainImage='" + mainImage + '\'' +
+                ", rate=" + rate +
+                ", country=" + country +
+                ", packageDetails=" + packageDetails +
+                '}';
     }
 }

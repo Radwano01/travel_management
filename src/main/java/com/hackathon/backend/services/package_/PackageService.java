@@ -1,162 +1,166 @@
 package com.hackathon.backend.services.package_;
 
+import com.hackathon.backend.dto.packageDto.CreatePackageDto;
 import com.hackathon.backend.dto.packageDto.EditPackageDto;
-import com.hackathon.backend.dto.packageDto.PostPackageDto;
 import com.hackathon.backend.dto.packageDto.GetEssentialPackageDto;
-import com.hackathon.backend.dto.packageDto.GetPackageDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
-import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
-import com.hackathon.backend.entities.package_.packageFeatures.BenefitEntity;
-import com.hackathon.backend.entities.package_.packageFeatures.RoadmapEntity;
-import com.hackathon.backend.utilities.amazonServices.S3Service;
-import com.hackathon.backend.utilities.country.CountryUtils;
-import com.hackathon.backend.utilities.package_.PackageDetailsUtils;
-import com.hackathon.backend.utilities.package_.PackageEvaluationUtils;
-import com.hackathon.backend.utilities.package_.PackageUtils;
-import com.hackathon.backend.utilities.package_.features.BenefitUtils;
-import com.hackathon.backend.utilities.package_.features.RoadmapUtils;
+import com.hackathon.backend.repositories.country.CountryRepository;
+import com.hackathon.backend.utilities.S3Service;
 import io.micrometer.common.lang.NonNull;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.hackathon.backend.libs.MyLib.checkIfSentEmptyData;
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class PackageService {
 
-    private final PackageUtils packageUtils;
-    private final PackageDetailsUtils packageDetailsUtils;
-    private final CountryUtils countryUtils;
-    private final RoadmapUtils roadmapUtils;
-    private final BenefitUtils benefitUtils;
-    private final PackageEvaluationUtils packageEvaluationUtils;
+    private final CountryRepository countryRepository;
     private final S3Service s3Service;
 
     @Autowired
-    public PackageService(PackageUtils packageUtils, PackageDetailsUtils packageDetailsUtils,
-                          CountryUtils countryUtils, RoadmapUtils roadmapUtils,
-                          BenefitUtils benefitUtils, PackageEvaluationUtils packageEvaluationUtils,
+    public PackageService(CountryRepository countryRepository,
                           S3Service s3Service){
-        this.packageUtils = packageUtils;
-        this.packageDetailsUtils = packageDetailsUtils;
-        this.countryUtils = countryUtils;
-        this.roadmapUtils = roadmapUtils;
-        this.benefitUtils = benefitUtils;
-        this.packageEvaluationUtils = packageEvaluationUtils;
+        this.countryRepository = countryRepository;
         this.s3Service = s3Service;
     }
 
-    public ResponseEntity<String> createPackage(int countryId,
-                                           @NonNull PostPackageDto postPackageDto){
-        try{
-            CountryEntity country = countryUtils.findCountryById(countryId);
+    @Transactional
+    public ResponseEntity<String> createPackage(int countryId, @NonNull CreatePackageDto createPackageDto){
+        CountryEntity country = getCountryById(countryId);
 
-            String packageMainImageName = s3Service.uploadFile(postPackageDto.getMainImage());
+        PackageEntity packageEntity = preparePackageEntity(createPackageDto, country);
 
-            PackageEntity packageEntity = new PackageEntity(
-                    postPackageDto.getPackageName(),
-                    postPackageDto.getPrice(),
-                    packageMainImageName,
-                    postPackageDto.getRate(),
-                    country
-            );
-            packageUtils.save(packageEntity);
-            country.getPackages().add(packageEntity);
-            countryUtils.save(country);
+        prepareANDSetPackageDetailsData(createPackageDto, packageEntity);
 
-            String packageDetailsImageOneName = s3Service.uploadFile(postPackageDto.getImageOne());
-            String packageDetailsImageTwoName = s3Service.uploadFile(postPackageDto.getImageTwo());
-            String packageDetailsImageThreeName = s3Service.uploadFile(postPackageDto.getImageThree());
+        country.getPackages().add(packageEntity);
 
-            PackageDetailsEntity packageDetails = new PackageDetailsEntity(
-                    packageDetailsImageOneName,
-                    packageDetailsImageTwoName,
-                    packageDetailsImageThreeName,
-                    postPackageDto.getDescription(),
-                    packageEntity
-            );
+        countryRepository.save(country);
 
-            packageDetailsUtils.save(packageDetails);
-            packageEntity.setPackageDetails(packageDetails);
-            packageUtils.save(packageEntity);
-            return ResponseEntity.ok("Package and package Details created successfully");
-        }catch(EntityNotFoundException e){
-            return notFoundException(e);
-        }catch(Exception e){
-            return serverErrorException(e);
-        }
+        return ResponseEntity.ok(packageEntity.toString());
     }
 
-    public ResponseEntity<?> getPackagesByCountry(int countryId){
-        try{
-            List<GetEssentialPackageDto> packages = packageUtils
-                    .findPackagesByCountryId(countryId);
-            return ResponseEntity.ok(packages);
-        }catch(EntityNotFoundException e){
-            return notFoundException(e);
-        }catch(Exception e){
-            return serverErrorException(e);
-        }
+    private CountryEntity getCountryById(int countryId){
+        return countryRepository.findById(countryId)
+                .orElseThrow(()-> new EntityNotFoundException("No such country has this id."));
+    }
+
+    private PackageEntity preparePackageEntity(CreatePackageDto createPackageDto, CountryEntity country){
+        String packageMainImageName = s3Service.uploadFile(createPackageDto.getMainImage());
+
+        return new PackageEntity(
+                createPackageDto.getPackageName(),
+                createPackageDto.getPrice(),
+                packageMainImageName,
+                createPackageDto.getRate(),
+                country
+        );
+    }
+
+    private void prepareANDSetPackageDetailsData(CreatePackageDto createPackageDto, PackageEntity packageEntity){
+        String packageDetailsImageOneName = s3Service.uploadFile(createPackageDto.getImageOne());
+        String packageDetailsImageTwoName = s3Service.uploadFile(createPackageDto.getImageTwo());
+        String packageDetailsImageThreeName = s3Service.uploadFile(createPackageDto.getImageThree());
+
+        PackageDetailsEntity packageDetails = new PackageDetailsEntity(
+                packageDetailsImageOneName,
+                packageDetailsImageTwoName,
+                packageDetailsImageThreeName,
+                createPackageDto.getDescription(),
+                packageEntity
+        );
+
+        packageEntity.setPackageDetails(packageDetails);
+    }
+
+    public ResponseEntity<List<GetEssentialPackageDto>> getPackagesByCountry(int countryId){
+        return ResponseEntity.ok(countryRepository.findPackagesByCountryId(countryId));
+    }
+
+    private PackageEntity findPackageByIdFromCountry(int countryId, int packageId){
+        return countryRepository.findPackageByCountryIdAndPackageId(countryId, packageId)
+                .orElseThrow(()-> new EntityNotFoundException("No such package has this id from country"));
     }
 
     @Transactional
-    public ResponseEntity<String> editPackage(int packageId,
-                                         EditPackageDto editPackageDto){
-        try{
-            if(!packageUtils.checkHelper(editPackageDto)){
-                return badRequestException("you sent an empty data to change");
-            }
-            PackageEntity packageEntity = packageUtils.findById(packageId);
-            packageUtils.editHelper(packageEntity, editPackageDto);
-            packageUtils.save(packageEntity);
-            return ResponseEntity.ok("Package edited successfully");
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        }catch (Exception e){
-            return serverErrorException(e);
+    public ResponseEntity<String> editPackage(int countryId, int packageId, EditPackageDto editPackageDto){
+        if(!checkIfSentEmptyData(editPackageDto)){
+            return badRequestException("you sent an empty data to change");
         }
+
+        CountryEntity country = getCountryById(countryId);
+
+        PackageEntity packageEntity = findPackageByIdFromCountry(countryId, packageId);
+
+        updateToNewData(packageEntity, editPackageDto);
+
+        countryRepository.save(country);
+
+        return ResponseEntity.ok(packageEntity.toString());
     }
 
-    @Transactional
-    public ResponseEntity<String> deletePackage(int packageId){
-        try{
-            PackageEntity packageEntity = packageUtils.findById(packageId);
-            PackageDetailsEntity packageDetails = packageEntity.getPackageDetails();
-
-            for(PackageEvaluationEntity evaluation:packageEntity.getPackageEvaluations()){
-                packageEvaluationUtils.delete(evaluation);
-            }
-
-            for(RoadmapEntity roadmap:packageEntity.getPackageDetails().getRoadmaps()){
-                packageDetails.getRoadmaps().remove(roadmap);
-                roadmapUtils.save(roadmap);
-            }
-
-            for(BenefitEntity benefit:packageEntity.getPackageDetails().getBenefits()){
-                packageDetails.getBenefits().remove(benefit);
-                benefitUtils.save(benefit);
-            }
-
-            s3Service.deleteFile(packageDetails.getImageOne());
-            s3Service.deleteFile(packageDetails.getImageTwo());
-            s3Service.deleteFile(packageDetails.getImageThree());
-            packageDetailsUtils.delete(packageDetails);
-
-
+    private void updateToNewData(PackageEntity packageEntity, EditPackageDto editPackageDto) {
+        if(editPackageDto.getPackageName() != null){
+            packageEntity.setPackageName(editPackageDto.getPackageName());
+        }
+        if(editPackageDto.getMainImage() != null){
             s3Service.deleteFile(packageEntity.getMainImage());
-            packageUtils.delete(packageEntity);
-            return ResponseEntity.ok("Package deleted successfully");
-        }catch(EntityNotFoundException e){
-            return notFoundException(e);
-        }catch(Exception e){
-            return serverErrorException(e);
+            String packageMainImageName = s3Service.uploadFile(editPackageDto.getMainImage());
+            packageEntity.setMainImage(packageMainImageName);
         }
+        if(editPackageDto.getPrice() != null && editPackageDto.getPrice() > 0){
+            packageEntity.setPrice(editPackageDto.getPrice());
+        }
+        if(editPackageDto.getRate() != null && editPackageDto.getRate() > 0){
+            packageEntity.setRate(editPackageDto.getRate());
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<String> deletePackage(int countryId, int packageId){
+        CountryEntity country = getCountryById(countryId);
+
+        PackageEntity packageEntity = findPackageByIdFromCountry(countryId, packageId);
+
+        removeBenefitsANDRoadmapsFromPackageDetails(packageEntity.getPackageDetails());
+
+        deletePackageANDPackageDetailsImages(packageEntity);
+
+        deletePackageANDPackageDetailsFromDB(country, packageEntity);
+
+        return ResponseEntity.ok("Package deleted successfully");
+    }
+
+    private void deletePackageANDPackageDetailsFromDB(CountryEntity country, PackageEntity packageEntity) {
+        country.getPackages().remove(packageEntity);
+        countryRepository.save(country);
+    }
+
+    private void removeBenefitsANDRoadmapsFromPackageDetails(PackageDetailsEntity packageDetails){
+        if (packageDetails.getBenefits() != null){
+            packageDetails.getBenefits().clear();
+        }
+
+        if(packageDetails.getRoadmaps() != null){
+            packageDetails.getRoadmaps().clear();
+        }
+    }
+
+    private void deletePackageANDPackageDetailsImages(PackageEntity packageEntity){
+        s3Service.deleteFile(packageEntity.getPackageDetails().getImageOne());
+        s3Service.deleteFile(packageEntity.getPackageDetails().getImageTwo());
+        s3Service.deleteFile(packageEntity.getPackageDetails().getImageThree());
+
+
+        s3Service.deleteFile(packageEntity.getMainImage());
     }
 }

@@ -6,149 +6,158 @@ import com.hackathon.backend.dto.planeDto.GetFlightDto;
 import com.hackathon.backend.entities.plane.AirPortEntity;
 import com.hackathon.backend.entities.plane.PlaneEntity;
 import com.hackathon.backend.entities.plane.PlaneFlightsEntity;
-import com.hackathon.backend.utilities.plane.AirPortsUtils;
-import com.hackathon.backend.utilities.plane.PlaneFlightsUtils;
-import com.hackathon.backend.utilities.plane.PlaneUtils;
+import com.hackathon.backend.repositories.plane.AirPortRepository;
+import com.hackathon.backend.repositories.plane.PlaneFlightsRepository;
+import com.hackathon.backend.repositories.plane.PlaneRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
+import static com.hackathon.backend.libs.MyLib.checkIfSentEmptyData;
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class PlaneFlightsService {
 
-    private final PlaneFlightsUtils planeFlightsUtils;
-    private final PlaneUtils planeUtils;
-    private final AirPortsUtils airPortsUtils;
+    private final PlaneFlightsRepository planeFlightsRepository;
+    private final AirPortRepository airPortRepository;
+    private final PlaneRepository planeRepository;
 
     @Autowired
-    public PlaneFlightsService(PlaneFlightsUtils planeFlightsUtils,
-                               PlaneUtils planeUtils,
-                               AirPortsUtils airPortsUtils) {
-        this.planeFlightsUtils = planeFlightsUtils;
-        this.planeUtils = planeUtils;
-        this.airPortsUtils = airPortsUtils;
+    public PlaneFlightsService(PlaneFlightsRepository planeFlightsRepository,
+                               AirPortRepository airPortRepository,
+                               PlaneRepository planeRepository) {
+        this.planeFlightsRepository = planeFlightsRepository;
+        this.airPortRepository = airPortRepository;
+        this.planeRepository = planeRepository;
     }
 
     @Transactional
     public ResponseEntity<String> addFlight(long planeId, long departureAirPortId,
-                                            long destinationAirPortId, FlightDto flightDto) {
-        try {
-            PlaneEntity plane = planeUtils.findPlaneById(planeId);
-            if (plane.getFlight() != null) {
-                return alreadyValidException("This plane has already flight");
-            }
-            AirPortEntity departureAirPort = airPortsUtils.findById(departureAirPortId);
-            AirPortEntity destinationAirPort = airPortsUtils.findById(destinationAirPortId);
-            PlaneFlightsEntity planeFlights = new PlaneFlightsEntity(
-                    flightDto.getPrice(),
-                    plane,
-                    departureAirPort,
-                    destinationAirPort,
-                    flightDto.getDepartureTime(),
-                    flightDto.getArrivalTime(),
-                    plane.getNumSeats()
-            );
-            planeFlightsUtils.save(planeFlights);
+                            long destinationAirPortId, FlightDto flightDto) {
+        PlaneEntity plane = getPlaneById(planeId);
 
-            plane.setStatus(false);
-            planeUtils.save(plane);
-            return ResponseEntity.ok("Flight added successfully");
-        } catch (EntityNotFoundException e) {
-            return notFoundException(e);
-        } catch (Exception e) {
-            return serverErrorException(e);
+        if (plane.getFlight() != null) {
+            return alreadyValidException("This plane has already flight");
         }
+
+        PlaneFlightsEntity planeFlights = prepareANDSaveFlightInDB
+                (flightDto,getAirportById(departureAirPortId), getAirportById(destinationAirPortId), plane);
+
+        updateANDSavePlaneStatus(plane, false);
+
+        return ResponseEntity.ok(planeFlights.toString());
     }
 
-    public ResponseEntity<?> getFlights(long departureAirPortId,
-                                        long destinationAirPortId,
-                                        int page, int size) {
-        try {
-            Pageable pageable = PageRequest.of(page, size);
-            List<GetFlightDto> planeFlights = planeFlightsUtils
-                    .findAllByDepartureAirPortIdAndDestinationAirPortId(
-                            departureAirPortId, destinationAirPortId, pageable
-                    );
+    private PlaneEntity getPlaneById(long planeId){
+        return planeRepository.findById(planeId)
+                .orElseThrow(()-> new EntityNotFoundException("No such plane has this id"));
+    }
 
-            List<GetFlightDto> flightDtoList = new ArrayList<>();
-            for(GetFlightDto flights:planeFlights){
-                    if(flights.getAvailableSeats() != 0) {
-                        GetFlightDto flightDto = new GetFlightDto(
-                                flights.getId(),
-                                flights.getPlaneCompanyName(),
-                                flights.getPrice(),
-                                flights.getDepartureAirPort(),
-                                flights.getDepartureAirPortCode(),
-                                flights.getDestinationAirPort(),
-                                flights.getDestinationAirPortCode(),
-                                flights.getDepartureTime(),
-                                flights.getArrivalTime(),
-                                flights.getAvailableSeats()
-                        );
-                        flightDtoList.add(flightDto);
-                    }
-            }
-            return ResponseEntity.ok(flightDtoList);
-        } catch (Exception e) {
-            return serverErrorException(e);
-        }
+    private AirPortEntity getAirportById(long airportId){
+        return airPortRepository.findById(airportId)
+                .orElseThrow(()-> new EntityNotFoundException("No such airport has this id"));
+    }
+
+    private PlaneFlightsEntity prepareANDSaveFlightInDB(FlightDto flightDto,AirPortEntity departureAirPort,
+                                                        AirPortEntity destinationAirPort, PlaneEntity plane){
+        PlaneFlightsEntity planeFlights = new PlaneFlightsEntity(
+                flightDto.getPrice(),
+                plane,
+                departureAirPort,
+                destinationAirPort,
+                flightDto.getDepartureTime(),
+                flightDto.getArrivalTime()
+        );
+        planeFlightsRepository.save(planeFlights);
+
+        return planeFlights;
+    }
+
+    private void updateANDSavePlaneStatus(PlaneEntity plane, boolean status){
+        plane.setStatus(status);
+        planeRepository.save(plane);
+    }
+
+    private PlaneFlightsEntity getFlightById(long flightId){
+        return planeFlightsRepository.findById(flightId)
+                .orElseThrow(()-> new EntityNotFoundException("No such flight has this id"));
+    }
+
+    public ResponseEntity<List<GetFlightDto>> getFlights(long departureAirPortId,
+                                         long destinationAirPortId,
+                                         int page, int size) {
+        return ResponseEntity.ok(planeFlightsRepository.findAllByDepartureAirPortIdAndDestinationAirPortId
+                (departureAirPortId, destinationAirPortId, PageRequest.of(page, size)));
     }
 
     @Transactional
-    public ResponseEntity<String> editFlight(long flightId,
-                                            EditFlightDto editFlightDto) {
-        try {
-            if(!planeFlightsUtils.checkHelper(editFlightDto)){
-                return badRequestException("you sent an empty data to change");
-            }
-            PlaneFlightsEntity planeFlights = planeFlightsUtils.findById(flightId);
-            planeFlightsUtils.editHelper(planeFlights, editFlightDto);
-            planeFlightsUtils.save(planeFlights);
+    public ResponseEntity<String> editFlight(long flightId, EditFlightDto editFlightDto) {
+        if(!checkIfSentEmptyData(editFlightDto)){
+            return badRequestException("you sent an empty data to change");
+        }
 
-            return ResponseEntity.ok("Flight edit successfully");
-        } catch (EntityNotFoundException e) {
-            return notFoundException(e);
-        } catch (Exception e) {
-            return serverErrorException(e);
+        PlaneFlightsEntity planeFlights = getFlightById(flightId);
+
+        updateToNewData(planeFlights, editFlightDto);
+
+        planeFlightsRepository.save(planeFlights);
+
+        return ResponseEntity.ok(planeFlights.toString());
+    }
+
+    private void updateToNewData(PlaneFlightsEntity planeFlights, EditFlightDto editFlightDto) {
+        if (editFlightDto.getPrice() != null && editFlightDto.getPrice() > 0) {
+            planeFlights.setPrice(editFlightDto.getPrice());
+        }
+        if (editFlightDto.getDepartureTime() != null) {
+            planeFlights.setDepartureTime(editFlightDto.getDepartureTime());
+        }
+        if (editFlightDto.getArrivalTime() != null) {
+            planeFlights.setArrivalTime(editFlightDto.getArrivalTime());
+        }
+        if (editFlightDto.getDepartureAirPortId() != null) {
+            AirPortEntity airPortEntity = getAirPortById(editFlightDto.getDepartureAirPortId());
+            planeFlights.setDepartureAirPort(airPortEntity);
+        }
+
+        if (editFlightDto.getDestinationAirPortId() != null) {
+            AirPortEntity airPortEntity = getAirPortById(editFlightDto.getDestinationAirPortId());
+            planeFlights.setDestinationAirPort(airPortEntity);
         }
     }
 
-    public ResponseEntity<String> deleteFlight(long flightId) {
-        try {
-            PlaneFlightsEntity planeFlights = planeFlightsUtils.findById(flightId);
 
-            if (planeFlights != null) {
-                PlaneEntity plane = planeFlights.getPlane();
-                plane.setStatus(true);
-                planeUtils.save(plane);
-                planeFlightsUtils.delete(planeFlights);
-                return ResponseEntity.ok("flight deleted successfully");
-            } else {
-                return notFoundException("flight not found");
-            }
-        } catch (EntityNotFoundException e) {
-            return notFoundException(e);
-        } catch (Exception e) {
-            return serverErrorException(e);
-        }
+    private AirPortEntity getAirPortById(long airportId){
+        return airPortRepository.findById(airportId)
+                .orElseThrow(()-> new EntityNotFoundException("No such airport has this id"));
+    }
+
+    public ResponseEntity<String> deleteFlight(long flightId) {
+        PlaneFlightsEntity planeFlights = getFlightById(flightId);
+
+        PlaneEntity plane = planeFlights.getPlane();
+
+        updateANDSavePlaneStatus(plane, true);
+
+        planeFlightsRepository.delete(planeFlights);
+
+        return ResponseEntity.ok("flight deleted successfully");
     }
 
 
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void removeFlights() {
-        List<PlaneFlightsEntity> flights = planeFlightsUtils.findAll();
+        List<PlaneFlightsEntity> flights = planeFlightsRepository.findAll();
 
         LocalDateTime currentDateTime = LocalDateTime.now();
 
@@ -158,8 +167,8 @@ public class PlaneFlightsService {
             if (currentDateTime.isAfter(endTime)) {
                 PlaneEntity plane = flight.getPlane();
                 plane.setStatus(true);
-                planeUtils.save(plane);
-                planeFlightsUtils.deleteById(flight.getId());
+                planeRepository.save(plane);
+                planeFlightsRepository.deleteById(flight.getId());
             }
         }
     }

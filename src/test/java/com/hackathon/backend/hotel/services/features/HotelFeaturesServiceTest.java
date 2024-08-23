@@ -1,13 +1,11 @@
 package com.hackathon.backend.hotel.services.features;
 
-import com.hackathon.backend.dto.hotelDto.EditHotelDto;
-import com.hackathon.backend.dto.planeDto.EditPlaneDto;
-import com.hackathon.backend.entities.hotel.HotelEntity;
+import com.hackathon.backend.dto.hotelDto.features.HotelFeatureDto;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
+import com.hackathon.backend.repositories.hotel.RoomDetailsRepository;
+import com.hackathon.backend.repositories.hotel.hotelFeatures.HotelFeaturesRepository;
 import com.hackathon.backend.services.hotel.hotelFeatures.HotelFeaturesService;
-import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
-import com.hackathon.backend.utilities.hotel.features.HotelFeaturesUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,89 +16,111 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class HotelFeaturesServiceTest {
 
     @Mock
-    HotelFeaturesUtils hotelFeaturesUtils;
+    HotelFeaturesRepository hotelFeaturesRepository;
 
     @Mock
-    RoomDetailsUtils roomDetailsUtils;
+    RoomDetailsRepository roomDetailsRepository;
 
     @InjectMocks
     HotelFeaturesService hotelFeaturesService;
 
+
     @Test
-    void createHotelFeature() {
-        //given
-        String hotelFeature = "testFeature";
+    void createHotelFeature_Success() {
+        // given
+        String featureName = "Swimming Pool";
+        HotelFeatureDto hotelFeatureDto = new HotelFeatureDto();
+        hotelFeatureDto.setHotelFeature(featureName);
 
         //behavior
-        when(hotelFeaturesUtils.existsHotelFeatureByHotelFeatures(hotelFeature)).thenReturn(false);
+        when(hotelFeaturesRepository.existsHotelFeatureByHotelFeatures(featureName)).thenReturn(false);
 
-        //when
-        ResponseEntity<?> response = hotelFeaturesService.createHotelFeature(hotelFeature);
+        // when
+        ResponseEntity<String> response = hotelFeaturesService.createHotelFeature(hotelFeatureDto);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Hotel feature created successfully Swimming Pool", response.getBody());
     }
 
     @Test
     void getHotelFeatures() {
-        //given
-        List<HotelFeaturesEntity> hotelFeatures = new ArrayList<>();
+        // given
+        HotelFeaturesEntity feature1 = new HotelFeaturesEntity();
+        HotelFeaturesEntity feature2 = new HotelFeaturesEntity();
+        List<HotelFeaturesEntity> features = List.of(feature1, feature2);
 
         //behavior
-        when(hotelFeaturesUtils.findAll()).thenReturn(hotelFeatures);
+        when(hotelFeaturesRepository.findAll()).thenReturn(features);
 
-        //when
-        ResponseEntity<?> response = hotelFeaturesService.getHotelFeatures();
+        // when
+        ResponseEntity<List<HotelFeaturesEntity>> response = hotelFeaturesService.getHotelFeatures();
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(hotelFeatures, response.getBody());
+        assertEquals(features, response.getBody());
+    }
+
+
+    @Test
+    void editHotelFeature_Success() {
+        // given
+        int featureId = 1;
+        String newFeatureName = "New Feature";
+        HotelFeatureDto hotelFeatureDto = new HotelFeatureDto();
+        hotelFeatureDto.setHotelFeature(newFeatureName);
+
+        HotelFeaturesEntity existingFeature = new HotelFeaturesEntity();
+        existingFeature.setId(featureId);
+
+        //behavior
+        when(hotelFeaturesRepository.findById(featureId)).thenReturn(Optional.of(existingFeature));
+        when(hotelFeaturesRepository.save(existingFeature)).thenReturn(existingFeature);
+
+        // when
+        ResponseEntity<String> response = hotelFeaturesService.editHotelFeature(featureId, hotelFeatureDto);
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Hotel Feature edited successfully New Feature", response.getBody());
+
+        verify(hotelFeaturesRepository).save(existingFeature);
+        assertEquals(newFeatureName, existingFeature.getHotelFeatures());
     }
 
     @Test
-    void editHotelFeature() {
-        //given
-        int featureId = 1;
-        String newHotelFeature = "testFeature";
-        HotelFeaturesEntity hotelFeatureEntity = new HotelFeaturesEntity();
-
-        //behavior
-        when(hotelFeaturesUtils.findById(featureId)).thenReturn(hotelFeatureEntity);
-
-        //when
-        ResponseEntity<?> response = hotelFeaturesService.editHotelFeature(featureId, newHotelFeature);
-
-        //then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(newHotelFeature, hotelFeatureEntity.getHotelFeatures());
-    }
-
-    @Test
-    void deleteHotelFeature() {
-        //given
+    void deleteHotelFeature_Success() {
+        // given
         int featureId = 1;
 
-        HotelFeaturesEntity hotelFeaturesEntity = new HotelFeaturesEntity();
-        hotelFeaturesEntity.setId(featureId);
-        hotelFeaturesEntity.setHotelFeatures("testFeature");
+        HotelFeaturesEntity hotelFeatures = new HotelFeaturesEntity();
+        hotelFeatures.setId(featureId);
 
-        RoomDetailsEntity roomDetailsEntity = new RoomDetailsEntity();
-        roomDetailsEntity.setHotelFeatures(List.of(hotelFeaturesEntity));
+        RoomDetailsEntity roomDetails = new RoomDetailsEntity();
+        roomDetails.setHotelFeatures(new ArrayList<>(List.of(hotelFeatures)));
+        hotelFeatures.setRoomDetails(new ArrayList<>(List.of(roomDetails)));
 
         //behavior
-        when(hotelFeaturesUtils.findById(featureId)).thenReturn(hotelFeaturesEntity);
+        when(hotelFeaturesRepository.findById(featureId)).thenReturn(Optional.of(hotelFeatures));
 
-        ResponseEntity<?> response = hotelFeaturesService.deleteHotelFeature(featureId);
+        // when
+        ResponseEntity<String> response = hotelFeaturesService.deleteHotelFeature(featureId);
 
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(hotelFeaturesUtils).delete(hotelFeaturesEntity);
+        assertEquals("Hotel feature deleted successfully", response.getBody());
+
+        verify(hotelFeaturesRepository).delete(hotelFeatures);
+        verify(roomDetailsRepository).save(roomDetails);
     }
 }

@@ -30,4 +30,16 @@ public class GetPlaceDetailsDto {
         this.description = description;
     }
 
+    @Override
+    public String toString() {
+        return "GetPlaceDetailsDto{" +
+                "id=" + id +
+                ", place='" + place + '\'' +
+                ", mainImage='" + mainImage + '\'' +
+                ", imageOne='" + imageOne + '\'' +
+                ", imageTwo='" + imageTwo + '\'' +
+                ", imageThree='" + imageThree + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

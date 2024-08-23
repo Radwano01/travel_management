@@ -3,10 +3,9 @@ package com.hackathon.backend.package_.services.features;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.package_.packageFeatures.BenefitEntity;
-import com.hackathon.backend.entities.package_.packageFeatures.RoadmapEntity;
+import com.hackathon.backend.repositories.package_.PackageRepository;
+import com.hackathon.backend.repositories.package_.packageFeatures.BenefitRepository;
 import com.hackathon.backend.services.package_.packageFeatures.PackageBenefitsRelationsService;
-import com.hackathon.backend.utilities.package_.PackageUtils;
-import com.hackathon.backend.utilities.package_.features.BenefitUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,82 +14,97 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PackageBenefitsRelationsServiceTest {
 
     @Mock
-    PackageUtils packageUtils;
+    private PackageRepository packageRepository;
 
     @Mock
-    BenefitUtils benefitUtils;
+    private BenefitRepository benefitRepository;
 
     @InjectMocks
-    PackageBenefitsRelationsService packageBenefitsRelationsService;
+    private PackageBenefitsRelationsService packageBenefitsRelationsService;
 
     @Test
-    void addPackageBenefit() {
-        //given
+    void addPackageBenefit_ShouldReturnOk_WhenBenefitIsAdded() {
+        // given
         int packageId = 1;
         int benefitId = 1;
 
-        BenefitEntity benefitEntity = new BenefitEntity();
-        benefitEntity.setId(benefitId);
-        benefitEntity.setBenefit("testBenefit");
-
-        PackageDetailsEntity packageDetails = new PackageDetailsEntity();
-
         PackageEntity packageEntity = new PackageEntity();
-        packageEntity.setId(packageId);
-        packageEntity.setPackageDetails(packageDetails);
+        packageEntity.setPackageDetails(new PackageDetailsEntity());
+        BenefitEntity benefitEntity = new BenefitEntity("Benefit 1");
+        benefitEntity.setId(benefitId);
 
-        //behavior
-        when(benefitUtils.findById(benefitId)).thenReturn(benefitEntity);
-        when(packageUtils.findById(packageId)).thenReturn(packageEntity);
+        // behavior
+        when(packageRepository.findById(packageId)).thenReturn(Optional.of(packageEntity));
+        when(benefitRepository.findById(benefitId)).thenReturn(Optional.of(benefitEntity));
 
-        //when
-        ResponseEntity<?> response = packageBenefitsRelationsService.addPackageBenefit(packageId,benefitId);
+        // when
+        ResponseEntity<String> response = packageBenefitsRelationsService.addPackageBenefit(packageId, benefitId);
 
-        //then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(benefitUtils).findById(benefitId);
-        verify(packageUtils).findById(packageId);
-        verify(benefitUtils).save(benefitEntity);
-        verify(packageUtils).save(packageEntity);
+        assertEquals("Benefit added successfully", response.getBody());
+        assertTrue(packageEntity.getPackageDetails().getBenefits().contains(benefitEntity));
     }
 
     @Test
-    void removePackageBenefit() {
-        //given
+    void addPackageBenefit_ShouldReturnAlreadyValidException_WhenBenefitAlreadyExists() {
+        // given
         int packageId = 1;
         int benefitId = 1;
 
-        BenefitEntity benefitEntity = new BenefitEntity();
-        benefitEntity.setId(benefitId);
-        benefitEntity.setBenefit("testBenefit");
+        PackageEntity packageEntity = new PackageEntity();
+        PackageDetailsEntity packageDetailsEntity = new PackageDetailsEntity();
+        packageEntity.setPackageDetails(packageDetailsEntity);
 
-        PackageDetailsEntity packageDetails = new PackageDetailsEntity();
-        packageDetails.getBenefits().add(benefitEntity);
+        BenefitEntity benefitEntity = new BenefitEntity("Benefit 1");
+        benefitEntity.setId(benefitId);
+        packageDetailsEntity.getBenefits().add(benefitEntity);
+
+        // behavior
+        when(packageRepository.findById(packageId)).thenReturn(Optional.of(packageEntity));
+        when(benefitRepository.findById(benefitId)).thenReturn(Optional.of(benefitEntity));
+
+        // when
+        ResponseEntity<String> response = packageBenefitsRelationsService.addPackageBenefit(packageId, benefitId);
+
+        // then
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("This benefit is already existed", response.getBody());
+    }
+
+    @Test
+    void removePackageBenefit_ShouldReturnOk_WhenBenefitIsRemoved() {
+        // given
+        int packageId = 1;
+        int benefitId = 1;
 
         PackageEntity packageEntity = new PackageEntity();
-        packageEntity.setId(packageId);
-        packageEntity.setPackageDetails(packageDetails);
+        PackageDetailsEntity packageDetailsEntity = new PackageDetailsEntity();
+        packageEntity.setPackageDetails(packageDetailsEntity);
 
-        //behavior
-        when(benefitUtils.findById(benefitId)).thenReturn(benefitEntity);
-        when(packageUtils.findById(packageId)).thenReturn(packageEntity);
+        BenefitEntity benefitEntity = new BenefitEntity("Benefit 1");
+        benefitEntity.setId(benefitId);
+        packageDetailsEntity.getBenefits().add(benefitEntity);
 
-        //when
-        ResponseEntity<?> response = packageBenefitsRelationsService.removePackageBenefit(packageId,benefitId);
+        // behavior
+        when(packageRepository.findById(packageId)).thenReturn(Optional.of(packageEntity));
+        when(benefitRepository.findById(benefitId)).thenReturn(Optional.of(benefitEntity));
 
-        //then
+        // when
+        ResponseEntity<String> response = packageBenefitsRelationsService.removePackageBenefit(packageId, benefitId);
+
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(benefitUtils).findById(benefitId);
-        verify(packageUtils).findById(packageId);
-        verify(benefitUtils).save(benefitEntity);
-        verify(packageUtils).save(packageEntity);
+        assertEquals("Benefit removed from this package", response.getBody());
+        assertFalse(packageEntity.getPackageDetails().getBenefits().contains(benefitEntity));
     }
 }

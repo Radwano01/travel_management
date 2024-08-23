@@ -6,11 +6,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "hotelEvaluations")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "hotelEvaluations")
 public class HotelEvaluationEntity {
 
     @Id

@@ -1,15 +1,14 @@
 package com.hackathon.backend.package_.services;
 
+import com.hackathon.backend.dto.packageDto.CreatePackageEvaluationDto;
 import com.hackathon.backend.dto.packageDto.EditPackageEvaluationDto;
 import com.hackathon.backend.dto.packageDto.PackageEvaluationDto;
-import com.hackathon.backend.dto.packageDto.PostPackageEvaluationDto;
 import com.hackathon.backend.entities.package_.PackageEntity;
 import com.hackathon.backend.entities.package_.PackageEvaluationEntity;
 import com.hackathon.backend.entities.user.UserEntity;
+import com.hackathon.backend.repositories.package_.PackageRepository;
+import com.hackathon.backend.repositories.user.UserRepository;
 import com.hackathon.backend.services.package_.PackageEvaluationService;
-import com.hackathon.backend.utilities.user.UserUtils;
-import com.hackathon.backend.utilities.package_.PackageEvaluationUtils;
-import com.hackathon.backend.utilities.package_.PackageUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,151 +18,150 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PackageEvaluationServiceTest {
 
     @Mock
-    PackageUtils packageUtils;
+    PackageRepository packageRepository;
 
     @Mock
-    UserUtils userUtils;
-
-    @Mock
-    PackageEvaluationUtils packageEvaluationUtils;
+    UserRepository userRepository;
 
     @InjectMocks
     PackageEvaluationService packageEvaluationService;
 
     @Test
-    void addComment() throws ExecutionException, InterruptedException {
-        //given
+    void addComment_ShouldAddComment_WhenAllDataIsProvided() {
+        // given
         int packageId = 1;
         long userId = 1L;
-
-        PostPackageEvaluationDto postPackageEvaluationDto = new PostPackageEvaluationDto();
-        postPackageEvaluationDto.setComment("testComment");
-        postPackageEvaluationDto.setRate(4);
-
-        PackageEntity packageEntity = new PackageEntity();
-        packageEntity.setId(packageId);
-        UserEntity user = new UserEntity();
-        user.setId(userId);
-
-        //behavior
-        when(packageUtils.findById(packageId)).thenReturn(packageEntity);
-        when(userUtils.findById(userId)).thenReturn(user);
-
-        //when
-        CompletableFuture<ResponseEntity<String>> response = packageEvaluationService.addComment(packageId, userId, postPackageEvaluationDto);
-
-        //then
-        assertEquals(HttpStatus.OK, response.get().getStatusCode());
-    }
-
-    @Test
-    void getComments() throws ExecutionException, InterruptedException {
-        //given
-        int packageId = 1;
-
-        UserEntity user = new UserEntity();
-        user.setId(1);
-        user.setUsername("testUsername");
-        user.setImage("testImage");
-
-
-        PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity();
-        packageEvaluation.setComment("testComment");
-        packageEvaluation.setRate(4);
-        packageEvaluation.setUser(user);
+        CreatePackageEvaluationDto createPackageEvaluationDto = new CreatePackageEvaluationDto();
+        createPackageEvaluationDto.setComment("Great package!");
+        createPackageEvaluationDto.setRate(5);
 
         PackageEntity packageEntity = new PackageEntity();
         packageEntity.setId(packageId);
-        packageEntity.getPackageEvaluations().add(packageEvaluation);
 
-        packageEvaluation.setPackageEntity(packageEntity);
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(userId);
 
         //behavior
-        when(packageUtils.findById(packageId)).thenReturn(packageEntity);
-
-        //when
-        CompletableFuture<ResponseEntity<?>> response = packageEvaluationService.getComments(packageId);
-        List<PackageEvaluationDto> responseData = (List<PackageEvaluationDto>) response.get().getBody();
-        //then
-        assertEquals(HttpStatus.OK, response.get().getStatusCode());
-        assertNotNull(responseData);
-        assertEquals(packageEvaluation.getComment(), responseData.get(0).getComment());
-        assertEquals(packageEvaluation.getRate(), responseData.get(0).getRate());
-        assertEquals(packageEvaluation.getUser().getUsername(), user.getUsername());
-        assertEquals(packageEvaluation.getUser().getImage(), user.getImage());
-    }
-
-    @Test
-    void editComment() throws ExecutionException, InterruptedException {
-        // given
-        long commentId = 1L;
-        EditPackageEvaluationDto editPackageEvaluationDto = new EditPackageEvaluationDto();
-        editPackageEvaluationDto.setComment("testComment");
-        editPackageEvaluationDto.setRate(2);
-
-        PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity("testComment1", 3,
-                new UserEntity(), new PackageEntity());
-        packageEvaluation.setId(commentId);
-
-        // behavior
-        when(packageEvaluationUtils.findById(commentId)).thenReturn(packageEvaluation);
-        when(packageEvaluationUtils.checkHelper(editPackageEvaluationDto)).thenReturn(true);
-
-        doAnswer(invocation -> {
-            PackageEvaluationEntity entity = invocation.getArgument(0);
-            EditPackageEvaluationDto dto = invocation.getArgument(1);
-
-            entity.setComment(dto.getComment());
-            entity.setRate(dto.getRate());
-
-            return null;
-        }).when(packageEvaluationUtils).editHelper(any(PackageEvaluationEntity.class), any(EditPackageEvaluationDto.class));
+        when(packageRepository.findById(packageId)).thenReturn(Optional.of(packageEntity));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 
         // when
-        CompletableFuture<ResponseEntity<String>> response = packageEvaluationService.editComment(commentId, editPackageEvaluationDto);
+        CompletableFuture<ResponseEntity<?>> responseFuture = packageEvaluationService.addComment(packageId, userId, createPackageEvaluationDto);
+        ResponseEntity<?> response = responseFuture.join();
 
         // then
-        assertEquals(HttpStatus.OK, response.get().getStatusCode());
-        assertEquals(editPackageEvaluationDto.getComment(), packageEvaluation.getComment());
-        assertEquals(editPackageEvaluationDto.getRate(), packageEvaluation.getRate());
-        verify(packageEvaluationUtils).save(packageEvaluation);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Comment added successfully", response.getBody());
+        assertEquals(1, packageEntity.getPackageEvaluations().size());
+        verify(packageRepository).save(packageEntity);
+    }
+
+
+    @Test
+    void getComments_ShouldReturnComments_WhenPackageExists() {
+        // given
+        int packageId = 1;
+
+        PackageEvaluationDto commentDto = new PackageEvaluationDto(
+                1L,
+                "Great package!",
+                5,
+                1L,
+                "username",
+                "https://example.com/user.jpg"
+        );
+        List<PackageEvaluationDto> comments = List.of(commentDto);
+
+        //behavior
+        when(packageRepository.findAllEvaluationsPackageByPackageId(packageId)).thenReturn(comments);
+
+        // when
+        CompletableFuture<ResponseEntity<?>> responseFuture = packageEvaluationService.getComments(packageId);
+        ResponseEntity<?> response = responseFuture.join();
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(comments, response.getBody());
+        verify(packageRepository).findAllEvaluationsPackageByPackageId(packageId);
     }
 
     @Test
-    void removeComment() throws ExecutionException, InterruptedException {
-        //given
+    void editComment_ShouldUpdateComment_WhenValidDataIsProvided() {
+        // given
         int packageId = 1;
-        long userId = 1L;
+        long commentId = 1L;
+        EditPackageEvaluationDto editPackageEvaluationDto = new EditPackageEvaluationDto("Updated comment", 4);
+
+        PackageEntity packageEntity = new PackageEntity();
+        PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity("Original comment", 5, new UserEntity(), packageEntity);
+        packageEvaluation.setId(commentId);
+        packageEntity.getPackageEvaluations().add(packageEvaluation);
+
+        //behavior
+        when(packageRepository.findById(packageId)).thenReturn(Optional.of(packageEntity));
+
+        // when
+        CompletableFuture<ResponseEntity<?>> responseFuture = packageEvaluationService.editComment(packageId, commentId, editPackageEvaluationDto);
+        ResponseEntity<?> response = responseFuture.join();
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Updated comment", packageEvaluation.getComment());
+        assertEquals(4, packageEvaluation.getRate());
+        verify(packageRepository).save(packageEntity);
+    }
+
+    @Test
+    void editComment_ShouldReturnBadRequest_WhenEmptyDataIsSent() {
+        // given
+        int packageId = 1;
+        long commentId = 1L;
+
+        EditPackageEvaluationDto emptyDto = new EditPackageEvaluationDto();
+
+        // when
+        CompletableFuture<ResponseEntity<?>> responseFuture = packageEvaluationService.editComment(packageId, commentId, emptyDto);
+        ResponseEntity<?> response = responseFuture.join();
+
+        // then
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("you sent an empty data to change", response.getBody());
+    }
+
+
+    @Test
+    void removeComment_ShouldDeleteComment_WhenValidDataIsProvided() {
+        // given
+        int packageId = 1;
         long commentId = 1L;
 
         PackageEntity packageEntity = new PackageEntity();
-        packageEntity.setId(packageId);
-
-        UserEntity user = new UserEntity();
-        user.setId(userId);
-
-        PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity("testComment", 4, user, packageEntity);
+        PackageEvaluationEntity packageEvaluation = new PackageEvaluationEntity("Original comment", 5, new UserEntity(), packageEntity);
+        packageEvaluation.setId(commentId);
+        packageEntity.getPackageEvaluations().add(packageEvaluation);
 
         //behavior
-        when(packageEvaluationUtils.findById(commentId)).thenReturn(packageEvaluation);
+        when(packageRepository.findById(packageId)).thenReturn(Optional.of(packageEntity));
 
-        //when
-        CompletableFuture<ResponseEntity<String>> response = packageEvaluationService.removeComment(commentId);
+        // when
+        CompletableFuture<ResponseEntity<?>> responseFuture = packageEvaluationService.removeComment(packageId, commentId);
+        ResponseEntity<?> response = responseFuture.join();
 
-        //then
-        assertEquals(HttpStatus.OK, response.get().getStatusCode());
-        verify(packageUtils).save(packageEntity);
-        verify(userUtils).save(user);
-        verify(packageEvaluationUtils).delete(packageEvaluation);
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Comment deleted successfully", response.getBody());
+        assertEquals(0, packageEntity.getPackageEvaluations().size());
+        verify(packageRepository).save(packageEntity);
     }
 }

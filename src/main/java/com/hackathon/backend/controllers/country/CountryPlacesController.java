@@ -1,12 +1,15 @@
 package com.hackathon.backend.controllers.country;
 
+import com.hackathon.backend.dto.countryDto.placeDto.CreatePlaceDto;
 import com.hackathon.backend.dto.countryDto.placeDto.EditPlaceDto;
-import com.hackathon.backend.dto.countryDto.placeDto.PostPlaceDto;
 import com.hackathon.backend.services.country.PlaceService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+
+import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
+import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 
 @RestController
 @RequestMapping(path = "${BASE_API}")
@@ -19,50 +22,61 @@ public class CountryPlacesController {
     }
 
     @PostMapping(path = "${CREATE_PLACE_PATH}")
-    public ResponseEntity<String> createPlace(@PathVariable("countryId") int countryId,
-                                         @RequestParam("place") String place,
-                                         @RequestParam("mainImage") MultipartFile mainImage,
-                                         @RequestParam("imageOne") MultipartFile imageOne,
-                                         @RequestParam("imageTwo") MultipartFile imageTwo,
-                                         @RequestParam("imageThree") MultipartFile imageThree,
-                                         @RequestParam("description") String description){
-        PostPlaceDto postPlaceDto = new PostPlaceDto(
-                place,
-                mainImage,
-                imageOne,
-                imageTwo,
-                imageThree,
-                description
-        );
-
-        return placeService.createPlace(countryId, postPlaceDto);
+    public ResponseEntity<?> createPlace(@PathVariable("countryId") int countryId,
+                                         @ModelAttribute CreatePlaceDto createPlaceDto){
+        try{
+            return placeService.createPlace(countryId, createPlaceDto);
+        } catch (EntityNotFoundException e) {
+            return notFoundException(e);
+        } catch (Exception e) {
+            return serverErrorException(e);
+        }
     }
 
     @GetMapping(path = "${GET_PLACES_PATH}")
     public ResponseEntity<?> getPlaces(@PathVariable("countryId") int countryId){
-        return placeService.getPlacesByCountryId(countryId);
+        try{
+            return placeService.getAllPlacesByCountryId(countryId);
+        }catch(EntityNotFoundException e){
+            return notFoundException(e);
+        }catch(Exception e){
+            return serverErrorException(e);
+        }
     }
 
     @GetMapping(path = "${GET_PLACE_FOR_FLIGHTS_PATH}")
     public ResponseEntity<?> getPlace(@RequestParam("place") String place){
-        return placeService.getPlaceByPlace(place);
+        try {
+            return placeService.getPlaceByPlace(place);
+        }catch(EntityNotFoundException e){
+            return notFoundException(e);
+        }catch(Exception e){
+            return serverErrorException(e);
+        }
     }
 
     @PutMapping(path = "${EDIT_PLACE_PATH}")
-    public ResponseEntity<String> editPlace(@PathVariable("countryId") int countryId,
+    public ResponseEntity<?> editPlace(@PathVariable("countryId") int countryId,
                                        @PathVariable("placeId") int placeId,
-                                       @RequestParam("place") String place,
-                                       @RequestParam("mainImage") MultipartFile mainImage){
-        EditPlaceDto editPlaceDto = new EditPlaceDto(
-                place,
-                mainImage
-        );
-        return placeService.editPlace(countryId, placeId, editPlaceDto);
+                                       @ModelAttribute EditPlaceDto editPlaceDto){
+        try {
+            return placeService.editPlace(countryId, placeId, editPlaceDto);
+        }catch (EntityNotFoundException e){
+            return notFoundException(e);
+        }catch (Exception e){
+            return serverErrorException(e);
+        }
     }
 
     @DeleteMapping(path = "${DELETE_PLACE_PATH}")
-    public ResponseEntity<String> deletePlace(@PathVariable("countryId") int countryId,
+    public ResponseEntity<?> deletePlace(@PathVariable("countryId") int countryId,
                                          @PathVariable("placeId") int placeId){
-        return placeService.deletePlace(countryId,placeId);
+        try {
+            return placeService.deletePlace(countryId, placeId);
+        }catch (EntityNotFoundException e){
+            return notFoundException(e);
+        }catch (Exception e){
+            return serverErrorException(e);
+        }
     }
 }

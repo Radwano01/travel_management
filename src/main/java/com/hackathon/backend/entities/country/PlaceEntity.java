@@ -10,11 +10,11 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "places")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "places")
 public class PlaceEntity {
 
     @Id
@@ -28,14 +28,14 @@ public class PlaceEntity {
     @JoinColumn(name = "country_id")
     private CountryEntity country;
 
-    @OneToMany(mappedBy = "place", fetch = FetchType.LAZY)
-    private List<HotelEntity> hotels;
+    @OneToMany(mappedBy = "place", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<HotelEntity> hotels = new ArrayList<>();
 
-    @OneToOne(mappedBy = "place", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "place", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     private PlaceDetailsEntity placeDetails;
 
-    @OneToMany(mappedBy = "place", fetch = FetchType.LAZY)
-    private List<AirPortEntity> airPorts;
+    @OneToMany(mappedBy = "place", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<AirPortEntity> airPorts = new ArrayList<>();
 
     public PlaceEntity(String place,
                        String mainImage,
@@ -50,5 +50,15 @@ public class PlaceEntity {
         this.id = id;
         this.place = place;
         this.mainImage = mainImage;
+    }
+
+    @Override
+    public String toString() {
+        return "PlaceEntity{" +
+                "id=" + id +
+                ", place='" + place + '\'' +
+                ", mainImage='" + mainImage + '\'' +
+                ", placeDetails=" + placeDetails +
+                '}';
     }
 }

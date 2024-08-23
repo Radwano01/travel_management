@@ -1,20 +1,16 @@
 package com.hackathon.backend.hotel.repositories;
 
-import com.hackathon.backend.dto.hotelDto.GetHotelDto;
-import com.hackathon.backend.entities.country.CountryEntity;
-import com.hackathon.backend.entities.country.PlaceEntity;
+import com.hackathon.backend.dto.hotelDto.evaluationDto.GetHotelEvaluationDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
-import com.hackathon.backend.repositories.country.CountryRepository;
-import com.hackathon.backend.repositories.country.PlaceRepository;
+import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
+import com.hackathon.backend.entities.user.UserEntity;
 import com.hackathon.backend.repositories.hotel.HotelRepository;
+import com.hackathon.backend.repositories.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -24,54 +20,59 @@ import static org.junit.jupiter.api.Assertions.*;
 class HotelRepositoryTest {
 
     @Autowired
-    PlaceRepository placeRepository;
+    HotelRepository hotelRepository;
 
     @Autowired
-    HotelRepository hotelRepository;
+    UserRepository userRepository;
+
 
     @BeforeEach
     void setUp() {
-        PlaceEntity place = new PlaceEntity();
-        place.setPlace("testPlace");
-        place.setMainImage("testImage");
+        // Create a user
+        UserEntity user = new UserEntity();
+        user.setUsername("testUser");
+        user.setImage("testUserImage.jpg");
+        userRepository.save(user);
 
-        placeRepository.save(place);
+        // Create a hotel
+        HotelEntity hotel = new HotelEntity();
+        hotel.setHotelName("Test Hotel");
 
-        HotelEntity hotel = new HotelEntity(
-                "testName",
-                "testImage",
-                "testDesc",
-                100,
-                "testAddress",
-                3,
-                place
+        // Create a hotel evaluation
+        HotelEvaluationEntity hotelEvaluation = new HotelEvaluationEntity(
+                "test comment",
+                5,
+                hotel,
+                user
         );
+
+        // Add evaluation to hotel
+        hotel.getEvaluations().add(hotelEvaluation);
+
+        // Save hotel entity
         hotelRepository.save(hotel);
     }
 
     @AfterEach
     void tearDown() {
         hotelRepository.deleteAll();
-        placeRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
-    void findByPlaceId() {
-        // given
-        int placeId = placeRepository.findAll().get(0).getId();
+    void itShouldReturnAllHotelEvaluationsByHotelId() {
+        //given
+        long hotelId = hotelRepository.findAll().get(0).getId();
 
-        Pageable pageable = PageRequest.of(0, 6); // Zero-based page index
+        //when
+        List<GetHotelEvaluationDto> evaluations = hotelRepository.findAllHotelEvaluationsByHotelId(hotelId);
 
-        // when
-        List<GetHotelDto> response = hotelRepository.findByPlaceId(placeId, pageable);
-
-        // then
-        assertFalse(response.isEmpty(), "Response should not be empty");
-        GetHotelDto hotelDto = response.get(0);
-        assertEquals("testName", hotelDto.getHotelName());
-        assertEquals("testImage", hotelDto.getMainImage());
-        assertEquals("testDesc", hotelDto.getDescription());
-        assertEquals("testAddress", hotelDto.getAddress());
-        assertEquals(3, hotelDto.getRate());
+        //then
+        assertEquals(1, evaluations.size());
+        GetHotelEvaluationDto evaluation = evaluations.get(0);
+        assertEquals("test comment", evaluation.getComment());
+        assertEquals(5, evaluation.getRate());
+        assertEquals("testUser", evaluation.getUsername());
+        assertEquals("testUserImage.jpg", evaluation.getUserImage());
     }
 }

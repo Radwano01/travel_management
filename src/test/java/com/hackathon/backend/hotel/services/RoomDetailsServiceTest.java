@@ -1,14 +1,15 @@
 package com.hackathon.backend.hotel.services;
 
 import com.hackathon.backend.dto.hotelDto.EditRoomDetailsDto;
-import com.hackathon.backend.dto.hotelDto.GetHotelDto;
 import com.hackathon.backend.dto.hotelDto.GetRoomDetailsDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
+import com.hackathon.backend.repositories.hotel.HotelRepository;
 import com.hackathon.backend.services.hotel.RoomDetailsService;
-import com.hackathon.backend.utilities.amazonServices.S3Service;
-import com.hackathon.backend.utilities.hotel.HotelUtils;
-import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
+import com.hackathon.backend.utilities.S3Service;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,109 +20,140 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RoomDetailsServiceTest {
 
     @Mock
-    HotelUtils hotelUtils;
+    private HotelRepository hotelRepository;
 
     @Mock
-    RoomDetailsUtils roomDetailsUtils;
-
-    @Mock
-    S3Service s3Service;
+    private S3Service s3Service;
 
     @InjectMocks
-    RoomDetailsService roomDetailsService;
+    private RoomDetailsService roomDetailsService;
+
+    private HotelEntity hotel;
+    private RoomDetailsEntity roomDetails;
+
+    @BeforeEach
+    void setUp() {
+        roomDetails = new RoomDetailsEntity();
+        roomDetails.setImageOne("imageOne.jpg");
+        roomDetails.setImageTwo("imageTwo.jpg");
+        roomDetails.setImageThree("imageThree.jpg");
+        roomDetails.setImageFour("imageFour.jpg");
+        roomDetails.setDescription("Room description");
+        roomDetails.setPrice(100);
+
+        hotel = new HotelEntity();
+        hotel.setId(1L);
+        hotel.setHotelName("Test Hotel");
+        hotel.setAddress("123 Test Street");
+        hotel.setRate(4);
+        hotel.setRoomDetails(roomDetails);
+    }
+
+    @AfterEach
+    void tearDown(){
+        hotelRepository.deleteAll();
+    }
 
     @Test
-    void getRoomAllDetails() {
-        //given
+    void getHotelRoomDetailsByHotelId() {
+        // given
         long hotelId = 1L;
-        HotelEntity hotel = new HotelEntity();
-        hotel.setId(hotelId);
-        RoomDetailsEntity roomDetails = new RoomDetailsEntity();
-        roomDetails.setImageOne("testImageOne");
-        roomDetails.setImageTwo("testImageTwo");
-        roomDetails.setImageThree("testImageThree");
-        roomDetails.setImageFour("testImageFour");
-        roomDetails.setDescription("testDesc");
-        roomDetails.setPrice(100);
-        hotel.setRoomDetails(roomDetails);
 
         //behavior
-        when(hotelUtils.findHotelById(hotelId)).thenReturn(hotel);
+        when(hotelRepository.findById(hotelId)).thenReturn(java.util.Optional.ofNullable(hotel));
 
         //when
-        ResponseEntity<?> response = roomDetailsService.getRoomAllDetails(hotelId);
-
-        GetRoomDetailsDto getRoomDetailsDto = (GetRoomDetailsDto) response.getBody();
+        ResponseEntity<GetRoomDetailsDto> response = roomDetailsService.getHotelRoomDetailsByHotelId(hotelId);
 
         //then
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        GetRoomDetailsDto roomDetailsDto = response.getBody();
+        assertNotNull(roomDetailsDto);
+        assertEquals(hotel.getHotelName(), roomDetailsDto.getHotelName());
+        assertEquals(roomDetails.getImageOne(), roomDetailsDto.getImageOne());
+    }
 
-        assertEquals(roomDetails.getImageOne(), getRoomDetailsDto.getImageOne());
-        assertEquals(roomDetails.getImageTwo(), getRoomDetailsDto.getImageTwo());
-        assertEquals(roomDetails.getImageThree(), getRoomDetailsDto.getImageThree());
-        assertEquals(roomDetails.getImageFour(), getRoomDetailsDto.getImageFour());
-        assertEquals(roomDetails.getDescription(), getRoomDetailsDto.getDescription());
-        assertEquals(roomDetails.getPrice(), getRoomDetailsDto.getPrice());
+    @Test
+    void getHotelRoomDetailsByHotelId_HotelNotFound() {
+        // given
+        long hotelId = 1L;
+
+        //behavior
+        when(hotelRepository.findById(hotelId)).thenReturn(java.util.Optional.empty());
+
+        // then
+        assertThrows(EntityNotFoundException.class, () -> roomDetailsService.getHotelRoomDetailsByHotelId(hotelId));
     }
 
     @Test
     void editRoomDetails() {
-        // given
+        // //given
         long hotelId = 1L;
         EditRoomDetailsDto editRoomDetailsDto = new EditRoomDetailsDto(
-                new MockMultipartFile("imageOne", "mainImage.jpg", "image/jpeg", new byte[0]),
-                new MockMultipartFile("imageTwo", "mainImage.jpg", "image/jpeg", new byte[0]),
-                new MockMultipartFile("imageThree", "mainImage.jpg", "image/jpeg", new byte[0]),
-                new MockMultipartFile("imageFour", "mainImage.jpg", "image/jpeg", new byte[0]),
-                "testDesc",
-                100
+                new MockMultipartFile("imageOne", "updatedImageOne.jpg", "image/jpeg", "new-image-content".getBytes()),
+                null,
+                null,
+                null,
+                "Updated description",
+                200
         );
 
-        HotelEntity hotel = new HotelEntity();
-        hotel.setId(hotelId);
-        RoomDetailsEntity roomDetails = new RoomDetailsEntity();
-        hotel.setRoomDetails(roomDetails);
 
-        // behavior
-        when(hotelUtils.findHotelById(hotelId)).thenReturn(hotel);
-        when(roomDetailsUtils.checkHelper(editRoomDetailsDto)).thenReturn(true);
-        when(s3Service.uploadFile(editRoomDetailsDto.getImageOne())).thenReturn("imageOne");
-        when(s3Service.uploadFile(editRoomDetailsDto.getImageTwo())).thenReturn("imageTwo");
-        when(s3Service.uploadFile(editRoomDetailsDto.getImageThree())).thenReturn("imageThree");
-        when(s3Service.uploadFile(editRoomDetailsDto.getImageFour())).thenReturn("imageFour");
-
-        doAnswer(invocation -> {
-            RoomDetailsEntity roomDetailsEntity = invocation.getArgument(0);
-            EditRoomDetailsDto dto = invocation.getArgument(1);
-
-            roomDetailsEntity.setImageOne(s3Service.uploadFile(dto.getImageOne()));
-            roomDetailsEntity.setImageTwo(s3Service.uploadFile(dto.getImageTwo()));
-            roomDetailsEntity.setImageThree(s3Service.uploadFile(dto.getImageThree()));
-            roomDetailsEntity.setImageFour(s3Service.uploadFile(dto.getImageFour()));
-            roomDetailsEntity.setDescription(dto.getDescription());
-            roomDetailsEntity.setPrice(dto.getPrice());
-
-            return null;
-        }).when(roomDetailsUtils).editHelper(any(RoomDetailsEntity.class), any(EditRoomDetailsDto.class));
+        //behavior
+        when(hotelRepository.findById(hotelId)).thenReturn(java.util.Optional.ofNullable(hotel));
+        when(s3Service.uploadFile(editRoomDetailsDto.getImageOne())).thenReturn("updatedImageOne.jpg");
 
         // when
-        ResponseEntity<?> response = roomDetailsService.editRoomDetails(hotelId, editRoomDetailsDto);
+        ResponseEntity<String> response = roomDetailsService.editRoomDetails(hotelId, editRoomDetailsDto);
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("imageOne", roomDetails.getImageOne());
-        assertEquals("imageTwo", roomDetails.getImageTwo());
-        assertEquals("imageThree", roomDetails.getImageThree());
-        assertEquals("imageFour", roomDetails.getImageFour());
-        assertEquals("testDesc", roomDetails.getDescription());
-        assertEquals(100, roomDetails.getPrice());
+        assertEquals("updatedImageOne.jpg", hotel.getRoomDetails().getImageOne());
+        assertEquals(200, hotel.getRoomDetails().getPrice());
+        assertEquals("Updated description", hotel.getRoomDetails().getDescription());
+
+        verify(s3Service, times(1)).deleteFile("imageOne.jpg");
+        verify(s3Service, times(1)).uploadFile(editRoomDetailsDto.getImageOne());
+        verify(hotelRepository, times(1)).save(hotel);
+    }
+
+    @Test
+    void editRoomDetails_WithEmptyData_ShouldReturnBadRequest() {
+        // given
+        long hotelId = 1L;
+        EditRoomDetailsDto editRoomDetailsDto = new EditRoomDetailsDto();
+
+        // when
+        ResponseEntity<String> response = roomDetailsService.editRoomDetails(hotelId, editRoomDetailsDto);
+
+        // then
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("you sent an empty data to change", response.getBody());
+    }
+
+    @Test
+    void editRoomDetails_HotelNotFound() {
+        // given
+        long hotelId = 1L;
+        EditRoomDetailsDto editRoomDetailsDto = new EditRoomDetailsDto(
+                new MockMultipartFile("imageOne", "updatedImageOne.jpg", "image/jpeg", "new-image-content".getBytes()),
+                null,
+                null,
+                null,
+                "Updated description",
+                200
+        );
+
+        //behavior
+        when(hotelRepository.findById(hotelId)).thenReturn(java.util.Optional.empty());
+
+        // then
+        assertThrows(EntityNotFoundException.class, () -> roomDetailsService.editRoomDetails(hotelId, editRoomDetailsDto));
     }
 }

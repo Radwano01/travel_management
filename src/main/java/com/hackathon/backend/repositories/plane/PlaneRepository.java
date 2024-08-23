@@ -12,6 +12,8 @@ import java.util.List;
 @Repository
 public interface PlaneRepository extends JpaRepository<PlaneEntity, Long> {
 
-    @Query("SELECT new com.hackathon.backend.dto.planeDto.GetPlaneDto(p.id, p.planeCompanyName, p.status) FROM PlaneEntity p")
+    @Query("SELECT new com.hackathon.backend.dto.planeDto.GetPlaneDto" +
+            "(p.id, p.planeCompanyName, p.numSeats, p.paidSeats, p.status)" +
+            " FROM PlaneEntity p")
     List<GetPlaneDto> findAllPlanes();
 }

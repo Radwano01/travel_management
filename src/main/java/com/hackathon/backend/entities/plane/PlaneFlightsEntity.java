@@ -1,6 +1,5 @@
 package com.hackathon.backend.entities.plane;
 
-import com.hackathon.backend.entities.country.CountryEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,11 +7,11 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "flights")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "flights")
 public class PlaneFlightsEntity {
 
     @Id
@@ -21,17 +20,15 @@ public class PlaneFlightsEntity {
 
     private int price;
 
-    private int availableSeats;
-
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plane_id")
     private PlaneEntity plane;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "departure_id")
     private AirPortEntity departureAirPort;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "destination_id")
     private AirPortEntity destinationAirPort;
 
@@ -44,14 +41,24 @@ public class PlaneFlightsEntity {
                               AirPortEntity departureAirPort,
                               AirPortEntity destinationAirPort,
                               LocalDateTime departureTime,
-                              LocalDateTime arrivalTime,
-                              int availableSeats) {
+                              LocalDateTime arrivalTime) {
         this.price = price;
         this.plane = plane;
         this.departureAirPort = departureAirPort;
         this.destinationAirPort = destinationAirPort;
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
-        this.availableSeats = availableSeats;
+    }
+
+    @Override
+    public String toString() {
+        return "PlaneFlightsEntity{" +
+                "id=" + id +
+                ", price=" + price +
+                ", departureAirPort=" + departureAirPort +
+                ", destinationAirPort=" + destinationAirPort +
+                ", departureTime=" + departureTime +
+                ", arrivalTime=" + arrivalTime +
+                '}';
     }
 }

@@ -1,16 +1,17 @@
 package com.hackathon.backend.entities.package_;
 
 import com.hackathon.backend.entities.user.UserEntity;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "packageEvaluation")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "packageEvaluation")
 public class PackageEvaluationEntity {
 
     @Id
@@ -35,5 +36,14 @@ public class PackageEvaluationEntity {
         this.rate = rate;
         this.user = user;
         this.packageEntity = packageEntity;
+    }
+
+    @Override
+    public String toString() {
+        return "PackageEvaluationEntity{" +
+                "id=" + id +
+                ", comment='" + comment + '\'' +
+                ", rate=" + rate +
+                '}';
     }
 }

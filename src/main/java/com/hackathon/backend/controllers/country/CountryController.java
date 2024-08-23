@@ -1,12 +1,15 @@
 package com.hackathon.backend.controllers.country;
 
+import com.hackathon.backend.dto.countryDto.CreateCountryDto;
 import com.hackathon.backend.dto.countryDto.EditCountryDto;
-import com.hackathon.backend.dto.countryDto.PostCountryDto;
 import com.hackathon.backend.services.country.CountryService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+
+import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
+import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 
 @RestController
 @RequestMapping(path = "${BASE_API}")
@@ -18,43 +21,41 @@ public class CountryController {
     }
 
     @PostMapping(path = "${CREATE_COUNTRY_PATH}")
-    public ResponseEntity<String> createCountry(@RequestParam("country") String countryName,
-                                           @RequestParam("mainImage") MultipartFile mainImage,
-                                           @RequestParam("imageOne") MultipartFile imageOne,
-                                           @RequestParam("imageTwo") MultipartFile imageTwo,
-                                           @RequestParam("imageThree") MultipartFile imageThree,
-                                           @RequestParam("description") String description){
-        PostCountryDto postCountryDto = new PostCountryDto(
-                countryName,
-                mainImage,
-                imageOne,
-                imageTwo,
-                imageThree,
-                description
-        );
-
-        return countryService.createCountry(postCountryDto);
+    private ResponseEntity<?> createCountry(@ModelAttribute CreateCountryDto createCountryDto){
+        try{
+            return countryService.createCountry(createCountryDto);
+        }catch(EntityNotFoundException e){
+            return notFoundException(e);
+        }catch (Exception e){
+            return serverErrorException(e);
+        }
     }
 
     @GetMapping(path = "${GET_COUNTRIES_PATH}")
-    public ResponseEntity<?> getCountries(){
-        return countryService.getCountry();
+    private ResponseEntity<?> getCountries(){
+        return countryService.getAllCountries();
     }
 
 
     @PutMapping(path = "${EDIT_COUNTRY_PATH}")
-    public ResponseEntity<String> editCountry(@PathVariable("countryId") int countryId,
-                                         @RequestParam(name = "country", required = false) String country,
-                                         @RequestParam(name = "mainImage", required = false) MultipartFile mainImage){
-        EditCountryDto editCountryDto = new EditCountryDto(
-                country,
-                mainImage
-        );
-        return countryService.editCountry(countryId, editCountryDto);
+    private ResponseEntity<?> editCountry(@PathVariable("countryId") int countryId,
+                                          @ModelAttribute EditCountryDto editCountryDto){
+        try{
+            return countryService.editCountry(countryId, editCountryDto);
+        }catch (EntityNotFoundException e){
+            return notFoundException(e);
+        } catch (Exception e) {
+            return serverErrorException(e);
+        }
     }
 
     @DeleteMapping(path = "${DELETE_COUNTRY_PATH}")
-    public ResponseEntity<String> deleteCountry(@PathVariable("countryId") int countryId){
-        return countryService.deleteCountry(countryId);
+    private ResponseEntity<?> deleteCountry(@PathVariable("countryId") int countryId){
+        try{
+            return countryService.deleteCountry(countryId);
+        }catch (Exception e){
+            return serverErrorException(e);
+        }
+
     }
 }

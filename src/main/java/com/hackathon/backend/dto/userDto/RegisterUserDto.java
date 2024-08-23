@@ -3,6 +3,7 @@ package com.hackathon.backend.dto.userDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
@@ -13,7 +14,7 @@ public class RegisterUserDto {
     private String email;
     private String username;
     private String password;
-    private String image;
+    private MultipartFile image;
     private String fullName;
     private String country;
     private String phoneNumber;

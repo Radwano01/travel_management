@@ -1,14 +1,17 @@
 package com.hackathon.backend.hotel.services;
 
-import com.hackathon.backend.dto.hotelDto.EditHotelEvaluationDto;
-import com.hackathon.backend.dto.hotelDto.HotelEvaluationDto;
+import com.hackathon.backend.dto.hotelDto.evaluationDto.CreateHotelEvaluationDto;
+import com.hackathon.backend.dto.hotelDto.evaluationDto.EditHotelEvaluationDto;
+import com.hackathon.backend.dto.hotelDto.evaluationDto.GetHotelEvaluationDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
 import com.hackathon.backend.entities.user.UserEntity;
+import com.hackathon.backend.repositories.hotel.HotelRepository;
+import com.hackathon.backend.repositories.user.UserRepository;
 import com.hackathon.backend.services.hotel.HotelEvaluationService;
-import com.hackathon.backend.utilities.user.UserUtils;
-import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
-import com.hackathon.backend.utilities.hotel.HotelUtils;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,9 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -28,142 +32,186 @@ import static org.mockito.Mockito.*;
 class HotelEvaluationServiceTest {
 
     @Mock
-    HotelUtils hotelUtils;
+    private HotelRepository hotelRepository;
 
     @Mock
-    UserUtils userUtils;
-
-    @Mock
-    HotelEvaluationUtils hotelEvaluationUtils;
+    private UserRepository userRepository;
 
     @InjectMocks
-    HotelEvaluationService hotelEvaluationService;
+    private HotelEvaluationService hotelEvaluationService;
+
+    private HotelEntity hotel;
+
+    @BeforeEach
+    void setUp() {
+        // Initialize UserEntity
+        UserEntity user = new UserEntity();
+        user.setId(1L);
+        user.setUsername("testUser");
+
+        // Initialize HotelEntity
+        hotel = new HotelEntity();
+        hotel.setId(1L);
+        hotel.setEvaluations(new ArrayList<>());
+    }
+
+    @AfterEach
+    void tearDown(){
+        hotelRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
     @Test
-    void addComment() throws ExecutionException, InterruptedException {
-        //given
+    void addComment() {
+        // given
         long hotelId = 1L;
         long userId = 1L;
-        HotelEvaluationDto hotelEvaluationDto = new HotelEvaluationDto();
-        hotelEvaluationDto.setComment("testComment");
-        hotelEvaluationDto.setRate(4);
+        CreateHotelEvaluationDto createHotelEvaluationDto = new CreateHotelEvaluationDto("Excellent", 5);
 
-        HotelEntity hotel = new HotelEntity();
-        hotel.setId(hotelId);
+        // Initialize entities
         UserEntity user = new UserEntity();
         user.setId(userId);
 
-        //behavior
-        when(hotelUtils.findHotelById(hotelId)).thenReturn(hotel);
-        when(userUtils.findById(userId)).thenReturn(user);
-        when(hotelEvaluationUtils.existsCommentByUserId(userId)).thenReturn(false);
-
-        //when
-        CompletableFuture<ResponseEntity<String>> response = hotelEvaluationService.addComment(hotelId, userId, hotelEvaluationDto);
-
-        //then
-        assertEquals(HttpStatus.OK, response.get().getStatusCode());
-    }
-
-    @Test
-    void getComments() throws ExecutionException, InterruptedException {
-        //given
-        long hotelId = 1;
-
-        UserEntity user = new UserEntity();
-        user.setId(1);
-        user.setUsername("testUsername");
-        user.setImage("testImage");
-
-
-        HotelEvaluationEntity hotelEvaluation = new HotelEvaluationEntity();
-        hotelEvaluation.setComment("testComment");
-        hotelEvaluation.setRate(4);
-        hotelEvaluation.setUser(user);
-
         HotelEntity hotel = new HotelEntity();
         hotel.setId(hotelId);
-        hotel.getEvaluations().add(hotelEvaluation);
+        hotel.setEvaluations(new ArrayList<>());
 
-        hotelEvaluation.setHotel(hotel);
-
-        EditHotelEvaluationDto hotelEvaluationDto = new EditHotelEvaluationDto();
-        hotelEvaluationDto.setComment("test 1");
-        hotelEvaluationDto.setRate(1);
-
-        //behavior
-        when(hotelUtils.findHotelById(hotelId)).thenReturn(hotel);
-
-        //when
-        CompletableFuture<ResponseEntity<?>> response = hotelEvaluationService.getComments(hotelId);
-        List<HotelEvaluationDto> responseData = (List<HotelEvaluationDto>) response.get().getBody();
-        //then
-        assertEquals(HttpStatus.OK, response.get().getStatusCode());
-        assertNotNull(responseData);
-        assertEquals(hotelEvaluation.getComment(), responseData.get(0).getComment());
-        assertEquals(hotelEvaluation.getRate(), responseData.get(0).getRate());
-        assertEquals(hotelEvaluation.getUser().getUsername(), user.getUsername());
-        assertEquals(hotelEvaluation.getUser().getImage(), user.getImage());
-    }
-
-    @Test
-    void editComment() throws ExecutionException, InterruptedException {
-        // given
-        long commentId = 1L;
-        EditHotelEvaluationDto editHotelEvaluationDto = new EditHotelEvaluationDto();
-        editHotelEvaluationDto.setComment("testComment");
-        editHotelEvaluationDto.setRate(2);
-
-        HotelEvaluationEntity hotelEvaluation = new HotelEvaluationEntity("testComment1", 3,
-                new HotelEntity(), new UserEntity());
-        hotelEvaluation.setId(commentId);
-
-        // behavior
-        when(hotelEvaluationUtils.findById(commentId)).thenReturn(hotelEvaluation);
-        when(hotelEvaluationUtils.checkHelper(editHotelEvaluationDto)).thenReturn(true);
-
-        doAnswer(invocation -> {
-            HotelEvaluationEntity savedHotelEvaluation = invocation.getArgument(0);
-            savedHotelEvaluation.setComment(editHotelEvaluationDto.getComment());
-            savedHotelEvaluation.setRate(editHotelEvaluationDto.getRate());
-            return null;
-        }).when(hotelEvaluationUtils).save(any(HotelEvaluationEntity.class));
+        // Mock behavior
+        when(hotelRepository.findById(hotelId)).thenReturn(Optional.of(hotel));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         // when
-        CompletableFuture<ResponseEntity<String>> response = hotelEvaluationService.editComment(commentId, editHotelEvaluationDto);
+        CompletableFuture<ResponseEntity<?>> responseFuture = hotelEvaluationService.addComment(hotelId, userId, createHotelEvaluationDto);
+        ResponseEntity<?> response = responseFuture.join();
 
         // then
-        assertEquals(HttpStatus.OK, response.get().getStatusCode());
-        assertEquals(editHotelEvaluationDto.getComment(), hotelEvaluation.getComment());
-        assertEquals(editHotelEvaluationDto.getRate(), hotelEvaluation.getRate());
-        verify(hotelEvaluationUtils).save(hotelEvaluation);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Comment added successfully Excellent", response.getBody());
+        assertEquals(1, hotel.getEvaluations().size());
+        assertEquals("Excellent", hotel.getEvaluations().get(0).getComment());
     }
 
     @Test
-    void removeComment() throws ExecutionException, InterruptedException {
-        //given
+    void addComment_UserAlreadyCommented() {
+        // given
         long hotelId = 1L;
         long userId = 1L;
-        long commentId = 1L;
+        CreateHotelEvaluationDto createHotelEvaluationDto = new CreateHotelEvaluationDto("Excellent", 5);
 
+        // Initialize UserEntity
+        UserEntity existingUser = new UserEntity();
+        existingUser.setId(userId);
+
+        // Initialize HotelEvaluationEntity
+        HotelEvaluationEntity existingEvaluation = new HotelEvaluationEntity();
+        existingEvaluation.setUser(existingUser);
+
+        // Initialize HotelEntity
         HotelEntity hotel = new HotelEntity();
         hotel.setId(hotelId);
+        hotel.setEvaluations(new ArrayList<>(List.of(existingEvaluation)));
 
-        UserEntity user = new UserEntity();
-        user.setId(userId);
+        // behavior
+        when(hotelRepository.findById(hotelId)).thenReturn(Optional.of(hotel));
 
-        HotelEvaluationEntity hotelEvaluation = new HotelEvaluationEntity("testComment", 4, hotel, user);
-
-        //behavior
-        when(hotelEvaluationUtils.findById(commentId)).thenReturn(hotelEvaluation);
-
-        //when
-        CompletableFuture<ResponseEntity<String>> response = hotelEvaluationService.removeComment(commentId);
+        // when
+        CompletableFuture<ResponseEntity<?>> responseFuture = hotelEvaluationService.addComment(hotelId, userId, createHotelEvaluationDto);
+        ResponseEntity<?> response = responseFuture.join();
 
         //then
-        assertEquals(HttpStatus.OK, response.get().getStatusCode());
-        verify(hotelUtils).save(hotel);
-        verify(userUtils).save(user);
-        verify(hotelEvaluationUtils).delete(hotelEvaluation);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("This user has already commented on this hotel", response.getBody());
+    }
+
+
+
+    @Test
+    void getComments() {
+        // given
+        long hotelId = 1L;
+
+        GetHotelEvaluationDto dto1 = new GetHotelEvaluationDto(1L, "Good", 4, 1L, "user1", "image1");
+        GetHotelEvaluationDto dto2 = new GetHotelEvaluationDto(2L, "Excellent", 5, 2L, "user2", "image2");
+        List<GetHotelEvaluationDto> mockDtos = List.of(dto1, dto2);
+
+        // behavior
+        when(hotelRepository.findAllHotelEvaluationsByHotelId(hotelId)).thenReturn(mockDtos);
+
+        // when
+        CompletableFuture<ResponseEntity<?>> responseFuture = hotelEvaluationService.getComments(hotelId);
+        ResponseEntity<?> response = responseFuture.join();
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockDtos, response.getBody());
+    }
+
+    @Test
+    void editComment() {
+        // given
+        long hotelId = 1L;
+        long commentId = 1L;
+        EditHotelEvaluationDto editHotelEvaluationDto = new EditHotelEvaluationDto();
+        editHotelEvaluationDto.setComment("Updated comment");
+        editHotelEvaluationDto.setRate(3);
+
+        HotelEvaluationEntity existingEvaluation = new HotelEvaluationEntity();
+        existingEvaluation.setId(commentId);
+        existingEvaluation.setComment("Old comment");
+        existingEvaluation.setRate(1);
+
+        hotel.getEvaluations().add(existingEvaluation);
+
+        // behavior
+        when(hotelRepository.findById(hotelId)).thenReturn(Optional.of(hotel));
+
+        // when
+        CompletableFuture<ResponseEntity<?>> responseFuture = hotelEvaluationService.editComment(hotelId, commentId, editHotelEvaluationDto);
+        ResponseEntity<?> response = responseFuture.join();
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Comment edited successfullyUpdated comment", response.getBody());
+        assertEquals("Updated comment", existingEvaluation.getComment());
+        assertEquals(3, existingEvaluation.getRate());
+    }
+
+    @Test
+    void removeComment() {
+        // given
+        long hotelId = 1L;
+        long commentId = 1L;
+
+        HotelEvaluationEntity commentToRemove = new HotelEvaluationEntity();
+        commentToRemove.setId(commentId);
+        hotel.setEvaluations(new ArrayList<>(List.of(commentToRemove)));
+
+        // behavior
+        when(hotelRepository.findById(hotelId)).thenReturn(Optional.of(hotel));
+
+        // when
+        CompletableFuture<ResponseEntity<?>> responseFuture = hotelEvaluationService.removeComment(hotelId, commentId);
+        ResponseEntity<?> response = responseFuture.join();
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Comment deleted successfully", response.getBody());
+        assertTrue(hotel.getEvaluations().isEmpty());
+    }
+
+    @Test
+    void removeComment_HotelNotFound() {
+        // given
+        long hotelId = 1L;
+        long commentId = 1L;
+
+        //behavior
+        when(hotelRepository.findById(hotelId)).thenReturn(Optional.empty());
+
+        //then
+        Exception exception = assertThrows(EntityNotFoundException.class, () ->
+                hotelEvaluationService.removeComment(hotelId, commentId).join()
+        );
+        assertEquals("Hotel id not found", exception.getMessage());
     }
 }

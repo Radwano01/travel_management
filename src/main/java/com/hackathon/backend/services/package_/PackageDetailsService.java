@@ -1,81 +1,109 @@
 package com.hackathon.backend.services.package_;
 
 import com.hackathon.backend.dto.packageDto.EditPackageDetailsDto;
+import com.hackathon.backend.dto.packageDto.GetPackageANDPackageDetailsDto;
 import com.hackathon.backend.dto.packageDto.GetPackageDetailsDto;
-import com.hackathon.backend.dto.packageDto.GetPackageDto;
+import com.hackathon.backend.dto.packageDto.features.GetBenefitDto;
+import com.hackathon.backend.dto.packageDto.features.GetRoadmapDto;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
-import com.hackathon.backend.utilities.amazonServices.S3Service;
-import com.hackathon.backend.utilities.package_.PackageDetailsUtils;
-import com.hackathon.backend.utilities.package_.PackageUtils;
+import com.hackathon.backend.repositories.package_.PackageRepository;
+import com.hackathon.backend.utilities.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.hackathon.backend.libs.MyLib.checkIfSentEmptyData;
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class PackageDetailsService {
 
-    private final PackageDetailsUtils packageDetailsUtils;
-    private final PackageUtils packageUtils;
+    private final PackageRepository packageRepository;
     private final S3Service s3Service;
 
     @Autowired
-    public PackageDetailsService(PackageDetailsUtils packageDetailsUtils,
-                                 PackageUtils packageUtils,
+    public PackageDetailsService(PackageRepository packageRepository,
                                  S3Service s3Service) {
-        this.packageDetailsUtils = packageDetailsUtils;
-        this.packageUtils = packageUtils;
+        this.packageRepository = packageRepository;
         this.s3Service = s3Service;
     }
 
-    public ResponseEntity<?> getSinglePackageDetails(int packageId) {
-        try{
-            PackageEntity packageEntity = packageUtils.findById(packageId);
-            PackageDetailsEntity packageDetails = packageEntity.getPackageDetails();
-            GetPackageDetailsDto getPackageDetailsDto = new GetPackageDetailsDto(
-                    packageDetails.getId(),
-                    packageDetails.getImageOne(),
-                    packageDetails.getImageTwo(),
-                    packageDetails.getImageThree(),
-                    packageDetails.getDescription()
-            );
-            GetPackageDto getPackageDto = new GetPackageDto(
+    public ResponseEntity<GetPackageANDPackageDetailsDto> getSinglePackageDetails(int packageId) {
+        PackageEntity packageEntity = findPackageById(packageId);
+
+        List<GetRoadmapDto> roadmapDtos = packageEntity.getPackageDetails().getRoadmaps().stream()
+                .map(roadmap -> new GetRoadmapDto(roadmap.getId(), roadmap.getRoadmap()))
+                .collect(Collectors.toList());
+
+        List<GetBenefitDto> benefitDtos = packageEntity.getPackageDetails().getBenefits().stream()
+                .map(benefit -> new GetBenefitDto(benefit.getId(), benefit.getBenefit()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(
+                new GetPackageANDPackageDetailsDto(
                     packageEntity.getId(),
                     packageEntity.getPackageName(),
                     packageEntity.getPrice(),
                     packageEntity.getRate(),
                     packageEntity.getMainImage(),
-                    getPackageDetailsDto,
-                    packageDetails.getRoadmaps(),
-                    packageDetails.getBenefits()
-            );
-            return ResponseEntity.ok(getPackageDto);
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        }catch (Exception e){
-            return serverErrorException(e);
-        }
+                    packageEntity.getPackageDetails().getImageOne(),
+                    packageEntity.getPackageDetails().getImageTwo(),
+                    packageEntity.getPackageDetails().getImageThree(),
+                    packageEntity.getPackageDetails().getDescription(),
+                    roadmapDtos,
+                    benefitDtos
+                )
+        );
+    }
+
+
+    private PackageEntity findPackageById(int packageId){
+        return packageRepository.findById(packageId)
+                .orElseThrow(()-> new EntityNotFoundException("No such package has this id"));
     }
 
     @Transactional
-    public ResponseEntity<String> editPackageDetails(int packageDetailsId,
-                                                EditPackageDetailsDto editPackageDetailsDto) {
-        try{
-            if(!packageDetailsUtils.checkHelper(editPackageDetailsDto)){
-                return badRequestException("you sent an empty data to change");
-            }
-            PackageDetailsEntity packageDetails = packageDetailsUtils.findById(packageDetailsId);
-            packageDetailsUtils.editHelper(packageDetails, editPackageDetailsDto);
-            packageDetailsUtils.save(packageDetails);
-            return ResponseEntity.ok("Package details edited successfully");
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        }catch (Exception e){
-            return serverErrorException(e);
+    public ResponseEntity<String> editPackageDetails(int packageId,
+                                                     EditPackageDetailsDto editPackageDetailsDto) {
+        if(!checkIfSentEmptyData(editPackageDetailsDto)){
+            return badRequestException("you sent an empty data to change");
+        }
+
+        PackageEntity packageEntity = findPackageById(packageId);
+
+        updateToNewData(packageEntity.getPackageDetails(), editPackageDetailsDto);
+
+        packageRepository.save(packageEntity);
+
+        return ResponseEntity.ok(packageEntity.getPackageDetails().toString());
+    }
+
+    private void updateToNewData(PackageDetailsEntity packageDetails,
+                           EditPackageDetailsDto editPackageDetailsDto) {
+        if(editPackageDetailsDto.getImageOne() != null){
+            s3Service.deleteFile(packageDetails.getImageOne());
+            String packageDetailsImageOneName = s3Service.uploadFile(editPackageDetailsDto.getImageOne());
+            packageDetails.setImageOne(packageDetailsImageOneName);
+        }
+        if(editPackageDetailsDto.getImageTwo() != null){
+            s3Service.deleteFile(packageDetails.getImageTwo());
+            String packageDetailsImageTwoName = s3Service.uploadFile(editPackageDetailsDto.getImageTwo());
+            packageDetails.setImageTwo(packageDetailsImageTwoName);
+        }
+        if(editPackageDetailsDto.getImageThree() != null){
+            s3Service.deleteFile(packageDetails.getImageThree());
+            String packageDetailsImageThreeName = s3Service.uploadFile(editPackageDetailsDto.getImageThree());
+            packageDetails.setImageThree(packageDetailsImageThreeName);
+        }
+        if(editPackageDetailsDto.getDescription() != null){
+            packageDetails.setDescription(editPackageDetailsDto.getDescription());
         }
     }
 }

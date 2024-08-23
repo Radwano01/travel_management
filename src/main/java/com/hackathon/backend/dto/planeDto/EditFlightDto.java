@@ -10,14 +10,13 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class EditFlightDto {
-    private long id;
     private String planeCompanyName;
     private Integer price;
-    private Integer availableSeats;
-    private String departureAirPort;
+
+    private Long departureAirPortId;
     private String departureAirPortCode;
 
-    private String destinationAirPort;
+    private Long destinationAirPortId;
     private String destinationAirPortCode;
 
     private LocalDateTime departureTime;

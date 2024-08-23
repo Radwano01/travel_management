@@ -10,11 +10,11 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "roomFeatures")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "roomFeatures")
 public class RoomFeaturesEntity {
 
     @Id

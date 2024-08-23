@@ -1,81 +1,90 @@
 package com.hackathon.backend.services.hotel.hotelFeatures;
 
 import com.hackathon.backend.entities.hotel.HotelEntity;
+import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
-import com.hackathon.backend.utilities.hotel.HotelUtils;
-import com.hackathon.backend.utilities.hotel.features.RoomFeaturesUtils;
+import com.hackathon.backend.repositories.hotel.HotelRepository;
+import com.hackathon.backend.repositories.hotel.RoomDetailsRepository;
+import com.hackathon.backend.repositories.hotel.hotelFeatures.RoomFeaturesRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
-import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
+import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class RoomFeaturesRelationsService {
 
-    private final HotelUtils hotelUtils;
-    private final RoomFeaturesUtils roomFeaturesUtils;
+    private final RoomFeaturesRepository roomFeaturesRepository;
+    private final RoomDetailsRepository roomDetailsRepository;
+    private final HotelRepository hotelRepository;
 
     @Autowired
-    public RoomFeaturesRelationsService(HotelUtils hotelUtils,
-                                        RoomFeaturesUtils roomFeaturesUtils) {
-        this.hotelUtils = hotelUtils;
-        this.roomFeaturesUtils = roomFeaturesUtils;
+    public RoomFeaturesRelationsService(RoomFeaturesRepository roomFeaturesRepository,
+                                        RoomDetailsRepository roomDetailsRepository,
+                                        HotelRepository hotelRepository) {
+        this.roomFeaturesRepository = roomFeaturesRepository;
+        this.roomDetailsRepository = roomDetailsRepository;
+        this.hotelRepository = hotelRepository;
     }
 
     @Transactional
-    public ResponseEntity<String> addRoomFeatureToHotel(long hotelId,
-                                                   int featureId) {
-        try{
-            HotelEntity hotel = hotelUtils.findHotelById(hotelId);
-            RoomFeaturesEntity roomFeatures = roomFeaturesUtils.findById(featureId);
-            Optional<RoomFeaturesEntity> roomFeaturesEntityOptional = hotel.getRoomDetails()
-                    .getRoomFeatures().stream().filter((feature)-> feature == roomFeatures).findFirst();
-            if(roomFeaturesEntityOptional.isPresent()){
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("This Room feature is already valid for this hotel");
-            }
-            hotel.getRoomDetails().getRoomFeatures().add(roomFeatures);
-            hotelUtils.save(hotel);
-            roomFeaturesUtils.save(roomFeatures);
-            return ResponseEntity.ok("Room feature added successfully");
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        }catch (Exception e){
-            return serverErrorException(e);
+    public ResponseEntity<String> addRoomFeatureToHotel(long hotelId, int featureId) {
+        HotelEntity hotel = findHotelById(hotelId);
+
+        RoomDetailsEntity roomDetails = hotel.getRoomDetails();
+
+        if(checkIfFeatureAlreadyExist(roomDetails, featureId) != null){
+            return alreadyValidException("This Room feature is already valid for this hotel");
         }
+
+        RoomFeaturesEntity roomFeatures = findRoomFeatureById(featureId);
+
+        hotel.getRoomDetails().getRoomFeatures().add(roomFeatures);
+
+        roomDetailsRepository.save(roomDetails);
+
+        return ResponseEntity.ok("Room feature added successfully " + roomFeatures.getRoomFeatures());
+    }
+
+    private HotelEntity findHotelById(long hotelId){
+        return hotelRepository.findById(hotelId)
+                .orElseThrow(()-> new EntityNotFoundException("Hotel id not found"));
     }
 
     @Transactional
     public ResponseEntity<String> removeRoomFeatureFromHotel(long hotelId, int featureId) {
-        try{
-            HotelEntity hotelEntity = hotelUtils.findHotelById(hotelId);
-            RoomFeaturesEntity roomFeaturesEntity = roomFeaturesUtils.findById(featureId);
-            if(hotelEntity != null && roomFeaturesEntity != null) {
-                Optional<RoomFeaturesEntity> roomFeaturesEntityOptional = hotelEntity.getRoomDetails().getRoomFeatures().stream()
-                        .filter((feature) -> feature.getId() == featureId)
-                        .findFirst();
-                if(roomFeaturesEntityOptional.isPresent()) {
-                    hotelEntity.getRoomDetails().getRoomFeatures().remove(roomFeaturesEntityOptional.get());
-                    hotelUtils.save(hotelEntity);
-                    roomFeaturesUtils.save(roomFeaturesEntity);
-                    return ResponseEntity.ok("Room feature removed from this hotel");
-                }else{
-                    return notFoundException("Room feature not found in this hotel");
-                }
-            }else{
-                return notFoundException("Hotel or room feature not found");
-            }
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        }catch (Exception e){
-            return serverErrorException(e);
+        HotelEntity hotelEntity = findHotelById(hotelId);
+
+        RoomDetailsEntity roomDetails = hotelEntity.getRoomDetails();
+
+        RoomFeaturesEntity roomFeatures = checkIfFeatureAlreadyExist(roomDetails, featureId);
+
+        if(roomFeatures == null){
+            return notFoundException("This feature is not found");
         }
+
+        hotelEntity.getRoomDetails().getRoomFeatures().remove(roomFeatures);
+
+        roomDetailsRepository.save(roomDetails);
+
+        return ResponseEntity.ok("Room feature removed from this hotel");
     }
 
+    private RoomFeaturesEntity findRoomFeatureById(int featureId){
+        return roomFeaturesRepository.findById(featureId)
+                .orElseThrow(()-> new EntityNotFoundException("No such feature has this id"));
+    }
+
+    private RoomFeaturesEntity checkIfFeatureAlreadyExist(RoomDetailsEntity roomDetails, int featureId){
+        Optional<RoomFeaturesEntity> exists = roomDetails.getRoomFeatures().stream()
+                .filter(feature -> feature.getId() == featureId)
+                .findFirst();
+
+        return exists.orElse(null);
+    }
 }

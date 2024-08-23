@@ -3,6 +3,7 @@ package com.hackathon.backend.dto.userDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
@@ -15,14 +16,14 @@ public class EditUserDetailsDto {
     private String phoneNumber;
     private String address;
     private LocalDate dateOfBirth;
-    private String image;
+    private MultipartFile image;
 
     public EditUserDetailsDto(String fullName,
                               String country,
                               String phoneNumber,
                               String address,
                               LocalDate dateOfBirth,
-                              String image) {
+                              MultipartFile image) {
         this.fullName = fullName;
         this.country = country;
         this.phoneNumber = phoneNumber;

@@ -1,17 +1,21 @@
 package com.hackathon.backend.country.services;
 
+import com.hackathon.backend.dto.countryDto.placeDto.CreatePlaceDto;
 import com.hackathon.backend.dto.countryDto.placeDto.EditPlaceDto;
 import com.hackathon.backend.dto.countryDto.placeDto.GetEssentialPlaceDto;
 import com.hackathon.backend.dto.countryDto.placeDto.GetPlaceForFlightDto;
-import com.hackathon.backend.dto.countryDto.placeDto.PostPlaceDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
+import com.hackathon.backend.entities.hotel.HotelEntity;
+import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
+import com.hackathon.backend.entities.package_.PackageEntity;
+import com.hackathon.backend.repositories.country.CountryRepository;
+import com.hackathon.backend.repositories.country.PlaceRepository;
 import com.hackathon.backend.services.country.PlaceService;
-import com.hackathon.backend.utilities.amazonServices.S3Service;
-import com.hackathon.backend.utilities.country.CountryUtils;
-import com.hackathon.backend.utilities.country.PlaceDetailsUtils;
-import com.hackathon.backend.utilities.country.PlaceUtils;
+import com.hackathon.backend.utilities.S3Service;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,26 +26,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PlaceServiceTest {
 
     @Mock
-    CountryUtils countryUtils;
+    CountryRepository countryRepository;
 
     @Mock
-    PlaceUtils placeUtils;
-
-    @Mock
-    PlaceDetailsUtils placeDetailsUtils;
+    PlaceRepository placeRepository;
 
     @Mock
     S3Service s3Service;
@@ -49,30 +49,103 @@ class PlaceServiceTest {
     @InjectMocks
     PlaceService placeService;
 
-    @Test
-    void createPlace() {
-        // given
-        int countryId = 1;
+    CreatePlaceDto createPlaceDto;
+    EditPlaceDto editPlaceDto;
+    CountryEntity country;
+    @Mock
+    PlaceEntity place = new PlaceEntity();
 
-        PostPlaceDto p = new PostPlaceDto(
-                "testPlace",
-                new MockMultipartFile("mainImage", "mainImage.jpg", "image/jpeg", new byte[0]),
-                new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", new byte[0]),
-                new MockMultipartFile("imageTwo", "imageTwo.jpg", "image/jpeg", new byte[0]),
-                new MockMultipartFile("imageThree", "imageThree.jpg", "image/jpeg", new byte[0]),
-                "testDesc"
+    @Mock
+    private HotelEntity hotel;
+
+    @BeforeEach
+    void setUp(){
+        createPlaceDto = new CreatePlaceDto(
+                "test place",
+                new MockMultipartFile("mainImage", "newImageOne.jpg", "image/jpeg", "image content".getBytes()),
+                new MockMultipartFile("imageOne", "newImageOne.jpg", "image/jpeg", "image content".getBytes()),
+                new MockMultipartFile("imageOne", "newImageOne.jpg", "image/jpeg", "image content".getBytes()),
+                new MockMultipartFile("imageOne", "newImageOne.jpg", "image/jpeg", "image content".getBytes()),
+                "test description"
         );
 
-        CountryEntity country = new CountryEntity();
-        country.setId(countryId);
-        country.setCountry("testCountry");
-        country.setMainImage("testImage");
+        editPlaceDto = new EditPlaceDto(
+                "edited test place",
+                new MockMultipartFile("mainImage", "newImageOne.jpg", "image/jpeg", "image content".getBytes())
+        );
 
-        // Mock the behavior
-        when(countryUtils.findCountryById(countryId)).thenReturn(country);
+        country = new CountryEntity(
+                "test country",
+                "test.image"
+        );
+        country.setId(1);
+
+        hotel.setRoomDetails(new RoomDetailsEntity());
+    }
+
+    @AfterEach
+    void tearDown(){
+        countryRepository.deleteAll();
+        placeRepository.deleteAll();
+    }
+
+
+    @Test
+    void createPlace() {
+
+        //behavior
+        when(countryRepository.findById(1)).thenReturn(Optional.ofNullable(country));
+
+        //when
+        ResponseEntity<String> response = placeService.createPlace(1, createPlaceDto);
+
+        //then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void getAllPlacesByCountryId() {
+        List<GetEssentialPlaceDto> ls = new ArrayList<>();
+
+        //behavior
+        when(countryRepository.findEssentialPlacesDataByCountryId(1)).thenReturn(ls);
+
+        //when
+        ResponseEntity<List<GetEssentialPlaceDto>> response = placeService.getAllPlacesByCountryId(1);
+
+        //then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(ls, response.getBody());
+    }
+
+    @Test
+    void getPlaceByPlace() {
+        //given
+        List<GetPlaceForFlightDto> ls = new ArrayList<>();
+
+        //behavior
+        when(placeRepository.findPlaceByPlace("test place")).thenReturn(ls);
+
+        //when
+        ResponseEntity<List<GetPlaceForFlightDto>> response = placeService.getPlaceByPlace("test place");
+
+        //then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void editPlace_Success() {
+        // given
+        int countryId = 1;
+        int placeId = 1;
+
+        // behavior
+        when(countryRepository.findPlaceByCountryIdANDPlaceId(anyInt(), anyInt())).thenReturn(Optional.of(place));
+        when(countryRepository.findById(anyInt())).thenReturn(Optional.ofNullable(country));
+        when(countryRepository.save(any(CountryEntity.class))).thenReturn(country);
 
         // when
-        ResponseEntity<?> response = placeService.createPlace(countryId, p);
+        ResponseEntity<String> response = placeService.editPlace(countryId, placeId, editPlaceDto);
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -80,118 +153,59 @@ class PlaceServiceTest {
 
 
     @Test
-    void getPlacesByCountry() {
+    void editPlace_EmptyData() {
         //given
         int countryId = 1;
-        CountryEntity country = new CountryEntity();
-        country.setId(countryId);
-        country.setCountry("testCountry");
-        country.setMainImage("testImage");
-
-        PlaceEntity place = new PlaceEntity();
-        place.setId(1);
-        place.setPlace("testImage");
-        place.setMainImage("testImage");
-        place.setCountry(country);
-
-        country.getPlaces().add(place);
-
-        GetEssentialPlaceDto getEssentialPlaceDto = new GetEssentialPlaceDto();
-        getEssentialPlaceDto.setId(place.getId());
-        getEssentialPlaceDto.setPlace(place.getPlace());
-        getEssentialPlaceDto.setMainImage(place.getMainImage());
-
-        List<GetEssentialPlaceDto> res = new ArrayList<>();
-        res.add(getEssentialPlaceDto);
-
-        //behavior
-        when(placeUtils.findPlacesByCountryId(countryId)).thenReturn(res);
+        int placeId = 1;
+        EditPlaceDto editPlaceDto = new EditPlaceDto();
 
         //when
-        ResponseEntity<?> response = placeService.getPlacesByCountryId(countryId);
-
-        List<GetEssentialPlaceDto> placeEntities = (List<GetEssentialPlaceDto>) response.getBody();
-        GetEssentialPlaceDto responseData = placeEntities.get(0);
+        ResponseEntity<String> response = placeService.editPlace(countryId, placeId, editPlaceDto);
 
         //then
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(place.getId(), responseData.getId());
-        assertEquals(place.getPlace(), responseData.getPlace());
-        assertEquals(place.getMainImage(), responseData.getMainImage());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
-    void getPlaceByPlace(){
-        List<GetPlaceForFlightDto> mockPlaces = Arrays.asList(
-                new GetPlaceForFlightDto(1, "Test Place", "Airport 1"),
-                new GetPlaceForFlightDto(2, "Test Place", "Airport 2")
-        );
-
-        when(placeUtils.findPlaceByPlace(anyString())).thenReturn(mockPlaces);
-
-        ResponseEntity<?> response = placeService.getPlaceByPlace("Test Place");
-
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(mockPlaces, response.getBody());
-    }
-
-    @Test
-    void editPlace() {
-        //given
-        EditPlaceDto dto = new EditPlaceDto();
-        dto.setPlace("New Place");
-
-        PlaceEntity place = new PlaceEntity();
-        place.setId(1);
-
-        CountryEntity country = new CountryEntity();
-        country.setPlaces(Collections.singletonList(place));
-
-        //behavior
-        when(placeUtils.checkHelper(dto)).thenReturn(true);
-        when(countryUtils.findCountryById(1)).thenReturn(country);
-
-        //when
-        ResponseEntity<?> response = placeService.editPlace(1, 1, dto);
-
-        //then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(placeUtils).checkHelper(dto);
-        verify(countryUtils).findCountryById(1);
-        verify(placeUtils).editHelper(place, dto);
-        verify(placeUtils).save(place);
-        verify(countryUtils).save(country);
-    }
-
-    @Test
-    void deletePlace() {
+    void deletePlace_Success() {
         //given
         int countryId = 1;
         int placeId = 1;
 
-        PlaceDetailsEntity placeDetails = new PlaceDetailsEntity();
+        RoomDetailsEntity roomDetails = mock(RoomDetailsEntity.class);
+        PlaceDetailsEntity placeDetails = mock(PlaceDetailsEntity.class);
 
-        PlaceEntity place = new PlaceEntity();
-        place.setId(placeId);
-        place.setMainImage("testImage");
-        place.setPlaceDetails(placeDetails);
+        when(roomDetails.getImageOne()).thenReturn("imageOne");
+        when(roomDetails.getImageTwo()).thenReturn("imageTwo");
+        when(roomDetails.getImageThree()).thenReturn("imageThree");
+        when(roomDetails.getImageFour()).thenReturn("imageFour");
 
-        CountryEntity country = new CountryEntity();
-        country.setId(countryId);
-        country.getPlaces().add(place);
+        when(placeDetails.getImageOne()).thenReturn("placeImageOne");
+        when(placeDetails.getImageTwo()).thenReturn("placeImageTwo");
+        when(placeDetails.getImageThree()).thenReturn("placeImageThree");
 
-        //behavior
-        when(countryUtils.findCountryById(countryId)).thenReturn(country);
+        // behavior
+        when(countryRepository.findById(countryId)).thenReturn(Optional.ofNullable(country));
+        when(countryRepository.findPlaceByCountryIdANDPlaceId(countryId, placeId)).thenReturn(Optional.ofNullable(place));
+        when(place.getHotels()).thenReturn(List.of(hotel));
+        when(hotel.getRoomDetails()).thenReturn(roomDetails);
+        when(place.getMainImage()).thenReturn("placeMainImage");
+        when(place.getPlaceDetails()).thenReturn(placeDetails);
 
         //when
-        ResponseEntity<?> response = placeService.deletePlace(countryId,placeId);
+        ResponseEntity<String> response = placeService.deletePlace(countryId, placeId);
 
         //then
+        verify(s3Service).deleteFile("imageOne");
+        verify(s3Service).deleteFile("imageTwo");
+        verify(s3Service).deleteFile("imageThree");
+        verify(s3Service).deleteFile("imageFour");
+        verify(s3Service).deleteFile("placeMainImage");
+        verify(s3Service).deleteFile("placeImageOne");
+        verify(s3Service).deleteFile("placeImageTwo");
+        verify(s3Service).deleteFile("placeImageThree");
+        verify(countryRepository).save(country);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-
-        verify(placeDetailsUtils).delete(placeDetails);
-        verify(placeUtils).delete(place);
-        verify(s3Service).deleteFile(place.getMainImage());
+        assertEquals("Place deleted successfully", response.getBody());
     }
 }

@@ -21,10 +21,10 @@ public interface PlaneFlightsRepository extends JpaRepository<PlaneFlightsEntity
             "f.destinationAirPort.airPortName, " +
             "f.destinationAirPort.airPortCode, " +
             "f.departureTime, " +
-            "f.arrivalTime," +
-            "f.availableSeats) " +
+            "f.arrivalTime)" +
             "FROM PlaneFlightsEntity f " +
             "WHERE f.departureAirPort.id = :departureAirPortId " +
             "AND f.destinationAirPort.id = :destinationAirPortId")
-    List<GetFlightDto> findAllByDepartureAirPortIdAndDestinationAirPortId(long departureAirPortId, long destinationAirPortId, Pageable pageable);
+    List<GetFlightDto> findAllByDepartureAirPortIdAndDestinationAirPortId
+            (long departureAirPortId, long destinationAirPortId, Pageable pageable);
 }

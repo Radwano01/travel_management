@@ -1,16 +1,12 @@
 package com.hackathon.backend.package_.services;
 
 import com.hackathon.backend.dto.packageDto.EditPackageDetailsDto;
-import com.hackathon.backend.dto.packageDto.GetPackageDetailsDto;
-import com.hackathon.backend.dto.packageDto.GetPackageDto;
+import com.hackathon.backend.dto.packageDto.GetPackageANDPackageDetailsDto;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
-import com.hackathon.backend.entities.package_.packageFeatures.BenefitEntity;
-import com.hackathon.backend.entities.package_.packageFeatures.RoadmapEntity;
+import com.hackathon.backend.repositories.package_.PackageRepository;
 import com.hackathon.backend.services.package_.PackageDetailsService;
-import com.hackathon.backend.utilities.amazonServices.S3Service;
-import com.hackathon.backend.utilities.package_.PackageDetailsUtils;
-import com.hackathon.backend.utilities.package_.PackageUtils;
+import com.hackathon.backend.utilities.S3Service;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,115 +16,124 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PackageDetailsServiceTest {
 
     @Mock
-    PackageUtils packageUtils;
+    private PackageRepository packageRepository;
 
     @Mock
-    PackageDetailsUtils packageDetailsUtils;
-
-    @Mock
-    S3Service s3Service;
+    private S3Service s3Service;
 
     @InjectMocks
-    PackageDetailsService packageDetailsService;
+    private PackageDetailsService packageDetailsService;
 
     @Test
-    void getSinglePackageDetails() {
-        //given
+    void getSinglePackageDetails_ShouldReturnPackageDetails_WhenPackageExists() {
+        // given
         int packageId = 1;
+
+        PackageDetailsEntity packageDetails = new PackageDetailsEntity();
+        packageDetails.setImageOne("imageOne.jpg");
+        packageDetails.setImageTwo("imageTwo.jpg");
+        packageDetails.setImageThree("imageThree.jpg");
+        packageDetails.setDescription("Package description");
+
         PackageEntity packageEntity = new PackageEntity();
         packageEntity.setId(packageId);
-        packageEntity.setPackageName("testPackage");
-        packageEntity.setMainImage("testImage");
+        packageEntity.setPackageName("Test Package");
         packageEntity.setPrice(100);
-        packageEntity.setRate(2);
-
-        PackageDetailsEntity packageDetailsEntity = new PackageDetailsEntity();
-        packageDetailsEntity.setId(1);
-        packageDetailsEntity.setImageOne("testImageOne");
-        packageDetailsEntity.setImageTwo("testImageTwo");
-        packageDetailsEntity.setImageThree("testImageThree");
-        packageDetailsEntity.setDescription("testDesc");
-        packageDetailsEntity.getRoadmaps().add(new RoadmapEntity());
-        packageDetailsEntity.getBenefits().add(new BenefitEntity());
-
-        packageEntity.setPackageDetails(packageDetailsEntity);
+        packageEntity.setRate(4);
+        packageEntity.setMainImage("mainImage.jpg");
+        packageEntity.setPackageDetails(packageDetails);
 
         //behavior
-        when(packageUtils.findById(packageId)).thenReturn(packageEntity);
-
-        //when
-        ResponseEntity<?> response = packageDetailsService.getSinglePackageDetails(packageId);
-
-        GetPackageDto getPackageDto = (GetPackageDto) response.getBody();
-        //then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(getPackageDto);
-        assertEquals(packageEntity.getPackageName(), getPackageDto.getPackageName());
-        assertEquals(packageEntity.getMainImage(), getPackageDto.getMainImage());
-        assertEquals(packageEntity.getPrice(), getPackageDto.getPrice());
-        assertEquals(packageEntity.getRate(), getPackageDto.getRate());
-        assertEquals(packageEntity.getPackageDetails().getImageOne(), getPackageDto.getPackageDetails().getImageOne());
-        assertEquals(packageEntity.getPackageDetails().getImageTwo(), getPackageDto.getPackageDetails().getImageTwo());
-        assertEquals(packageEntity.getPackageDetails().getImageThree(), getPackageDto.getPackageDetails().getImageThree());
-        assertEquals(packageEntity.getPackageDetails().getDescription(), getPackageDto.getPackageDetails().getDescription());
-        assertEquals(packageEntity.getPackageDetails().getRoadmaps(), getPackageDto.getRoadmaps());
-        assertEquals(packageEntity.getPackageDetails().getBenefits(), getPackageDto.getBenefits());
-    }
-
-    @Test
-    void editPackageDetails() {
-        // given
-        int packageDetailsId = 1;
-        EditPackageDetailsDto editPackageDetailsDto = new EditPackageDetailsDto(
-                new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", new byte[0]),
-                new MockMultipartFile("imageTwo", "imageTwo.jpg", "image/jpeg", new byte[0]),
-                new MockMultipartFile("imageThree", "imageThree.jpg", "image/jpeg", new byte[0]),
-                "testDesc"
-        );
-
-        PackageDetailsEntity packageDetailsEntity = new PackageDetailsEntity();
-        packageDetailsEntity.setId(packageDetailsId);
-        packageDetailsEntity.setImageOne("testImageOne");
-        packageDetailsEntity.setImageTwo("testImageTwo");
-        packageDetailsEntity.setImageThree("testImageThree");
-        packageDetailsEntity.setDescription("testDesc");
-
-        // behavior
-        when(packageDetailsUtils.findById(packageDetailsId)).thenReturn(packageDetailsEntity);
-        when(packageDetailsUtils.checkHelper(editPackageDetailsDto)).thenReturn(true);
-        when(s3Service.uploadFile(editPackageDetailsDto.getImageOne())).thenReturn("imageOne");
-        when(s3Service.uploadFile(editPackageDetailsDto.getImageTwo())).thenReturn("imageTwo");
-        when(s3Service.uploadFile(editPackageDetailsDto.getImageThree())).thenReturn("imageThree");
-
-        doAnswer(invocation -> {
-            PackageDetailsEntity entity = invocation.getArgument(0);
-            EditPackageDetailsDto dto = invocation.getArgument(1);
-
-            entity.setImageOne(s3Service.uploadFile(dto.getImageOne()));
-            entity.setImageTwo(s3Service.uploadFile(dto.getImageTwo()));
-            entity.setImageThree(s3Service.uploadFile(dto.getImageThree()));
-            entity.setDescription(dto.getDescription());
-
-            return null;
-        }).when(packageDetailsUtils).editHelper(any(PackageDetailsEntity.class), any(EditPackageDetailsDto.class));
+        when(packageRepository.findById(packageId)).thenReturn(Optional.of(packageEntity));
 
         // when
-        ResponseEntity<?> response = packageDetailsService.editPackageDetails(packageDetailsId, editPackageDetailsDto);
+        ResponseEntity<GetPackageANDPackageDetailsDto> response = packageDetailsService.getSinglePackageDetails(packageId);
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("imageOne", packageDetailsEntity.getImageOne());
-        assertEquals("imageTwo", packageDetailsEntity.getImageTwo());
-        assertEquals("imageThree", packageDetailsEntity.getImageThree());
-        assertEquals("testDesc", packageDetailsEntity.getDescription());
+        assertNotNull(response.getBody());
+        assertEquals(packageId, response.getBody().getId());
+        assertEquals("Test Package", response.getBody().getPackageName());
+        assertEquals(100.0, response.getBody().getPrice());
+        assertEquals(4, response.getBody().getRate());
+        assertEquals("mainImage.jpg", response.getBody().getMainImage());
+        assertEquals("imageOne.jpg", response.getBody().getImageOne());
+        assertEquals("imageTwo.jpg", response.getBody().getImageTwo());
+        assertEquals("imageThree.jpg", response.getBody().getImageThree());
+        assertEquals("Package description", response.getBody().getDescription());
+
+        verify(packageRepository, times(1)).findById(packageId);
+    }
+
+
+    @Test
+    void editPackageDetails_ShouldUpdateAllFields_WhenAllFieldsAreProvided() {
+        // given
+        int packageId = 1;
+        MockMultipartFile imageOne = new MockMultipartFile("imageOne", "imageOne.jpg", "image/jpeg", "random-image-content-1".getBytes());
+        MockMultipartFile imageTwo = new MockMultipartFile("imageTwo", "imageTwo.jpg", "image/jpeg", "random-image-content-2".getBytes());
+        MockMultipartFile imageThree = new MockMultipartFile("imageThree", "imageThree.jpg", "image/jpeg", "random-image-content-3".getBytes());
+
+        EditPackageDetailsDto editPackageDetailsDto = new EditPackageDetailsDto(
+                imageOne,
+                imageTwo,
+                imageThree,
+                "New Description"
+        );
+
+        PackageDetailsEntity packageDetails = new PackageDetailsEntity();
+        packageDetails.setImageOne("oldImageOne.jpg");
+        packageDetails.setImageTwo("oldImageTwo.jpg");
+        packageDetails.setImageThree("oldImageThree.jpg");
+        packageDetails.setDescription("Old Description");
+
+        PackageEntity packageEntity = new PackageEntity();
+        packageEntity.setPackageDetails(packageDetails);
+
+        //behavior
+        when(packageRepository.findById(packageId)).thenReturn(Optional.of(packageEntity));
+        when(s3Service.uploadFile(imageOne)).thenReturn("uploadedImageOne.jpg");
+        when(s3Service.uploadFile(imageTwo)).thenReturn("uploadedImageTwo.jpg");
+        when(s3Service.uploadFile(imageThree)).thenReturn("uploadedImageThree.jpg");
+
+        // when
+        ResponseEntity<String> response = packageDetailsService.editPackageDetails(packageId, editPackageDetailsDto);
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("uploadedImageOne.jpg"));
+        assertTrue(response.getBody().contains("uploadedImageTwo.jpg"));
+        assertTrue(response.getBody().contains("uploadedImageThree.jpg"));
+        assertTrue(response.getBody().contains("New Description"));
+
+        verify(s3Service).deleteFile("oldImageOne.jpg");
+        verify(s3Service).deleteFile("oldImageTwo.jpg");
+        verify(s3Service).deleteFile("oldImageThree.jpg");
+        verify(packageRepository, times(1)).save(packageEntity);
+    }
+
+    @Test
+    void editPackageDetails_ShouldReturnBadRequest_WhenSentEmptyData() {
+        // given
+        int packageId = 1;
+        EditPackageDetailsDto editPackageDetailsDto = new EditPackageDetailsDto(); // All fields are null
+
+        // when
+        ResponseEntity<String> response = packageDetailsService.editPackageDetails(packageId, editPackageDetailsDto);
+
+        // then
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("you sent an empty data to change", response.getBody());
+        verify(packageRepository, never()).save(any()); // Ensure save is never called
+        verify(s3Service, never()).deleteFile(anyString()); // Ensure no file deletion
     }
 }

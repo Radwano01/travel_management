@@ -1,97 +1,99 @@
 package com.hackathon.backend.services.hotel.hotelFeatures;
 
+import com.hackathon.backend.dto.hotelDto.features.HotelFeatureDto;
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
-import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
-import com.hackathon.backend.utilities.hotel.features.HotelFeaturesUtils;
+import com.hackathon.backend.repositories.hotel.RoomDetailsRepository;
+import com.hackathon.backend.repositories.hotel.hotelFeatures.HotelFeaturesRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.hackathon.backend.libs.MyLib.checkIfSentEmptyData;
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class HotelFeaturesService {
 
-    private final RoomDetailsUtils roomDetailsUtils;
-    private final HotelFeaturesUtils hotelFeaturesUtils;
+    private final HotelFeaturesRepository hotelFeaturesRepository;
+    private final RoomDetailsRepository roomDetailsRepository;
 
     @Autowired
-    public HotelFeaturesService(RoomDetailsUtils roomDetailsUtils,
-                                HotelFeaturesUtils hotelFeaturesUtils){
-        this.roomDetailsUtils = roomDetailsUtils;
-        this.hotelFeaturesUtils = hotelFeaturesUtils;
+    public HotelFeaturesService(HotelFeaturesRepository hotelFeaturesRepository,
+                                RoomDetailsRepository roomDetailsRepository){
+        this.hotelFeaturesRepository = hotelFeaturesRepository;
+        this.roomDetailsRepository = roomDetailsRepository;
     }
 
     //hotel features
     //note: create feature without connecting it with hotels details
     // because there is many to many with join table
 
-    public ResponseEntity<String> createHotelFeature(String hotelFeature) {
-        try{
-            String feature = hotelFeature.trim();
-            boolean existsHotelFeature = hotelFeaturesUtils.existsHotelFeatureByHotelFeatures(feature);
-            if(existsHotelFeature){
-                return alreadyValidException("Hotel Feature already exists");
-            }
-            HotelFeaturesEntity hotelFeatures = new HotelFeaturesEntity(
-                    feature
-            );
-            hotelFeaturesUtils.save(hotelFeatures);
-            return ResponseEntity.ok("Hotel feature created successfully");
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        }catch (Exception e){
-            return serverErrorException(e);
+    public ResponseEntity<String> createHotelFeature(HotelFeatureDto hotelFeatureDto) {
+        String feature = hotelFeatureDto.getHotelFeature().trim();
+
+        ResponseEntity<String> checkResult = checkIfFeatureAlreadyExist(feature);
+        if(!checkResult.getStatusCode().equals(HttpStatus.OK)){
+            return checkResult;
         }
+
+        hotelFeaturesRepository.save(new HotelFeaturesEntity(feature));
+
+        return ResponseEntity.ok("Hotel feature created successfully " + feature);
     }
 
-    public ResponseEntity<?> getHotelFeatures() {
-        try{
-            List<HotelFeaturesEntity> hotelFeatures = hotelFeaturesUtils.findAll();
-            return ResponseEntity.ok(hotelFeatures);
-        }catch (Exception e){
-            return serverErrorException(e);
-        }
+    public ResponseEntity<List<HotelFeaturesEntity>> getHotelFeatures() {
+        return ResponseEntity.ok(hotelFeaturesRepository.findAll());
     }
 
     @Transactional
-    public ResponseEntity<String> editHotelFeature(int featureId,
-                                              String hotelFeature){
-        try{
-            if(hotelFeature == null){
-                return badRequestException("you sent an empty data to change");
-            }
-            HotelFeaturesEntity hotelFeatures = hotelFeaturesUtils.findById(featureId);
-            hotelFeatures.setHotelFeatures(hotelFeature);
-            hotelFeaturesUtils.save(hotelFeatures);
-            return ResponseEntity.ok("Hotel Feature edited successfully");
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        } catch (Exception e){
-            return serverErrorException(e);
+    public ResponseEntity<String> editHotelFeature(int featureId, HotelFeatureDto hotelFeatureDto){
+        if(!checkIfSentEmptyData(hotelFeatureDto)){
+            return badRequestException("you sent an empty data to change");
         }
+
+        String hotelFeature = hotelFeatureDto.getHotelFeature().trim();
+
+        HotelFeaturesEntity hotelFeatures = findHotelFeatureById(featureId);
+
+        hotelFeatures.setHotelFeatures(hotelFeature);
+
+        hotelFeaturesRepository.save(hotelFeatures);
+
+        return ResponseEntity.ok("Hotel Feature edited successfully " + hotelFeature);
+    }
+
+
+    private ResponseEntity<String> checkIfFeatureAlreadyExist(String feature){
+        boolean existsHotelFeature = hotelFeaturesRepository.existsHotelFeatureByHotelFeatures(feature);
+
+        if(existsHotelFeature){
+            return alreadyValidException("Hotel Feature already exists");
+        }
+        return ResponseEntity.ok("OK");
     }
 
     @Transactional
     public ResponseEntity<String> deleteHotelFeature(int featureId) {
-        try {
-            HotelFeaturesEntity hotelFeatures = hotelFeaturesUtils.findById(featureId);
-            for (RoomDetailsEntity roomDetails : hotelFeatures.getRoomDetails()) {
-                roomDetails.getHotelFeatures().remove(hotelFeatures);
-                roomDetailsUtils.save(roomDetails);
-            }
-            hotelFeaturesUtils.delete(hotelFeatures);
-            return ResponseEntity.ok("Hotel feature deleted successfully");
+        HotelFeaturesEntity hotelFeatures = findHotelFeatureById(featureId);
 
-        } catch (EntityNotFoundException e) {
-            return notFoundException(e);
-        } catch (Exception e) {
-            return serverErrorException(e);
+        for (RoomDetailsEntity roomDetails : hotelFeatures.getRoomDetails()) {
+            roomDetails.getHotelFeatures().remove(hotelFeatures);
+            roomDetailsRepository.save(roomDetails);
         }
+
+        hotelFeaturesRepository.delete(hotelFeatures);
+
+        return ResponseEntity.ok("Hotel feature deleted successfully");
+    }
+
+    private HotelFeaturesEntity findHotelFeatureById(int featureId){
+        return hotelFeaturesRepository.findById(featureId)
+                .orElseThrow(() -> new EntityNotFoundException("No such feature has this id"));
     }
 }

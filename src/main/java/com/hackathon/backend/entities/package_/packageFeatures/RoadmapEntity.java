@@ -1,8 +1,6 @@
 package com.hackathon.backend.entities.package_.packageFeatures;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
-import com.hackathon.backend.entities.package_.PackageEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,11 +9,11 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "roadmaps")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "roadmaps")
 public class RoadmapEntity {
 
     @Id
@@ -23,7 +21,6 @@ public class RoadmapEntity {
     private int id;
     private String roadmap;
 
-    @JsonIgnore
     @ManyToMany(mappedBy = "roadmaps", fetch = FetchType.LAZY)
     private List<PackageDetailsEntity> packageDetails = new ArrayList<>();
 

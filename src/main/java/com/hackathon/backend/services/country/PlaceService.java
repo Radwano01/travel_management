@@ -1,24 +1,17 @@
 package com.hackathon.backend.services.country;
 
+import com.hackathon.backend.dto.countryDto.placeDto.CreatePlaceDto;
 import com.hackathon.backend.dto.countryDto.placeDto.EditPlaceDto;
 import com.hackathon.backend.dto.countryDto.placeDto.GetEssentialPlaceDto;
 import com.hackathon.backend.dto.countryDto.placeDto.GetPlaceForFlightDto;
-import com.hackathon.backend.dto.countryDto.placeDto.PostPlaceDto;
 import com.hackathon.backend.entities.country.CountryEntity;
 import com.hackathon.backend.entities.country.PlaceDetailsEntity;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.hotel.HotelEntity;
-import com.hackathon.backend.entities.hotel.HotelEvaluationEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
-import com.hackathon.backend.entities.hotel.RoomEntity;
-import com.hackathon.backend.utilities.amazonServices.S3Service;
-import com.hackathon.backend.utilities.country.CountryUtils;
-import com.hackathon.backend.utilities.country.PlaceDetailsUtils;
-import com.hackathon.backend.utilities.country.PlaceUtils;
-import com.hackathon.backend.utilities.hotel.HotelEvaluationUtils;
-import com.hackathon.backend.utilities.hotel.HotelUtils;
-import com.hackathon.backend.utilities.hotel.RoomDetailsUtils;
-import com.hackathon.backend.utilities.hotel.RoomUtils;
+import com.hackathon.backend.repositories.country.CountryRepository;
+import com.hackathon.backend.repositories.country.PlaceRepository;
+import com.hackathon.backend.utilities.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,194 +21,151 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
-import java.util.Optional;
 
+import static com.hackathon.backend.libs.MyLib.checkIfSentEmptyData;
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
 @Service
 public class PlaceService{
 
-    private final CountryUtils countryUtils;
-    private final PlaceUtils placeUtils;
-    private final PlaceDetailsUtils placeDetailsUtils;
+    private final CountryRepository countryRepository;
+    private final PlaceRepository placeRepository;
     private final S3Service s3Service;
-    private final HotelUtils hotelUtils;
-    private final RoomDetailsUtils roomDetailsUtils;
-    private final HotelEvaluationUtils hotelEvaluationUtils;
-    private final RoomUtils roomUtils;
 
     @Autowired
-    public PlaceService(CountryUtils countryUtils,
-                        PlaceUtils placeUtils,
-                        PlaceDetailsUtils placeDetailsUtils,
-                        S3Service s3Service, HotelUtils hotelUtils,
-                        RoomDetailsUtils roomDetailsUtils,
-                        HotelEvaluationUtils hotelEvaluationUtils,
-                        RoomUtils roomUtils) {
-        this.countryUtils = countryUtils;
-        this.placeUtils = placeUtils;
-        this.placeDetailsUtils = placeDetailsUtils;
+    public PlaceService(CountryRepository countryRepository,
+                        PlaceRepository placeRepository,
+                        S3Service s3Service) {
+        this.countryRepository = countryRepository;
+        this.placeRepository = placeRepository;
         this.s3Service = s3Service;
-        this.hotelUtils = hotelUtils;
-        this.roomDetailsUtils = roomDetailsUtils;
-        this.hotelEvaluationUtils = hotelEvaluationUtils;
-        this.roomUtils = roomUtils;
     }
 
-    public ResponseEntity<String> createPlace(int countryId, @NonNull PostPlaceDto postPlaceDto) {
-        try {
-            CountryEntity country = countryUtils.findCountryById(countryId);
+    @Transactional
+    public ResponseEntity<String> createPlace(int countryId, @NonNull CreatePlaceDto createPlaceDto) {
+        CountryEntity country = getCountryById(countryId);
 
-            String placeImageName = s3Service.uploadFile(postPlaceDto.getMainImage());
+        PlaceEntity place = savePlaceInCountry(createPlaceDto, country);
 
-            PlaceEntity place = new PlaceEntity(
-                    postPlaceDto.getPlace(),
-                    placeImageName,
-                    country
-            );
-            placeUtils.save(place);
+        prepareANDSetPlaceDetails(createPlaceDto, place);
 
-            String placeDetailsImageNameOne = s3Service.uploadFile(postPlaceDto.getImageOne());
-            String placeDetailsImageNameTwo = s3Service.uploadFile(postPlaceDto.getImageTwo());
-            String placeDetailsImageNameThree = s3Service.uploadFile(postPlaceDto.getImageThree());
+        countryRepository.save(country);
 
-            PlaceDetailsEntity placeDetails = new PlaceDetailsEntity(
-                    placeDetailsImageNameOne,
-                    placeDetailsImageNameTwo,
-                    placeDetailsImageNameThree,
-                    postPlaceDto.getDescription(),
-                    place
-            );
+        return ResponseEntity.ok(place.toString());
+    }
 
-            placeDetailsUtils.save(placeDetails);
-            place.setPlaceDetails(placeDetails);
+    private PlaceEntity savePlaceInCountry(CreatePlaceDto createPlaceDto, CountryEntity country){
+        String placeImageName = s3Service.uploadFile(createPlaceDto.getMainImage());
 
-            placeUtils.save(place);
+        PlaceEntity place = new PlaceEntity(
+                createPlaceDto.getPlace(),
+                placeImageName,
+                country
+        );
 
-            country.getPlaces().add(place);
-            countryUtils.save(country);
+        country.getPlaces().add(place);
 
-            return ResponseEntity.ok("Place created successfully");
-        } catch (EntityNotFoundException e) {
-            return notFoundException(e);
-        } catch (Exception e) {
-            return serverErrorException(e);
+        return place;
+    }
+
+    private void prepareANDSetPlaceDetails(CreatePlaceDto createPlaceDto, PlaceEntity place){
+        String placeDetailsImageNameOne = s3Service.uploadFile(createPlaceDto.getImageOne());
+        String placeDetailsImageNameTwo = s3Service.uploadFile(createPlaceDto.getImageTwo());
+        String placeDetailsImageNameThree = s3Service.uploadFile(createPlaceDto.getImageThree());
+
+        PlaceDetailsEntity placeDetails = new PlaceDetailsEntity(
+                placeDetailsImageNameOne,
+                placeDetailsImageNameTwo,
+                placeDetailsImageNameThree,
+                createPlaceDto.getDescription(),
+                place
+        );
+
+        place.setPlaceDetails(placeDetails);
+    }
+
+    private CountryEntity getCountryById(int countryId){
+        return countryRepository.findById(countryId)
+                .orElseThrow(()-> new EntityNotFoundException("No such country has this id."));
+    }
+
+    public ResponseEntity<List<GetEssentialPlaceDto>> getAllPlacesByCountryId(int countryId){
+           return ResponseEntity.ok(countryRepository.findEssentialPlacesDataByCountryId(countryId));
+    }
+
+    public ResponseEntity<List<GetPlaceForFlightDto>> getPlaceByPlace(String place){
+        return ResponseEntity.ok(placeRepository.findPlaceByPlace(place));
+    }
+
+    @Transactional
+    public ResponseEntity<String> editPlace(int countryId, int placeId, EditPlaceDto editPlaceDto) {
+        if(!checkIfSentEmptyData(editPlaceDto)){
+            return badRequestException("you sent an empty data to change");
         }
+
+        CountryEntity country = getCountryById(countryId);
+
+        PlaceEntity place = getPlaceByCountryIdANDPlaceId(countryId, placeId);
+
+        updateToNewData(place, editPlaceDto);
+
+        countryRepository.save(country);
+
+        return ResponseEntity.ok(place.toString());
     }
 
-    public ResponseEntity<?> getPlacesByCountryId(int countryId){
-        try{
-            List<GetEssentialPlaceDto> places = placeUtils.findPlacesByCountryId(countryId);
-            return ResponseEntity.ok(places);
-        }catch(EntityNotFoundException e){
-            return notFoundException(e);
-        }catch(Exception e){
-            return serverErrorException(e);
+    private PlaceEntity getPlaceByCountryIdANDPlaceId(int countryId, int placeId) {
+        return countryRepository.findPlaceByCountryIdANDPlaceId(countryId, placeId)
+                .orElseThrow(()-> new EntityNotFoundException("Place id not found"));
+    }
+
+    private void updateToNewData(PlaceEntity place, EditPlaceDto editPlaceDto) {
+        if(editPlaceDto.getPlace() != null){
+            place.setPlace(editPlaceDto.getPlace());
         }
-    }
-
-    public ResponseEntity<?> getPlaceByPlace(String place){
-        try{
-            List<GetPlaceForFlightDto> places = placeUtils.findPlaceByPlace(place);
-            return ResponseEntity.ok(places);
-        }catch(EntityNotFoundException e){
-            return notFoundException(e);
-        }catch(Exception e){
-            return serverErrorException(e);
+        if(editPlaceDto.getMainImage() != null){
+            s3Service.deleteFile(place.getMainImage());
+            String placeMainImageName = s3Service.uploadFile(editPlaceDto.getMainImage());
+            place.setMainImage(placeMainImageName);
         }
     }
 
     @Transactional
-    public ResponseEntity<String> editPlace(int countryId,
-                                       int placeId,
-                                       EditPlaceDto editPlaceDto) {
-        try{
-            if(!placeUtils.checkHelper(editPlaceDto)){
-                return badRequestException("you sent an empty data to change");
+    public ResponseEntity<String> deletePlace(int countryId, int placeId) {
+        CountryEntity country = getCountryById(countryId);
+
+        PlaceEntity place = getPlaceByCountryIdANDPlaceId(countryId, placeId);
+
+        deleteHotelANDRoomDetailsImages(place);
+
+        deletePlaceANDPlaceDetailsImages(place);
+
+        countryRepository.save(country);
+
+        return ResponseEntity.ok("Place deleted successfully");
+    }
+
+
+    private void deleteHotelANDRoomDetailsImages(PlaceEntity place){
+        if(place.getHotels() != null) {
+            for (HotelEntity hotel : place.getHotels()) {
+                RoomDetailsEntity roomDetails = hotel.getRoomDetails();
+
+                s3Service.deleteFile(hotel.getMainImage());
+
+                s3Service.deleteFile(roomDetails.getImageOne());
+                s3Service.deleteFile(roomDetails.getImageTwo());
+                s3Service.deleteFile(roomDetails.getImageThree());
+                s3Service.deleteFile(roomDetails.getImageFour());
             }
-            CountryEntity country = countryUtils.findCountryById(countryId);
-            Optional<PlaceEntity> place = country.getPlaces().stream()
-                    .filter((data)-> data.getId() == placeId).findFirst();
-            if(place.isPresent()) {
-                placeUtils.editHelper(place.get(), editPlaceDto);
-                placeUtils.save(place.get());
-                countryUtils.save(country);
-                return ResponseEntity.ok("Place updated successfully");
-            }else{
-                return notFoundException("Place not found in country data");
-            }
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        }catch (Exception e){
-            return serverErrorException(e);
         }
     }
 
-    @Transactional
-    public ResponseEntity<String> deletePlace(int countryId,
-                                         int placeId) {
-        try{
-            CountryEntity country = countryUtils.findCountryById(countryId);
-            Optional<PlaceEntity> place = country.getPlaces().stream()
-                    .filter((data)-> data.getId() == placeId).findFirst();
+    private void deletePlaceANDPlaceDetailsImages(PlaceEntity place){
+        s3Service.deleteFile(place.getMainImage());
 
-
-
-            if(place.isPresent()) {
-                if (place.get().getHotels() != null) {
-                    for (HotelEntity hotel : place.get().getHotels()) {
-                        RoomDetailsEntity roomDetails = hotel.getRoomDetails();
-
-                        if (roomDetails.getHotelFeatures() != null) {
-                            roomDetails.getHotelFeatures().clear();
-                        }
-
-                        if (roomDetails.getRoomFeatures() != null) {
-                            roomDetails.getRoomFeatures().clear();
-                        }
-                        s3Service.deleteFile(roomDetails.getImageOne());
-                        s3Service.deleteFile(roomDetails.getImageTwo());
-                        s3Service.deleteFile(roomDetails.getImageThree());
-                        s3Service.deleteFile(roomDetails.getImageFour());
-
-                        roomDetailsUtils.delete(roomDetails);
-
-                        List<HotelEvaluationEntity> hotelEvaluations = hotel.getEvaluations();
-                        if (hotelEvaluations != null) {
-                            for (HotelEvaluationEntity hotelEvaluation : hotelEvaluations) {
-                                hotelEvaluationUtils.delete(hotelEvaluation);
-                            }
-                        }
-                        if (hotel.getRooms() != null) {
-                            for (RoomEntity room : hotel.getRooms()) {
-                                roomUtils.delete(room);
-                            }
-                        }
-
-                        s3Service.deleteFile(hotel.getMainImage());
-                        hotelUtils.delete(hotel);
-                    }
-                }
-
-                if(place.get().getPlaceDetails() != null) {
-                    PlaceDetailsEntity placeDetails = place.get().getPlaceDetails();
-
-                    s3Service.deleteFile(placeDetails.getImageOne());
-                    s3Service.deleteFile(placeDetails.getImageTwo());
-                    s3Service.deleteFile(placeDetails.getImageThree());
-                    placeDetailsUtils.delete(placeDetails);
-                }
-                s3Service.deleteFile(place.get().getMainImage());
-                placeUtils.delete(place.get());
-                countryUtils.save(country);
-                return ResponseEntity.ok("Place deleted successfully");
-            }else{
-                return notFoundException("Place not found in country data");
-            }
-        }catch (EntityNotFoundException e){
-            return notFoundException(e);
-        }catch (Exception e){
-            return serverErrorException(e);
-        }
+        s3Service.deleteFile(place.getPlaceDetails().getImageOne());
+        s3Service.deleteFile(place.getPlaceDetails().getImageTwo());
+        s3Service.deleteFile(place.getPlaceDetails().getImageThree());
     }
 }

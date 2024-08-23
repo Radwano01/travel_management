@@ -1,120 +1,169 @@
 package com.hackathon.backend.plane.services;
 
-import com.hackathon.backend.dto.planeDto.EditPlaneDto;
 import com.hackathon.backend.dto.planeDto.AirPortDto;
 import com.hackathon.backend.dto.planeDto.GetAirPortDto;
 import com.hackathon.backend.entities.country.PlaceEntity;
 import com.hackathon.backend.entities.plane.AirPortEntity;
-
+import com.hackathon.backend.repositories.country.PlaceRepository;
 import com.hackathon.backend.services.plane.AirPortService;
-import com.hackathon.backend.utilities.country.PlaceUtils;
-import com.hackathon.backend.utilities.plane.AirPortsUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AirPortServiceTest {
+class AirPortServiceTest {
 
     @Mock
-    AirPortsUtils airPortsUtils;
-
-    @Mock
-    PlaceUtils placeUtils;
+    private PlaceRepository placeRepository;
 
     @InjectMocks
-    AirPortService airPortService;
-
-    AirPortDto airPortDto;
-    AirPortEntity airPortEntity;
-
-    @BeforeEach
-    void setUp() {
-        airPortDto = new AirPortDto();
-        airPortDto.setAirPortName("Test Airport");
-        airPortDto.setAirPortCode("TST");
-
-        PlaceEntity placeEntity = new PlaceEntity();
-        placeEntity.setId(1);
-        placeEntity.setPlace("Test Place");
-        placeUtils.save(placeEntity);
-
-        airPortEntity = new AirPortEntity("Test Airport", "TST", placeEntity);
-    }
-
-    @AfterEach
-    void tearDown(){
-        airPortsUtils.deleteAll();
-        placeUtils.deleteAll();
-    }
+    private AirPortService airPortService;
 
     @Test
-    void createAirPort() {
-        //given
+    void createAirPort_ShouldReturnSuccess_WhenAirPortIsCreated() {
+        // given
+        int placeId = 1;
+        AirPortDto airPortDto = new AirPortDto();
+        airPortDto.setAirPortName("JFK");
+        airPortDto.setAirPortCode("JFK001");
         PlaceEntity place = new PlaceEntity();
-        place.setId(1);
+        place.setAirPorts(new ArrayList<>());
 
-        //behavior
-        when(placeUtils.findById(1)).thenReturn(place);
-        when(airPortsUtils.existsAirPortByAirPort(anyString())).thenReturn(false);
+        // behavior
+        when(placeRepository.findById(placeId)).thenReturn(Optional.of(place));
+        when(placeRepository.save(any(PlaceEntity.class))).thenReturn(place);
 
-        //when
-        ResponseEntity<?> response = airPortService.createAirPort(1, airPortDto);
+        // when
+        ResponseEntity<String> response = airPortService.createAirPort(placeId, airPortDto);
 
-        //then
-        assertEquals(ResponseEntity.ok("AirPort created successfully"), response);
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("AirPort created successfully", response.getBody());
+        assertEquals(1, place.getAirPorts().size());
+        assertEquals("JFK", place.getAirPorts().get(0).getAirPortName());
     }
 
     @Test
-    void getAirPortsByPlaceId(){
-        List<GetAirPortDto> mockAirPortDtos = Arrays.asList(
-                new GetAirPortDto(1, "Airport 1", "AP1"),
-                new GetAirPortDto(1, "Airport 2", "AP2")
-        );
+    void createAirPort_ShouldReturnBadRequest_WhenAirPortNameAlreadyExists() {
+        // given
+        int placeId = 1;
+        AirPortDto airPortDto = new AirPortDto();
+        airPortDto.setAirPortName("JFK");
+        airPortDto.setAirPortCode("JFK002");
+        PlaceEntity place = new PlaceEntity();
+        AirPortEntity existingAirPort = new AirPortEntity("JFK", "JFK002", place);
+        place.setAirPorts(List.of(existingAirPort));
 
-        when(airPortsUtils.findByPlaceId(anyInt())).thenReturn(mockAirPortDtos);
+        // behavior
+        when(placeRepository.findById(placeId)).thenReturn(Optional.of(place));
 
-        ResponseEntity<?> response = airPortService.getAirPortsByPlaceId(1);
+        // when
+        ResponseEntity<String> response = airPortService.createAirPort(placeId, airPortDto);
 
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(mockAirPortDtos, response.getBody());
+        // then
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody().contains("airport name already exist"));
     }
 
     @Test
-    void editAirPort() {
-        //behavior
-        when(airPortsUtils.findById(anyLong())).thenReturn(airPortEntity);
-        when(airPortsUtils.checkHelper(any(AirPortDto.class))).thenReturn(true);
+    void getAirPortsByPlaceId_ShouldReturnListOfAirPorts() {
+        // given
+        int placeId = 1;
+        List<GetAirPortDto> airPortDtos = new ArrayList<>();
+        GetAirPortDto airPortDto = new GetAirPortDto();
+        airPortDtos.add(airPortDto);
 
-        //when
-        ResponseEntity<?> response = airPortService.editAirPort(1L, airPortDto);
+        // behavior
+        when(placeRepository.findAllAirportsByPlaceId(placeId)).thenReturn(airPortDtos);
 
-        //then
-        assertEquals(ResponseEntity.ok("AirPort edited successfully"), response);
+        // when
+        ResponseEntity<List<GetAirPortDto>> response = airPortService.getAirPortsByPlaceId(placeId);
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(airPortDtos, response.getBody());
     }
 
     @Test
-    void deleteAirPort() {
-        //given
-        doNothing().when(airPortsUtils).deleteById(anyLong());
+    void editAirPort_ShouldReturnUpdatedAirPortDetails() {
+        // given
+        int placeId = 1;
+        long airPortId = 1L;
+        AirPortDto airPortDto = new AirPortDto();
+        airPortDto.setAirPortName("New JFK");
+        airPortDto.setAirPortCode("JFK003");
+        PlaceEntity place = new PlaceEntity();
+        AirPortEntity airPortEntity = new AirPortEntity("JFK", "JFK001", place);
+        airPortEntity.setId(airPortId);
+        place.setAirPorts(List.of(airPortEntity));
 
-        //when
-        ResponseEntity<?> response = airPortService.deleteAirPort(1L);
+        // behavior
+        when(placeRepository.findById(placeId)).thenReturn(Optional.of(place));
+        when(placeRepository.save(any(PlaceEntity.class))).thenReturn(place);
 
-        //then
-        assertEquals(ResponseEntity.ok("AirPort deleted successfully"), response);
-        verify(airPortsUtils, times(1)).deleteById(anyLong());
+        // when
+        ResponseEntity<String> response = airPortService.editAirPort(placeId, airPortId, airPortDto);
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("New JFK"));
+        assertEquals("New JFK", airPortEntity.getAirPortName());
+        assertEquals("JFK003", airPortEntity.getAirPortCode());
+    }
+
+    @Test
+    void editAirPort_ShouldReturnBadRequest_WhenNoDataIsSent() {
+        // given
+        int placeId = 1;
+        long airPortId = 1L;
+        AirPortDto airPortDto = new AirPortDto();
+        PlaceEntity place = new PlaceEntity();
+        AirPortEntity airPortEntity = new AirPortEntity("JFK", "JFK001", place);
+        airPortEntity.setId(airPortId);
+        place.setAirPorts(List.of(airPortEntity));
+
+        // when
+        ResponseEntity<String> response = airPortService.editAirPort(placeId, airPortId, airPortDto);
+
+        // then
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody().contains("you sent an empty data to change"));
+    }
+
+    @Test
+    void deleteAirPort_ShouldReturnSuccess_WhenAirPortIsDeleted() {
+        // given
+        int placeId = 1;
+        long airPortId = 1L;
+        PlaceEntity place = new PlaceEntity();
+        AirPortEntity airPortEntity = new AirPortEntity("JFK", "JFK001", place);
+        airPortEntity.setId(airPortId);
+
+        // Use ArrayList instead of List.of
+        List<AirPortEntity> airPorts = new ArrayList<>();
+        airPorts.add(airPortEntity);
+        place.setAirPorts(airPorts);
+
+        // behavior
+        when(placeRepository.findById(placeId)).thenReturn(Optional.of(place));
+
+        // when
+        ResponseEntity<String> response = airPortService.deleteAirPort(placeId, airPortId);
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("AirPort deleted successfully", response.getBody());
+        assertTrue(place.getAirPorts().isEmpty()); // Verify that the airport has been removed
     }
 }
