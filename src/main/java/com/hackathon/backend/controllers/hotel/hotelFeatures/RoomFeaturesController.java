@@ -1,7 +1,7 @@
 package com.hackathon.backend.controllers.hotel.hotelFeatures;
 
 import com.hackathon.backend.dto.hotelDto.features.RoomFeatureDto;
-import com.hackathon.backend.services.hotel.hotelFeatures.RoomFeaturesService;
+import com.hackathon.backend.services.hotel.hotelFeatures.impl.RoomFeaturesServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,17 +14,17 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RequestMapping(path = "${BASE_API}")
 public class RoomFeaturesController {
 
-    private final RoomFeaturesService roomFeaturesService;
+    private final RoomFeaturesServiceImpl roomFeaturesServiceImpl;
 
     @Autowired
-    private RoomFeaturesController(RoomFeaturesService roomFeaturesService){
-        this.roomFeaturesService = roomFeaturesService;
+    private RoomFeaturesController(RoomFeaturesServiceImpl roomFeaturesServiceImpl){
+        this.roomFeaturesServiceImpl = roomFeaturesServiceImpl;
     }
 
     @PostMapping(path = "${CREATE_ROOM_FEATURE_PATH}")
     public ResponseEntity<String> createRoomFeature(@RequestBody RoomFeatureDto roomFeatureDto){
         try {
-            return roomFeaturesService.createRoomFeature(roomFeatureDto);
+            return roomFeaturesServiceImpl.createRoomFeature(roomFeatureDto);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){
@@ -35,7 +35,7 @@ public class RoomFeaturesController {
     @GetMapping(path = "${GET_ROOM_FEATURES_PATH}")
     public ResponseEntity<?> getRoomFeatures(){
         try {
-            return roomFeaturesService.getRoomFeatures();
+            return roomFeaturesServiceImpl.getRoomFeatures();
         }catch (Exception e){
             return serverErrorException(e);
         }
@@ -45,7 +45,7 @@ public class RoomFeaturesController {
     public ResponseEntity<String> editRoomFeature(@PathVariable("featureId") int featureId,
                                                   @RequestBody RoomFeatureDto roomFeatureDto){
         try {
-            return roomFeaturesService.editRoomFeature(featureId, roomFeatureDto);
+            return roomFeaturesServiceImpl.editRoomFeature(featureId, roomFeatureDto);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){
@@ -56,7 +56,7 @@ public class RoomFeaturesController {
     @DeleteMapping(path = "${DELETE_ROOM_FEATURE_PATH}")
     public ResponseEntity<String> deleteRoomFeature(@PathVariable("featureId") int featureId){
         try {
-            return roomFeaturesService.deleteRoomFeature(featureId);
+            return roomFeaturesServiceImpl.deleteRoomFeature(featureId);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){

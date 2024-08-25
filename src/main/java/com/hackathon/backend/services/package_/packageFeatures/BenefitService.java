@@ -1,97 +1,19 @@
 package com.hackathon.backend.services.package_.packageFeatures;
 
-
 import com.hackathon.backend.dto.packageDto.features.CreateBenefitDto;
 import com.hackathon.backend.dto.packageDto.features.EditBenefitDto;
 import com.hackathon.backend.dto.packageDto.features.GetBenefitDto;
-import com.hackathon.backend.entities.package_.PackageDetailsEntity;
-import com.hackathon.backend.entities.package_.packageFeatures.BenefitEntity;
-import com.hackathon.backend.repositories.package_.PackageDetailsRepository;
-import com.hackathon.backend.repositories.package_.packageFeatures.BenefitRepository;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.hackathon.backend.libs.MyLib.checkIfSentEmptyData;
-import static com.hackathon.backend.utilities.ErrorUtils.*;
+public interface BenefitService {
 
-@Service
-public class BenefitService{
+    ResponseEntity<String> createBenefit(CreateBenefitDto createBenefitDto);
 
-    private final BenefitRepository benefitRepository;
-    private final PackageDetailsRepository packageDetailsRepository;
+    ResponseEntity<List<GetBenefitDto>> getBenefits();
 
-    @Autowired
-    public BenefitService(BenefitRepository benefitRepository,
-                          PackageDetailsRepository packageDetailsRepository){
-        this.benefitRepository = benefitRepository;
-        this.packageDetailsRepository = packageDetailsRepository;
-    }
+    ResponseEntity<String> editBenefit(int benefitId, EditBenefitDto editBenefitDto);
 
-    public ResponseEntity<String> createBenefit(CreateBenefitDto createBenefitDto){
-        String benefit = createBenefitDto.getBenefit().trim();
-
-        ResponseEntity<String> checkResult = checkIfBenefitAlreadyExist(benefit);
-        if(!checkResult.getStatusCode().equals(HttpStatus.OK)){
-            return checkResult;
-        }
-
-        benefitRepository.save(new BenefitEntity(benefit));
-
-        return ResponseEntity.ok("Benefit created successfully" + benefit);
-    }
-
-    private ResponseEntity<String> checkIfBenefitAlreadyExist(String benefit){
-        boolean existsBenefit = benefitRepository.existsBenefitByBenefit(benefit);
-
-        if(existsBenefit){
-            return alreadyValidException("Hotel Feature already exists");
-        }
-        return ResponseEntity.ok("OK");
-    }
-
-    public ResponseEntity<List<GetBenefitDto>> getBenefits(){
-        return ResponseEntity.ok(benefitRepository.findAllBenefits());
-    }
-
-    @Transactional
-    public ResponseEntity<String> editBenefit(int benefitId, EditBenefitDto editBenefitDto){
-        if(!checkIfSentEmptyData(editBenefitDto)){
-            return badRequestException("you sent an empty data to change");
-        }
-
-        String benefit = editBenefitDto.getBenefit().trim();
-
-        BenefitEntity benefitEntity = findBenefitById(benefitId);
-
-        benefitEntity.setBenefit(benefit);
-
-        benefitRepository.save(benefitEntity);
-
-        return ResponseEntity.ok("Benefit edit successfully" + benefit);
-    }
-
-    private BenefitEntity findBenefitById(int benefitId) {
-        return benefitRepository.findById(benefitId)
-                .orElseThrow(()-> new EntityNotFoundException("No such benefit has this id"));
-    }
-
-    @Transactional
-    public ResponseEntity<String> deleteBenefit(int benefitId) {
-        BenefitEntity benefitEntity = findBenefitById(benefitId);
-
-        for (PackageDetailsEntity packageDetails : benefitEntity.getPackageDetails()) {
-            packageDetails.getBenefits().remove(benefitEntity);
-            packageDetailsRepository.save(packageDetails);
-        }
-
-        benefitRepository.delete(benefitEntity);
-
-        return ResponseEntity.ok("Benefit deleted successfully");
-    }
+    ResponseEntity<String> deleteBenefit(int benefitId);
 }

@@ -1,6 +1,6 @@
 package com.hackathon.backend.controllers.package_.packageFeatures;
 
-import com.hackathon.backend.services.package_.packageFeatures.PackageRoadmapsRelationsService;
+import com.hackathon.backend.services.package_.packageFeatures.impl.PackageRoadmapsRelationsServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,18 +13,18 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RequestMapping(path = "${BASE_API}")
 public class RoadmapsRelationsController {
 
-    private final PackageRoadmapsRelationsService packageRoadmapsRelationsService;
+    private final PackageRoadmapsRelationsServiceImpl packageRoadmapsRelationsServiceImpl;
 
     @Autowired
-    public RoadmapsRelationsController(PackageRoadmapsRelationsService packageRoadmapsRelationsService){
-        this.packageRoadmapsRelationsService = packageRoadmapsRelationsService;
+    public RoadmapsRelationsController(PackageRoadmapsRelationsServiceImpl packageRoadmapsRelationsServiceImpl){
+        this.packageRoadmapsRelationsServiceImpl = packageRoadmapsRelationsServiceImpl;
     }
 
     @PostMapping(path = "${PACKAGE_ROADMAP_RELATIONS_PATH}")
     public ResponseEntity<String> addPackageRoadmap(@PathVariable("packageId") int packageId,
                                                     @PathVariable("roadmapId") int roadmapId){
         try {
-            return packageRoadmapsRelationsService.addPackageRoadmap(packageId, roadmapId);
+            return packageRoadmapsRelationsServiceImpl.addPackageRoadmap(packageId, roadmapId);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){
@@ -36,7 +36,7 @@ public class RoadmapsRelationsController {
     public ResponseEntity<String> removePackageRoadmap(@PathVariable("packageId") int packageId,
                                                   @PathVariable("roadmapId") int roadmapId){
         try {
-            return packageRoadmapsRelationsService.removePackageRoadmap(packageId, roadmapId);
+            return packageRoadmapsRelationsServiceImpl.removePackageRoadmap(packageId, roadmapId);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){

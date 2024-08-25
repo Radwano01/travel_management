@@ -2,7 +2,7 @@ package com.hackathon.backend.controllers.package_;
 
 import com.hackathon.backend.dto.packageDto.EditPackageEvaluationDto;
 import com.hackathon.backend.dto.packageDto.CreatePackageEvaluationDto;
-import com.hackathon.backend.services.package_.PackageEvaluationService;
+import com.hackathon.backend.services.package_.impl.PackageEvaluationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +17,11 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RequestMapping(path = "${BASE_API}")
 public class PackageEvaluationController {
 
-    private final PackageEvaluationService packageEvaluationService;
+    private final PackageEvaluationServiceImpl packageEvaluationServiceImpl;
 
     @Autowired
-    public PackageEvaluationController(PackageEvaluationService packageEvaluationService) {
-        this.packageEvaluationService = packageEvaluationService;
+    public PackageEvaluationController(PackageEvaluationServiceImpl packageEvaluationServiceImpl) {
+        this.packageEvaluationServiceImpl = packageEvaluationServiceImpl;
     }
 
     @PostMapping(path = "${ADD_PACKAGE_EVALUATION_PATH}")
@@ -29,7 +29,7 @@ public class PackageEvaluationController {
                                                            @PathVariable("userId") long userId,
                                                            @RequestBody CreatePackageEvaluationDto createPackageEvaluationDto){
         try {
-            return packageEvaluationService.addComment(packageId, userId, createPackageEvaluationDto);
+            return packageEvaluationServiceImpl.addComment(packageId, userId, createPackageEvaluationDto);
         }catch (EntityNotFoundException e) {
             return CompletableFuture.completedFuture(notFoundException(e));
         } catch (Exception e) {
@@ -40,7 +40,7 @@ public class PackageEvaluationController {
     @GetMapping(path = "${GET_PACKAGE_EVALUATION_PATH}")
     public CompletableFuture<ResponseEntity<?>> getComments(@PathVariable("packageId") int packageId){
         try {
-            return packageEvaluationService.getComments(packageId);
+            return packageEvaluationServiceImpl.getComments(packageId);
         }catch (EntityNotFoundException e) {
             return CompletableFuture.completedFuture(ResponseEntity.notFound().build());
         } catch (Exception e) {
@@ -53,7 +53,7 @@ public class PackageEvaluationController {
                                                             @PathVariable("commentId") long commentId,
                                                             @RequestBody EditPackageEvaluationDto editPackageEvaluationDto){
         try {
-            return packageEvaluationService.editComment(packageId, commentId, editPackageEvaluationDto);
+            return packageEvaluationServiceImpl.editComment(packageId, commentId, editPackageEvaluationDto);
         }catch (EntityNotFoundException e) {
             return CompletableFuture.completedFuture(notFoundException(e));
         } catch (Exception e) {
@@ -65,7 +65,7 @@ public class PackageEvaluationController {
     public CompletableFuture<ResponseEntity<?>> removeComment(@PathVariable("packageId") int packageId,
                                                               @PathVariable("commentId") long commentId){
         try {
-            return packageEvaluationService.removeComment(packageId, commentId);
+            return packageEvaluationServiceImpl.removeComment(packageId, commentId);
         }catch (EntityNotFoundException e) {
             return CompletableFuture.completedFuture(notFoundException(e));
         } catch (Exception e) {

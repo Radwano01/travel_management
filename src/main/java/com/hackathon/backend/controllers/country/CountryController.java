@@ -2,7 +2,7 @@ package com.hackathon.backend.controllers.country;
 
 import com.hackathon.backend.dto.countryDto.CreateCountryDto;
 import com.hackathon.backend.dto.countryDto.EditCountryDto;
-import com.hackathon.backend.services.country.CountryService;
+import com.hackathon.backend.services.country.impl.CountryServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,16 +14,16 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RestController
 @RequestMapping(path = "${BASE_API}")
 public class CountryController {
-    private final CountryService countryService;
+    private final CountryServiceImpl countryServiceImpl;
     @Autowired
-    public CountryController(CountryService countryService) {
-        this.countryService = countryService;
+    public CountryController(CountryServiceImpl countryServiceImpl) {
+        this.countryServiceImpl = countryServiceImpl;
     }
 
     @PostMapping(path = "${CREATE_COUNTRY_PATH}")
     private ResponseEntity<?> createCountry(@ModelAttribute CreateCountryDto createCountryDto){
         try{
-            return countryService.createCountry(createCountryDto);
+            return countryServiceImpl.createCountry(createCountryDto);
         }catch(EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){
@@ -33,7 +33,7 @@ public class CountryController {
 
     @GetMapping(path = "${GET_COUNTRIES_PATH}")
     private ResponseEntity<?> getCountries(){
-        return countryService.getAllCountries();
+        return countryServiceImpl.getAllCountries();
     }
 
 
@@ -41,7 +41,7 @@ public class CountryController {
     private ResponseEntity<?> editCountry(@PathVariable("countryId") int countryId,
                                           @ModelAttribute EditCountryDto editCountryDto){
         try{
-            return countryService.editCountry(countryId, editCountryDto);
+            return countryServiceImpl.editCountry(countryId, editCountryDto);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         } catch (Exception e) {
@@ -52,7 +52,7 @@ public class CountryController {
     @DeleteMapping(path = "${DELETE_COUNTRY_PATH}")
     private ResponseEntity<?> deleteCountry(@PathVariable("countryId") int countryId){
         try{
-            return countryService.deleteCountry(countryId);
+            return countryServiceImpl.deleteCountry(countryId);
         }catch (Exception e){
             return serverErrorException(e);
         }

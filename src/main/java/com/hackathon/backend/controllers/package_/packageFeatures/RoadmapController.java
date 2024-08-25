@@ -2,7 +2,7 @@ package com.hackathon.backend.controllers.package_.packageFeatures;
 
 import com.hackathon.backend.dto.packageDto.features.CreateRoadmapDto;
 import com.hackathon.backend.dto.packageDto.features.EditRoadmapDto;
-import com.hackathon.backend.services.package_.packageFeatures.RoadmapService;
+import com.hackathon.backend.services.package_.packageFeatures.impl.RoadmapServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,17 +15,17 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RequestMapping(path = "${BASE_API}")
 public class RoadmapController{
 
-    private final RoadmapService roadmapService;
+    private final RoadmapServiceImpl roadmapServiceImpl;
 
     @Autowired
-    public RoadmapController(RoadmapService roadmapService){
-        this.roadmapService = roadmapService;
+    public RoadmapController(RoadmapServiceImpl roadmapServiceImpl){
+        this.roadmapServiceImpl = roadmapServiceImpl;
     }
 
     @PostMapping(path = "${CREATE_ROADMAP_PATH}")
     public ResponseEntity<String> createRoadmap(@RequestBody CreateRoadmapDto createRoadmapDto){
         try {
-            return roadmapService.createRoadmap(createRoadmapDto);
+            return roadmapServiceImpl.createRoadmap(createRoadmapDto);
         }catch(Exception e){
             return serverErrorException(e);
         }
@@ -34,7 +34,7 @@ public class RoadmapController{
     @GetMapping(path = "${GET_ROADMAPS_PATH}")
     public ResponseEntity<?> getRoadmaps(){
         try {
-            return roadmapService.getRoadmaps();
+            return roadmapServiceImpl.getRoadmaps();
         }catch(Exception e){
             return serverErrorException(e);
         }
@@ -44,7 +44,7 @@ public class RoadmapController{
     public ResponseEntity<String> editRoadmap(@PathVariable("roadmapId") int roadmapId,
                                               @RequestBody EditRoadmapDto editRoadmapDto){
         try {
-            return roadmapService.editRoadmap(roadmapId, editRoadmapDto);
+            return roadmapServiceImpl.editRoadmap(roadmapId, editRoadmapDto);
         }catch(EntityNotFoundException e){
             return notFoundException(e);
         }catch(Exception e){
@@ -55,7 +55,7 @@ public class RoadmapController{
     @DeleteMapping(path = "${DELETE_ROADMAP_PATH}")
     public ResponseEntity<String> deleteRoadmap(@PathVariable("roadmapId") int roadmapId){
         try {
-            return roadmapService.deleteRoadmap(roadmapId);
+            return roadmapServiceImpl.deleteRoadmap(roadmapId);
         }catch(EntityNotFoundException e){
             return notFoundException(e);
         }catch(Exception e){

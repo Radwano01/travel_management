@@ -2,12 +2,11 @@ package com.hackathon.backend.controllers.hotel;
 
 import com.hackathon.backend.dto.hotelDto.CreateHotelDto;
 import com.hackathon.backend.dto.hotelDto.EditHotelDto;
-import com.hackathon.backend.services.hotel.HotelService;
+import com.hackathon.backend.services.hotel.impl.HotelServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
 import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
@@ -16,18 +15,18 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RestController
 @RequestMapping(path = "${BASE_API}")
 public class HotelController {
-    private final HotelService hotelService;
+    private final HotelServiceImpl hotelServiceImpl;
 
     @Autowired
-    private HotelController(HotelService hotelService){
-        this.hotelService = hotelService;
+    private HotelController(HotelServiceImpl hotelServiceImpl){
+        this.hotelServiceImpl = hotelServiceImpl;
     }
 
     @PostMapping(path = "${CREATE_HOTEL_PATH}")
     public ResponseEntity<?> createHotel(@PathVariable("placeId") int placeId,
                                          @ModelAttribute CreateHotelDto createHotelDto){
         try {
-            return hotelService.createHotel(placeId, createHotelDto);
+            return hotelServiceImpl.createHotel(placeId, createHotelDto);
         }catch (EntityNotFoundException e) {
             return notFoundException(e);
         } catch (Exception e) {
@@ -40,7 +39,7 @@ public class HotelController {
                                        @RequestParam("page") int page,
                                        @RequestParam("size") int size){
         try {
-            return hotelService.getHotels(placeId, page, size);
+            return hotelServiceImpl.getHotels(placeId, page, size);
         }catch (Exception e) {
             return serverErrorException(e);
         }
@@ -51,7 +50,7 @@ public class HotelController {
                                             @PathVariable("hotelId") long hotelId,
                                             @ModelAttribute EditHotelDto editHotelDto){
         try {
-            return hotelService.editHotel(placeId, hotelId, editHotelDto);
+            return hotelServiceImpl.editHotel(placeId, hotelId, editHotelDto);
         }catch (EntityNotFoundException e) {
             return notFoundException(e);
         } catch (Exception e){
@@ -63,7 +62,7 @@ public class HotelController {
     public ResponseEntity<?> deleteHotel(@PathVariable("placeId") int placeId,
                                          @PathVariable("hotelId") long hotelId){
         try {
-            return hotelService.deleteHotel(placeId, hotelId);
+            return hotelServiceImpl.deleteHotel(placeId, hotelId);
         }catch (EntityNotFoundException e) {
             return notFoundException(e);
         } catch (Exception e) {

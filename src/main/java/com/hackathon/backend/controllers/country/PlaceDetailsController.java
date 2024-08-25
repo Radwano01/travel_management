@@ -2,13 +2,11 @@ package com.hackathon.backend.controllers.country;
 
 
 import com.hackathon.backend.dto.countryDto.placeDto.EditPlaceDetailsDto;
-import com.hackathon.backend.dto.countryDto.placeDto.GetPlaceDetailsDto;
-import com.hackathon.backend.services.country.PlaceDetailsService;
+import com.hackathon.backend.services.country.impl.PlaceDetailsServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
 import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
@@ -17,16 +15,16 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RequestMapping(path = "${BASE_API}")
 public class PlaceDetailsController {
 
-    private final PlaceDetailsService placeDetailsService;
+    private final PlaceDetailsServiceImpl placeDetailsServiceImpl;
     @Autowired
-    public PlaceDetailsController(PlaceDetailsService placeDetailsService) {
-        this.placeDetailsService = placeDetailsService;
+    public PlaceDetailsController(PlaceDetailsServiceImpl placeDetailsServiceImpl) {
+        this.placeDetailsServiceImpl = placeDetailsServiceImpl;
     }
 
     @GetMapping(path = "${GET_SINGLE_PLACE_PATH}")
     public ResponseEntity<?> getSinglePlace(@PathVariable("placeId") int placeId){
         try {
-            return placeDetailsService.getSinglePlaceDetails(placeId);
+            return placeDetailsServiceImpl.getSinglePlaceDetails(placeId);
         } catch (EntityNotFoundException e) {
             return notFoundException(e);
         } catch (Exception e) {
@@ -38,7 +36,7 @@ public class PlaceDetailsController {
     public ResponseEntity<?> editPlaceDetails(@PathVariable("placeId") int placeId,
                                               @ModelAttribute EditPlaceDetailsDto editPlaceDetailsDto) {
         try {
-            return placeDetailsService.editPlaceDetails(placeId, editPlaceDetailsDto);
+            return placeDetailsServiceImpl.editPlaceDetails(placeId, editPlaceDetailsDto);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){

@@ -1,7 +1,7 @@
 package com.hackathon.backend.controllers.package_;
 
 import com.hackathon.backend.dto.payment.PackagePaymentDto;
-import com.hackathon.backend.services.package_.PackageBookingService;
+import com.hackathon.backend.services.package_.impl.PackageBookingServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +16,11 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RequestMapping(path = "${BASE_API}")
 public class PackageBookingController {
 
-    private final PackageBookingService packageBookingService;
+    private final PackageBookingServiceImpl packageBookingServiceImpl;
 
     @Autowired
-    public PackageBookingController(PackageBookingService packageBookingService){
-        this.packageBookingService = packageBookingService;
+    public PackageBookingController(PackageBookingServiceImpl packageBookingServiceImpl){
+        this.packageBookingServiceImpl = packageBookingServiceImpl;
     }
 
     @PostMapping("${PACKAGE_PAYMENT_PATH}")
@@ -29,7 +29,7 @@ public class PackageBookingController {
                                                              @RequestBody PackagePaymentDto packagePaymentDto){
         try {
             return CompletableFuture.completedFuture
-                    (packageBookingService.payment(userId, packageId, packagePaymentDto));
+                    (packageBookingServiceImpl.payment(userId, packageId, packagePaymentDto));
         }catch (EntityNotFoundException e){
             return CompletableFuture.completedFuture((notFoundException(e)));
         } catch (Exception e){

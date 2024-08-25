@@ -1,6 +1,6 @@
 package com.hackathon.backend.controllers.hotel.hotelFeatures;
 
-import com.hackathon.backend.services.hotel.hotelFeatures.HotelFeaturesRelationsService;
+import com.hackathon.backend.services.hotel.hotelFeatures.impl.HotelFeaturesRelationsServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,18 +13,18 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RequestMapping(path = "${BASE_API}")
 public class HotelFeaturesRelationsController {
 
-    private final HotelFeaturesRelationsService hotelFeaturesRelationsService;
+    private final HotelFeaturesRelationsServiceImpl hotelFeaturesRelationsServiceImpl;
 
     @Autowired
-    public HotelFeaturesRelationsController(HotelFeaturesRelationsService hotelFeaturesRelationsService) {
-        this.hotelFeaturesRelationsService = hotelFeaturesRelationsService;
+    public HotelFeaturesRelationsController(HotelFeaturesRelationsServiceImpl hotelFeaturesRelationsServiceImpl) {
+        this.hotelFeaturesRelationsServiceImpl = hotelFeaturesRelationsServiceImpl;
     }
 
     @PostMapping(path = "${HOTEL_FEATURE_RELATIONS_PATH}")
     public ResponseEntity<String> addHotelFeatureToHotel(@PathVariable("hotelId") long hotelId,
                                                          @PathVariable("featureId") int featureId){
         try {
-            return hotelFeaturesRelationsService.addHotelFeatureToHotel(hotelId, featureId);
+            return hotelFeaturesRelationsServiceImpl.addHotelFeatureToHotel(hotelId, featureId);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){
@@ -36,7 +36,7 @@ public class HotelFeaturesRelationsController {
     public ResponseEntity<String> removeHotelFeatureToHotel(@PathVariable("hotelId") long hotelId,
                                                             @PathVariable("featureId") int featureId){
         try {
-            return hotelFeaturesRelationsService.removeHotelFeatureFromHotel(hotelId, featureId);
+            return hotelFeaturesRelationsServiceImpl.removeHotelFeatureFromHotel(hotelId, featureId);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){

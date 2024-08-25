@@ -2,7 +2,7 @@ package com.hackathon.backend.controllers.hotel;
 
 import com.hackathon.backend.dto.hotelDto.evaluationDto.CreateHotelEvaluationDto;
 import com.hackathon.backend.dto.hotelDto.evaluationDto.EditHotelEvaluationDto;
-import com.hackathon.backend.services.hotel.HotelEvaluationService;
+import com.hackathon.backend.services.hotel.impl.HotelEvaluationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +17,11 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RequestMapping(path = "${BASE_API}")
 public class HotelEvaluationController {
 
-    private final HotelEvaluationService hotelEvaluationService;
+    private final HotelEvaluationServiceImpl hotelEvaluationServiceImpl;
 
     @Autowired
-    public HotelEvaluationController(HotelEvaluationService hotelEvaluationService) {
-        this.hotelEvaluationService = hotelEvaluationService;
+    public HotelEvaluationController(HotelEvaluationServiceImpl hotelEvaluationServiceImpl) {
+        this.hotelEvaluationServiceImpl = hotelEvaluationServiceImpl;
     }
 
     @PostMapping(path = "${ADD_HOTEL_EVALUATION_PATH}")
@@ -29,7 +29,7 @@ public class HotelEvaluationController {
                                                            @PathVariable("userId") long userId,
                                                            @RequestBody CreateHotelEvaluationDto createHotelEvaluationDto){
         try {
-            return hotelEvaluationService.addComment(hotelId, userId, createHotelEvaluationDto);
+            return hotelEvaluationServiceImpl.addComment(hotelId, userId, createHotelEvaluationDto);
         }catch (EntityNotFoundException e){
             return CompletableFuture.completedFuture(notFoundException(e));
         }catch (Exception e){
@@ -40,7 +40,7 @@ public class HotelEvaluationController {
     @GetMapping(path = "${GET_HOTEL_EVALUATION_PATH}")
     public CompletableFuture<ResponseEntity<?>> getComments(@PathVariable("hotelId") long hotelId){
         try {
-            return hotelEvaluationService.getComments(hotelId);
+            return hotelEvaluationServiceImpl.getComments(hotelId);
         }catch (EntityNotFoundException e){
             return CompletableFuture.completedFuture(notFoundException(e));
         }catch (Exception e){
@@ -53,7 +53,7 @@ public class HotelEvaluationController {
                                                             @PathVariable("commentId") long commentId,
                                                             @RequestBody EditHotelEvaluationDto editHotelEvaluationDto){
         try {
-            return hotelEvaluationService.editComment(hotelId, commentId, editHotelEvaluationDto);
+            return hotelEvaluationServiceImpl.editComment(hotelId, commentId, editHotelEvaluationDto);
         }catch (EntityNotFoundException e){
             return CompletableFuture.completedFuture(notFoundException(e));
         }catch (Exception e){
@@ -65,7 +65,7 @@ public class HotelEvaluationController {
     public CompletableFuture<ResponseEntity<?>> deleteComment(@PathVariable("hotelId") long hotelId,
                                                               @PathVariable("commentId") long commentId){
         try {
-            return hotelEvaluationService.removeComment(hotelId, commentId);
+            return hotelEvaluationServiceImpl.removeComment(hotelId, commentId);
         }catch (EntityNotFoundException e) {
             return CompletableFuture.completedFuture(notFoundException(e));
         } catch (Exception e) {

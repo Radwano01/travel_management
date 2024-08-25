@@ -2,12 +2,11 @@ package com.hackathon.backend.controllers.hotel;
 
 import com.hackathon.backend.dto.hotelDto.EditRoomDetailsDto;
 
-import com.hackathon.backend.services.hotel.RoomDetailsService;
+import com.hackathon.backend.services.hotel.impl.RoomDetailsServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
 import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
@@ -16,17 +15,17 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RequestMapping(path = "${BASE_API}")
 public class RoomDetailsController {
 
-    private final RoomDetailsService roomDetailsService;
+    private final RoomDetailsServiceImpl roomDetailsServiceImpl;
 
     @Autowired
-    private RoomDetailsController(RoomDetailsService roomDetailsService){
-        this.roomDetailsService = roomDetailsService;
+    private RoomDetailsController(RoomDetailsServiceImpl roomDetailsServiceImpl){
+        this.roomDetailsServiceImpl = roomDetailsServiceImpl;
     }
 
     @GetMapping(path = "${GET_ROOM_ALL_DETAILS_PATH}")
     public ResponseEntity<?> getRoomAllDetails(@PathVariable("hotelId") long hotelId){
         try {
-            return roomDetailsService.getHotelRoomDetailsByHotelId(hotelId);
+            return roomDetailsServiceImpl.getHotelRoomDetailsByHotelId(hotelId);
         }catch (Exception e){
             return serverErrorException(e);
         }
@@ -36,7 +35,7 @@ public class RoomDetailsController {
     public ResponseEntity<String> editRoomDetails(@PathVariable("hotelId") long hotelId,
                                                   @ModelAttribute EditRoomDetailsDto editRoomDetailsDto) {
         try {
-            return roomDetailsService.editRoomDetails(hotelId, editRoomDetailsDto);
+            return roomDetailsServiceImpl.editRoomDetails(hotelId, editRoomDetailsDto);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){

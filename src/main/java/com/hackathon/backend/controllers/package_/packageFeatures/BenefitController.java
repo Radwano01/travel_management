@@ -2,7 +2,7 @@ package com.hackathon.backend.controllers.package_.packageFeatures;
 
 import com.hackathon.backend.dto.packageDto.features.CreateBenefitDto;
 import com.hackathon.backend.dto.packageDto.features.EditBenefitDto;
-import com.hackathon.backend.services.package_.packageFeatures.BenefitService;
+import com.hackathon.backend.services.package_.packageFeatures.impl.BenefitServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,17 +15,17 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RequestMapping(path = "${BASE_API}")
 public class BenefitController{
 
-    private final BenefitService benefitService;
+    private final BenefitServiceImpl benefitServiceImpl;
 
     @Autowired
-    public BenefitController(BenefitService benefitService){
-        this.benefitService = benefitService;
+    public BenefitController(BenefitServiceImpl benefitServiceImpl){
+        this.benefitServiceImpl = benefitServiceImpl;
     }
 
     @PostMapping(path = "${CREATE_BENEFIT_PATH}")
     public ResponseEntity<String> createBenefit(@RequestBody CreateBenefitDto createBenefitDto){
         try {
-            return benefitService.createBenefit(createBenefitDto);
+            return benefitServiceImpl.createBenefit(createBenefitDto);
         }catch(Exception e){
             return serverErrorException(e);
         }
@@ -34,7 +34,7 @@ public class BenefitController{
     @GetMapping(path = "${GET_BENEFITS_PATH}")
     public ResponseEntity<?> getBenefits(){
         try {
-            return benefitService.getBenefits();
+            return benefitServiceImpl.getBenefits();
         }catch(Exception e){
             return serverErrorException(e);
         }
@@ -44,7 +44,7 @@ public class BenefitController{
     public ResponseEntity<String> editBenefit(@PathVariable("benefitId") int benefitId,
                                               @RequestBody EditBenefitDto editBenefitDto){
         try {
-            return benefitService.editBenefit(benefitId, editBenefitDto);
+            return benefitServiceImpl.editBenefit(benefitId, editBenefitDto);
         }catch(EntityNotFoundException e){
             return notFoundException(e);
         }catch(Exception e){
@@ -55,7 +55,7 @@ public class BenefitController{
     @DeleteMapping(path = "${DELETE_BENEFIT_PATH}")
     public ResponseEntity<String> deleteBenefit(@PathVariable("benefitId") int benefitId){
         try {
-            return benefitService.deleteBenefit(benefitId);
+            return benefitServiceImpl.deleteBenefit(benefitId);
         }catch (EntityNotFoundException e) {
             return notFoundException(e);
         } catch (Exception e) {

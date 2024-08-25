@@ -1,6 +1,6 @@
 package com.hackathon.backend.controllers.package_.packageFeatures;
 
-import com.hackathon.backend.services.package_.packageFeatures.PackageBenefitsRelationsService;
+import com.hackathon.backend.services.package_.packageFeatures.impl.PackageBenefitsRelationsServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,11 +13,11 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RequestMapping(path = "${BASE_API}")
 public class BenefitsRelationsController {
 
-    private final PackageBenefitsRelationsService packageBenefitsRelationsService;
+    private final PackageBenefitsRelationsServiceImpl packageBenefitsRelationsServiceImpl;
 
     @Autowired
-    public BenefitsRelationsController(PackageBenefitsRelationsService packageBenefitsRelationsService) {
-        this.packageBenefitsRelationsService = packageBenefitsRelationsService;
+    public BenefitsRelationsController(PackageBenefitsRelationsServiceImpl packageBenefitsRelationsServiceImpl) {
+        this.packageBenefitsRelationsServiceImpl = packageBenefitsRelationsServiceImpl;
     }
 
 
@@ -25,7 +25,7 @@ public class BenefitsRelationsController {
     public ResponseEntity<String> addPackageRoadmap(@PathVariable("packageId") int packageId,
                                                @PathVariable("benefitId") int benefitId){
         try {
-            return packageBenefitsRelationsService.addPackageBenefit(packageId, benefitId);
+            return packageBenefitsRelationsServiceImpl.addPackageBenefit(packageId, benefitId);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){
@@ -37,7 +37,7 @@ public class BenefitsRelationsController {
     public ResponseEntity<String> removePackageRoadmap(@PathVariable("packageId") int packageId,
                                                   @PathVariable("benefitId") int benefitId){
         try {
-            return packageBenefitsRelationsService.removePackageBenefit(packageId, benefitId);
+            return packageBenefitsRelationsServiceImpl.removePackageBenefit(packageId, benefitId);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){

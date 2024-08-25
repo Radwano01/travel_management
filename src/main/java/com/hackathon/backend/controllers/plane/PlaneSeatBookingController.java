@@ -1,7 +1,7 @@
 package com.hackathon.backend.controllers.plane;
 
 import com.hackathon.backend.dto.payment.FlightPaymentDto;
-import com.hackathon.backend.services.plane.PlaneSeatBookingService;
+import com.hackathon.backend.services.plane.impl.PlaneSeatBookingServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +16,11 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RequestMapping(path = "${BASE_API}")
 public class PlaneSeatBookingController {
 
-    private final PlaneSeatBookingService planeSeatBookingService;
+    private final PlaneSeatBookingServiceImpl planeSeatBookingServiceImpl;
 
     @Autowired
-    public PlaneSeatBookingController(PlaneSeatBookingService planeSeatBookingService) {
-        this.planeSeatBookingService = planeSeatBookingService;
+    public PlaneSeatBookingController(PlaneSeatBookingServiceImpl planeSeatBookingServiceImpl) {
+        this.planeSeatBookingServiceImpl = planeSeatBookingServiceImpl;
     }
 
     @PostMapping(path = "${PLANE_SEAT_PAYMENT_PATH}")
@@ -29,7 +29,7 @@ public class PlaneSeatBookingController {
                                                              @RequestBody FlightPaymentDto flightPaymentDto){
         try{
             return CompletableFuture.completedFuture(
-                    planeSeatBookingService.payment(userId, flightId, flightPaymentDto));
+                    planeSeatBookingServiceImpl.payment(userId, flightId, flightPaymentDto));
         }catch (EntityNotFoundException e){
             return CompletableFuture.completedFuture(notFoundException(e));
         }catch (Exception e){

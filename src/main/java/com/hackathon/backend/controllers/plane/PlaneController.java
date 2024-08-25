@@ -2,7 +2,7 @@ package com.hackathon.backend.controllers.plane;
 
 import com.hackathon.backend.dto.planeDto.CreatePlaneDto;
 import com.hackathon.backend.dto.planeDto.EditPlaneDto;
-import com.hackathon.backend.services.plane.PlaneService;
+import com.hackathon.backend.services.plane.impl.PlaneServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,17 +15,17 @@ import static com.hackathon.backend.utilities.ErrorUtils.serverErrorException;
 @RequestMapping(path = "${BASE_API}")
 public class PlaneController {
 
-    private final PlaneService planeService;
+    private final PlaneServiceImpl planeServiceImpl;
 
     @Autowired
-    public PlaneController(PlaneService planeService){
-        this.planeService = planeService;
+    public PlaneController(PlaneServiceImpl planeServiceImpl){
+        this.planeServiceImpl = planeServiceImpl;
     }
 
     @PostMapping(path="${CREATE_PLANE_PATH}")
     public ResponseEntity<String> createPlane(@RequestBody CreatePlaneDto createPlaneDto){
         try {
-            return planeService.createPlane(createPlaneDto);
+            return planeServiceImpl.createPlane(createPlaneDto);
         }catch (Exception e){
             return serverErrorException(e);
         }
@@ -34,7 +34,7 @@ public class PlaneController {
     @GetMapping(path = "${GET_PLANES_PATH}")
     public ResponseEntity<?> getPlanes(){
         try {
-            return planeService.getPlanes();
+            return planeServiceImpl.getPlanes();
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         }catch (Exception e){
@@ -46,7 +46,7 @@ public class PlaneController {
     public ResponseEntity<String> editPlane(@PathVariable("planeId") Long planeId,
                                        @RequestBody EditPlaneDto editPlaneDto){
         try {
-            return planeService.editPlane(planeId, editPlaneDto);
+            return planeServiceImpl.editPlane(planeId, editPlaneDto);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         } catch (Exception e){
@@ -57,7 +57,7 @@ public class PlaneController {
     @DeleteMapping(path = "${DELETE_PLANE_PATH}")
     public ResponseEntity<String> deletePlane(@PathVariable("planeId") Long planeId){
         try {
-            return planeService.deletePlane(planeId);
+            return planeServiceImpl.deletePlane(planeId);
         }catch (EntityNotFoundException e){
             return notFoundException(e);
         } catch (Exception e){
