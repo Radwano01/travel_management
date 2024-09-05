@@ -79,6 +79,17 @@ public class UserController {
         }
     }
 
+    @GetMapping(path = "${GET_USERID_BY_EMAIL_PATH}")
+    public CompletableFuture<ResponseEntity<?>> getUserIdByEmail(@RequestParam("email") String email){
+        try{
+            return userServiceImpl.getUserIdByEmail(email);
+        }catch (EntityNotFoundException e){
+            return CompletableFuture.completedFuture(notFoundException(e));
+        }catch (Exception e){
+            return CompletableFuture.completedFuture((serverErrorException(e)));
+        }
+    }
+
     @PutMapping(path="${USER_EDIT_PATH}")
     public CompletableFuture<ResponseEntity<?>> editUserPassword(@PathVariable("userId") long userId,
                                                                  @RequestBody EditUserDto editUserDto){
@@ -116,7 +127,7 @@ public class UserController {
     }
 
     @PostMapping(path = "${VERIFY_USER_PHONE_NUMBER_PATH}")
-    public void verifyPhoneNumber(@RequestBody String phoneNumber){
+    public void verifyPhoneNumber(@PathVariable("phoneNumber") String phoneNumber){
         userServiceImpl.sendSms(phoneNumber);
     }
 

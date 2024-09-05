@@ -22,4 +22,8 @@ public interface UserRepository extends JpaRepository<UserEntity,Long> {
             " u.phoneNumber, u.address, u.dateOfBirth)" +
             " FROM UserEntity u WHERE u.id = :userId")
     UserDto findUserDetailsById(long userId);
+
+
+    @Query("SELECT u.id FROM UserEntity u WHERE u.email = :email")
+    Optional<UserEntity> findUserIdByEmail(String email);
 }

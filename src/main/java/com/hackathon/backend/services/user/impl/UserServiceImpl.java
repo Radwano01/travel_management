@@ -207,6 +207,14 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public CompletableFuture<ResponseEntity<?>> getUserIdByEmail(@NonNull String email) {
+        return CompletableFuture.completedFuture(ResponseEntity.ok(getUserIdByEmailFromDB(email)));
+    }
+
+    private Object getUserIdByEmailFromDB(String email) {
+        return userRepository.findUserIdByEmail(email);
+    }
 
     @Async("userServiceTaskExecutor")
     @Transactional

@@ -1,6 +1,7 @@
 package com.hackathon.backend.config;
 
 import com.twilio.Twilio;
+import com.twilio.exception.ApiException;
 import com.twilio.rest.verify.v2.service.Verification;
 import com.twilio.rest.verify.v2.service.VerificationCheck;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,22 +21,30 @@ public class TwilioConfig {
     @Value("${VERIFICATION_SERVICE_SID}")
     private String VERIFICATION_SERVICE_SID;
 
-    public void sendSms(String phoneNumber){
-        Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
-        Verification verification = Verification.creator(
-                VERIFICATION_SERVICE_SID,
-                phoneNumber,
-                "sms"
-        ).create();
-        System.out.println("Verification SID: " + verification.getSid());
+    public void sendSms(String phoneNumber) {
+        try {
+            Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
+            Verification.creator(
+                    VERIFICATION_SERVICE_SID,
+                    phoneNumber,
+                    "sms"
+            ).create();
+        } catch (ApiException e) {
+            System.err.println("Error sending SMS: " + e.getMessage());
+        }
     }
 
     public boolean checkVerificationCode(String phoneNumber, String code) {
-        Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
-        VerificationCheck verificationCheck = VerificationCheck.creator(VERIFICATION_SERVICE_SID)
-                .setTo(phoneNumber)
-                .setCode(code)
-                .create();
-        return "approved".equals(verificationCheck.getStatus());
+        try {
+            Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
+            VerificationCheck verificationCheck = VerificationCheck.creator(VERIFICATION_SERVICE_SID)
+                    .setTo(phoneNumber)
+                    .setCode(code)
+                    .create();
+            return "approved".equals(verificationCheck.getStatus());
+        } catch (ApiException e) {
+            System.err.println("Error checking verification code: " + e.getMessage());
+            return false;
+        }
     }
 }

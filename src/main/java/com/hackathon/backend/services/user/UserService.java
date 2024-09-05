@@ -1,9 +1,6 @@
 package com.hackathon.backend.services.user;
 
-import com.hackathon.backend.dto.userDto.EditUserDetailsDto;
-import com.hackathon.backend.dto.userDto.EditUserDto;
-import com.hackathon.backend.dto.userDto.LoginUserDto;
-import com.hackathon.backend.dto.userDto.RegisterUserDto;
+import com.hackathon.backend.dto.userDto.*;
 import jakarta.mail.MessagingException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -17,6 +14,8 @@ public interface UserService {
     CompletableFuture<ResponseEntity<?>> loginUser(LoginUserDto loginUserDto);
 
     CompletableFuture<ResponseEntity<?>> deleteUser(long userId);
+
+    CompletableFuture<ResponseEntity<?>> getUserIdByEmail(String email);
 
     CompletableFuture<ResponseEntity<?>> editUserPassword(long userId, EditUserDto editUserDto);
 
