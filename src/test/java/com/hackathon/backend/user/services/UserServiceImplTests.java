@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -91,10 +90,6 @@ public class UserServiceImplTests {
 
     @Test
     public void testRegisterUser_Success() {
-        MockMultipartFile mainImage =
-                new MockMultipartFile(
-                        "mainImage", "mainImage.jpg", "image/jpeg", "random-image-content".getBytes());
-
         RegisterUserDto dto = new RegisterUserDto();
         dto.setUsername("user");
         dto.setEmail("user@example.com");
@@ -104,13 +99,11 @@ public class UserServiceImplTests {
         dto.setPhoneNumber("1234567890");
         dto.setAddress("Address");
         dto.setDateOfBirth(LocalDate.of(1990, 1, 1));
-        dto.setImage(mainImage);
 
         RoleEntity roleEntity = new RoleEntity();
         roleEntity.setRole("USER");
 
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(s3Service.uploadFile(mainImage)).thenReturn("uploadedImageUrl");
         when(userRepository.save(any(UserEntity.class))).thenReturn(new UserEntity());
         when(roleRepository.findByRole("USER")).thenReturn(Optional.of(roleEntity));
 

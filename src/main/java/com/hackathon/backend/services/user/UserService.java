@@ -31,5 +31,5 @@ public interface UserService {
 
     boolean verifyCode(String phoneNumber, String code);
 
-
+    boolean verifyCode(long userId, String phoneNumber, String code);
 }

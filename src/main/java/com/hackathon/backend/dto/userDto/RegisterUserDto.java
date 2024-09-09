@@ -14,7 +14,6 @@ public class RegisterUserDto {
     private String email;
     private String username;
     private String password;
-    private MultipartFile image;
     private String fullName;
     private String country;
     private String phoneNumber;

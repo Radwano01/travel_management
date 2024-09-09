@@ -48,14 +48,13 @@ public class UserEntity {
     private List<PackageEvaluationEntity> packageEvaluations = new ArrayList<>();
 
     public UserEntity(String username, String email,
-                      String password, String image,
-                      String fullName, String country,
-                      String phoneNumber, String address,
-                      LocalDate dateOfBirth, RoleEntity role) {
+                      String password, String fullName,
+                      String country, String phoneNumber,
+                      String address, LocalDate dateOfBirth,
+                      RoleEntity role) {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.image = image;
         this.fullName = fullName;
         this.country = country;
         this.phoneNumber = phoneNumber;

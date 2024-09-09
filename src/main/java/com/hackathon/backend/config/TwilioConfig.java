@@ -21,7 +21,7 @@ public class TwilioConfig {
     @Value("${VERIFICATION_SERVICE_SID}")
     private String VERIFICATION_SERVICE_SID;
 
-    public void sendSms(String phoneNumber) {
+    public void sendSMS(String phoneNumber) {
         try {
             Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
             Verification.creator(

@@ -26,7 +26,7 @@ public class UserController {
     }
 
     @PostMapping(path="${USER_REGISTER_PATH}")
-    public CompletableFuture<ResponseEntity<?>> registerUserDetails(@ModelAttribute RegisterUserDto registerUserDto){
+    public CompletableFuture<ResponseEntity<?>> registerUserDetails(@RequestBody RegisterUserDto registerUserDto){
         try{
             return userServiceImpl.registerUser(registerUserDto);
         }catch (EntityNotFoundException e) {
@@ -73,7 +73,7 @@ public class UserController {
     @DeleteMapping(path="${USER_DELETE_PATH}")
     public CompletableFuture<ResponseEntity<?>> deleteUserDetails(@PathVariable("userId") long userId){
         try{
-        return userServiceImpl.deleteUser(userId);
+            return userServiceImpl.deleteUser(userId);
         }catch (Exception e){
             return CompletableFuture.completedFuture((serverErrorException(e)));
         }
@@ -134,5 +134,10 @@ public class UserController {
     @PostMapping("${VERIFY_USER_PHONE_NUMBER_CODE_PATH}")
     public boolean verifyCode(@RequestBody VerifyPhoneNumberDto verifyPhoneNumberDto) {
         return userServiceImpl.verifyCode(verifyPhoneNumberDto.getPhoneNumber(), verifyPhoneNumberDto.getCode());
+    }
+
+    @PostMapping("${VERIFY_USER_PHONE_NUMBER_CODE_BY_USERID_PATH}")
+    public boolean verifyCode(@PathVariable("userId") long userId, @RequestBody VerifyPhoneNumberDto verifyPhoneNumberDto) {
+        return userServiceImpl.verifyCode(userId, verifyPhoneNumberDto.getPhoneNumber(), verifyPhoneNumberDto.getCode());
     }
 }

@@ -27,7 +27,7 @@ public class MyLib {
     //check if the password is strong using multi-threading.
     public static boolean isStrongPassword(String password){
         if (password == null || password.length() < 8) {
-            return false;
+            return true;
         }
 
         int numThreads = 4;
@@ -46,9 +46,8 @@ public class MyLib {
 
             executorService.shutdown();
 
-            return futureUppercase.get() && futureLowercase.get() && futureDigit.get() && futureSpecial.get();
+            return !futureUppercase.get() || !futureLowercase.get() || !futureDigit.get() || !futureSpecial.get();
         }catch (InterruptedException | ExecutionException e){
-            e.printStackTrace();
             executorService.shutdown();
             return true;
         }

@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
     @Async("userServiceTaskExecutor")
     @Override
     public CompletableFuture<ResponseEntity<?>> registerUser(@NonNull RegisterUserDto registerUserDto) {
-        if(!isStrongPassword(registerUserDto.getPassword())){
+        if(isStrongPassword(registerUserDto.getPassword())){
             return CompletableFuture.completedFuture(badRequestException("Password is weak"));
         }
 
@@ -119,10 +119,9 @@ public class UserServiceImpl implements UserService {
                 registerUserDto.getUsername(),
                 registerUserDto.getEmail(),
                 passwordEncoder.encode(registerUserDto.getPassword()),
-                s3Service.uploadFile(registerUserDto.getImage()),
                 registerUserDto.getFullName(),
                 registerUserDto.getCountry(),
-                registerUserDto.getPhoneNumber(),
+                (registerUserDto.getPhoneNumber().isEmpty() ? null : registerUserDto.getPhoneNumber()),
                 registerUserDto.getAddress(),
                 registerUserDto.getDateOfBirth(),
                 findRoleByRole()
@@ -158,12 +157,14 @@ public class UserServiceImpl implements UserService {
     @Async("userServiceTaskExecutor")
     @Override
     public CompletableFuture<ResponseEntity<?>> deleteUser(long userId) {
-        UserEntity user = getUserById(userId); // Make sure this method is mocked or returns a valid UserEntity
+        UserEntity user = getUserById(userId);
 
         removeUserFromHotelANDPackageEvaluation(userId);
         removeUserFromRoomANDPackageANDPlaneSeatBooking(userId);
 
-        s3Service.deleteFile(user.getImage());
+        if(user.getImage() != null) {
+            s3Service.deleteFile(user.getImage());
+        }
 
         userRepository.delete(user);
 
@@ -224,7 +225,7 @@ public class UserServiceImpl implements UserService {
             return CompletableFuture.completedFuture(badRequestException("you sent an empty data to change"));
         }
 
-        if(!isStrongPassword(editUserDto.getPassword())){
+        if(isStrongPassword(editUserDto.getPassword())){
             return CompletableFuture.completedFuture(badRequestException("password is weak"));
         }
 
@@ -311,13 +312,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void sendSms(String phoneNumber){
-        twilioConfig.sendSms(phoneNumber);
+    public void sendSms(String phoneNumber) {
+        twilioConfig.sendSMS(phoneNumber);
     }
 
     @Override
     public boolean verifyCode(String phoneNumber, String code) {
         return twilioConfig.checkVerificationCode(phoneNumber, code);
+    }
+
+    @Override
+    public boolean verifyCode(long userId, String phoneNumber, String code) {
+        UserEntity user = getUserById(userId);
+
+        boolean result = twilioConfig.checkVerificationCode(phoneNumber, code);
+
+        if(result){
+            user.setPhoneNumber(phoneNumber);
+            userRepository.save(user);
+
+            return true;
+        }
+
+        return false;
     }
 
     private UserEntity getUserById(long userId) {
