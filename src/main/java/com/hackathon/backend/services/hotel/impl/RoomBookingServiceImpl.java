@@ -180,10 +180,15 @@ public class RoomBookingServiceImpl implements RoomBookingService {
         javaMailSender.send(mimeMessage);
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 1800000)
     public void removeExpiredBookings(){
         LocalDateTime nowTime = LocalDateTime.now();
         List<RoomBookingEntity> expiredBookings = roomBookingRepository.findAllByEndTime(nowTime);
-        roomBookingRepository.deleteAll(expiredBookings);
+        for(RoomBookingEntity roomBookingEntity : expiredBookings){
+            HotelEntity hotel = roomBookingEntity.getHotel();
+            hotel.setHotelRoomsCount(hotel.getHotelRoomsCount() + 1);
+            hotel.setPaidRoomsCount(hotel.getPaidRoomsCount() - 1);
+            hotelRepository.save(hotel);
+        }
     }
 }

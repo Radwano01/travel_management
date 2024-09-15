@@ -6,6 +6,7 @@ import com.hackathon.backend.dto.packageDto.features.GetBenefitDto;
 import com.hackathon.backend.dto.packageDto.features.GetRoadmapDto;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
+import com.hackathon.backend.repositories.package_.PackageDetailsRepository;
 import com.hackathon.backend.repositories.package_.PackageRepository;
 import com.hackathon.backend.services.package_.PackageDetailsService;
 import com.hackathon.backend.utilities.S3Service;
@@ -25,12 +26,15 @@ import static com.hackathon.backend.utilities.ErrorUtils.*;
 public class PackageDetailsServiceImpl implements PackageDetailsService {
 
     private final PackageRepository packageRepository;
+    private final PackageDetailsRepository packageDetailsRepository;
     private final S3Service s3Service;
 
     @Autowired
     public PackageDetailsServiceImpl(PackageRepository packageRepository,
+                                     PackageDetailsRepository packageDetailsRepository,
                                      S3Service s3Service) {
         this.packageRepository = packageRepository;
+        this.packageDetailsRepository = packageDetailsRepository;
         this.s3Service = s3Service;
     }
 
@@ -63,6 +67,15 @@ public class PackageDetailsServiceImpl implements PackageDetailsService {
         );
     }
 
+    @Override
+    public ResponseEntity<List<GetRoadmapDto>> getRoadmapsFromPackage(int packageId){
+        return ResponseEntity.ok(packageDetailsRepository.findPackageDetailsRoadmapsByPackageId(packageId));
+    }
+
+    @Override
+    public ResponseEntity<List<GetBenefitDto>> getBenefitsFromPackage(int packageId){
+        return ResponseEntity.ok(packageDetailsRepository.findPackageDetailsBenefitsByPackageId(packageId));
+    }
 
     private PackageEntity findPackageById(int packageId){
         return packageRepository.findById(packageId)

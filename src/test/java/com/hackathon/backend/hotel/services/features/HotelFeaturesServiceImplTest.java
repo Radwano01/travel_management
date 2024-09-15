@@ -1,5 +1,6 @@
 package com.hackathon.backend.hotel.services.features;
 
+import com.hackathon.backend.dto.hotelDto.features.GetHotelFeaturesDto;
 import com.hackathon.backend.dto.hotelDto.features.HotelFeatureDto;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
@@ -56,15 +57,15 @@ class HotelFeaturesServiceImplTest {
     @Test
     void getHotelFeatures() {
         // given
-        HotelFeaturesEntity feature1 = new HotelFeaturesEntity();
-        HotelFeaturesEntity feature2 = new HotelFeaturesEntity();
-        List<HotelFeaturesEntity> features = List.of(feature1, feature2);
+        GetHotelFeaturesDto feature1 = new GetHotelFeaturesDto();
+        GetHotelFeaturesDto feature2 = new GetHotelFeaturesDto();
+        List<GetHotelFeaturesDto> features = List.of(feature1, feature2);
 
         //behavior
-        when(hotelFeaturesRepository.findAll()).thenReturn(features);
+        when(hotelFeaturesRepository.findAllHotelFeatures()).thenReturn(features);
 
         // when
-        ResponseEntity<List<HotelFeaturesEntity>> response = hotelFeaturesServiceImpl.getHotelFeatures();
+        ResponseEntity<List<GetHotelFeaturesDto>> response = hotelFeaturesServiceImpl.getHotelFeatures();
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());

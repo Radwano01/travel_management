@@ -20,7 +20,7 @@ import java.util.List;
 public interface PlaceRepository extends JpaRepository<PlaceEntity,Integer> {
 
     @Query("SELECT new com.hackathon.backend.dto.countryDto.placeDto.GetPlaceForFlightDto" +
-            "(p.id, p.place, ap.airPortName) " +
+            "(p.id, p.place, ap.id, ap.airPortName) " +
             "FROM PlaceEntity p " +
             "JOIN p.airPorts ap " +
             "WHERE p.place = :place")

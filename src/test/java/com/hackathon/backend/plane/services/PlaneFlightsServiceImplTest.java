@@ -15,11 +15,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,6 +95,61 @@ class PlaneFlightsServiceImplTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(flightDtos, response.getBody());
     }
+
+    @Test
+    void getFlights() {
+        // given
+        int page = 0;
+        int size = 10;
+        Long departureAirPortId = 1L;
+        Long destinationAirPortId = 2L;
+        String planeCompanyName = "Airline A";
+
+        // Create mock flight DTOs with full details
+        List<GetFlightDto> mockFlights = Arrays.asList(
+                new GetFlightDto(
+                        1L,
+                        "Airline A",
+                        500,
+                        "JFK International",
+                        "JFK",
+                        "LAX International",
+                        "LAX",
+                        LocalDateTime.of(2023, 9, 14, 10, 30),
+                        LocalDateTime.of(2023, 9, 14, 14, 30)
+                ),
+                new GetFlightDto(
+                        2L,
+                        "Airline A",
+                        600,
+                        "JFK International",
+                        "JFK",
+                        "LAX International",
+                        "LAX",
+                        LocalDateTime.of(2023, 9, 14, 12, 30),
+                        LocalDateTime.of(2023, 9, 14, 16, 30)
+                )
+        );
+
+        // behavior
+        when(planeFlightsRepository.findAllByFilters(PageRequest.of(page, size), departureAirPortId, destinationAirPortId, planeCompanyName))
+                .thenReturn(mockFlights);
+
+        // when
+        ResponseEntity<List<GetFlightDto>> response = planeFlightsServiceImpl.getFlights(page, size, departureAirPortId, destinationAirPortId, planeCompanyName);
+
+        // then
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(2, response.getBody().size());
+        assertEquals(planeCompanyName, response.getBody().get(0).getPlaneCompanyName());
+        assertEquals("JFK", response.getBody().get(0).getDepartureAirPortCode());
+        assertEquals("LAX", response.getBody().get(0).getDestinationAirPortCode());
+        assertEquals(LocalDateTime.of(2023, 9, 14, 10, 30), response.getBody().get(0).getDepartureTime());
+    }
+
+
+
 
     @Test
     void editFlight_ShouldReturnUpdatedFlight_WhenFlightIsEdited() {

@@ -45,7 +45,7 @@ public class CountryPlacesController {
     }
 
     @GetMapping(path = "${GET_PLACE_FOR_FLIGHTS_PATH}")
-    public ResponseEntity<?> getPlace(@RequestParam("place") String place){
+    public ResponseEntity<?> getPlace(@PathVariable("place") String place){
         try {
             return placeServiceImpl.getPlaceByPlace(place);
         }catch(EntityNotFoundException e){

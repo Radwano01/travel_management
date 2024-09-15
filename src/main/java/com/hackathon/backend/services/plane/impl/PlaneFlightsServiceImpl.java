@@ -43,7 +43,7 @@ public class PlaneFlightsServiceImpl implements PlaneFlightsService {
     @Transactional
     @Override
     public ResponseEntity<String> addFlight(long planeId, long departureAirPortId,
-                            long destinationAirPortId, FlightDto flightDto) {
+                                            long destinationAirPortId, FlightDto flightDto) {
         PlaneEntity plane = getPlaneById(planeId);
 
         if (plane.getFlight() != null) {
@@ -95,10 +95,19 @@ public class PlaneFlightsServiceImpl implements PlaneFlightsService {
 
     @Override
     public ResponseEntity<List<GetFlightDto>> getFlights(long departureAirPortId,
-                                         long destinationAirPortId,
-                                         int page, int size) {
+                                                         long destinationAirPortId,
+                                                         int page, int size) {
         return ResponseEntity.ok(planeFlightsRepository.findAllByDepartureAirPortIdAndDestinationAirPortId
                 (departureAirPortId, destinationAirPortId, PageRequest.of(page, size)));
+    }
+
+    @Override
+    public ResponseEntity<List<GetFlightDto>> getFlights(int page, int size,
+                                                         Long departureAirPortId,
+                                                         Long destinationAirPortId,
+                                                         String planeCompanyName){
+        return ResponseEntity.ok(planeFlightsRepository.findAllByFilters
+                (PageRequest.of(page, size), departureAirPortId, destinationAirPortId, planeCompanyName));
     }
 
     @Transactional
@@ -158,7 +167,7 @@ public class PlaneFlightsServiceImpl implements PlaneFlightsService {
     }
 
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 1800000)
     @Transactional
     public void removeFlights() {
         List<PlaneFlightsEntity> flights = planeFlightsRepository.findAll();
@@ -166,8 +175,8 @@ public class PlaneFlightsServiceImpl implements PlaneFlightsService {
         LocalDateTime currentDateTime = LocalDateTime.now();
 
         for (PlaneFlightsEntity flight : flights) {
-
             LocalDateTime endTime = flight.getArrivalTime();
+
             if (currentDateTime.isAfter(endTime)) {
                 PlaneEntity plane = flight.getPlane();
                 plane.setStatus(true);
@@ -176,4 +185,5 @@ public class PlaneFlightsServiceImpl implements PlaneFlightsService {
             }
         }
     }
+
 }

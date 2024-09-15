@@ -16,6 +16,11 @@ public interface PlaneFlightsService {
                                                   long destinationAirPortId,
                                                   int page, int size);
 
+    ResponseEntity<List<GetFlightDto>> getFlights(int page, int size,
+                                                  Long departureAirPortId,
+                                                  Long destinationAirPortId,
+                                                  String planeCompanyName);
+
     ResponseEntity<String> editFlight(long flightId, EditFlightDto editFlightDto);
 
     ResponseEntity<String> deleteFlight(long flightId);

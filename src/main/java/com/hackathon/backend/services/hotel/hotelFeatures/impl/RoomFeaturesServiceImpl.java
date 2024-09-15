@@ -1,6 +1,7 @@
 package com.hackathon.backend.services.hotel.hotelFeatures.impl;
 
 
+import com.hackathon.backend.dto.hotelDto.features.GetRoomFeaturesDto;
 import com.hackathon.backend.dto.hotelDto.features.RoomFeatureDto;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
@@ -46,8 +47,8 @@ public class RoomFeaturesServiceImpl implements RoomFeaturesService {
     }
 
     @Override
-    public ResponseEntity<List<RoomFeaturesEntity>> getRoomFeatures() {
-        return ResponseEntity.ok(roomFeaturesRepository.findAll());
+    public ResponseEntity<List<GetRoomFeaturesDto>> getRoomFeatures() {
+        return ResponseEntity.ok(roomFeaturesRepository.findAllRoomFeatures());
     }
 
     @Transactional

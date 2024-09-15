@@ -100,4 +100,31 @@ class PlaneFlightsRepositoryTest {
         assertEquals("JFK", flightDto1.getDepartureAirPortCode());
         assertEquals("LAX", flightDto1.getDestinationAirPortCode());
     }
+
+    @Test
+    void findAllByFilters() {
+        // given
+        Long departureAirPortId = 1L;
+        Long destinationAirPortId = 2L;
+        String planeCompanyName = "Airways";
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        List<GetFlightDto> flights = planeFlightsRepository.findAllByFilters(
+                pageable,
+                departureAirPortId,
+                destinationAirPortId,
+                planeCompanyName
+        );
+
+        // then
+        assertNotNull(flights);
+        assertFalse(flights.isEmpty());
+
+        GetFlightDto flightDto = flights.get(0);
+        assertEquals("Airways", flightDto.getPlaneCompanyName());
+        assertEquals(500, flightDto.getPrice());
+        assertEquals("JFK", flightDto.getDepartureAirPortCode());
+        assertEquals("LAX", flightDto.getDestinationAirPortCode());
+    }
 }

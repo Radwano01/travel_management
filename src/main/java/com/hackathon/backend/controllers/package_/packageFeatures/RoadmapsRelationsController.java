@@ -34,7 +34,7 @@ public class RoadmapsRelationsController {
 
     @DeleteMapping(path = "${PACKAGE_ROADMAP_RELATIONS_PATH}")
     public ResponseEntity<String> removePackageRoadmap(@PathVariable("packageId") int packageId,
-                                                  @PathVariable("roadmapId") int roadmapId){
+                                                       @PathVariable("roadmapId") int roadmapId){
         try {
             return packageRoadmapsRelationsServiceImpl.removePackageRoadmap(packageId, roadmapId);
         }catch (EntityNotFoundException e){

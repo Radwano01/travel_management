@@ -1,5 +1,6 @@
 package com.hackathon.backend.hotel.services.features;
 
+import com.hackathon.backend.dto.hotelDto.features.GetRoomFeaturesDto;
 import com.hackathon.backend.dto.hotelDto.features.RoomFeatureDto;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import com.hackathon.backend.repositories.hotel.hotelFeatures.RoomFeaturesRepository;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,19 +72,38 @@ class RoomFeaturesServiceImplTest {
     @Test
     void getRoomFeatures() {
         // given
-        RoomFeaturesEntity feature1 = new RoomFeaturesEntity("Free WiFi");
-        RoomFeaturesEntity feature2 = new RoomFeaturesEntity("Air Conditioning");
-        List<RoomFeaturesEntity> features = new ArrayList<>(List.of(feature1, feature2));
+        GetRoomFeaturesDto feature1 = new GetRoomFeaturesDto();
+        GetRoomFeaturesDto feature2 = new GetRoomFeaturesDto();
+        List<GetRoomFeaturesDto> features = new ArrayList<>(List.of(feature1, feature2));
 
         // behavior
-        when(roomFeaturesRepository.findAll()).thenReturn(features);
+        when(roomFeaturesRepository.findAllRoomFeatures()).thenReturn(features);
 
         // when
-        ResponseEntity<List<RoomFeaturesEntity>> response = roomFeaturesServiceImpl.getRoomFeatures();
+        ResponseEntity<List<GetRoomFeaturesDto>> response = roomFeaturesServiceImpl.getRoomFeatures();
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(features, response.getBody());
+    }
+
+    @Test
+    void testGetRoomFeatures() {
+        // Arrange
+        List<GetRoomFeaturesDto> mockRoomFeatures = Arrays.asList(
+                new GetRoomFeaturesDto(1, "Feature 1"),
+                new GetRoomFeaturesDto(2, "Feature 2")
+        );
+        when(roomFeaturesRepository.findAllRoomFeatures()).thenReturn(mockRoomFeatures);
+
+        // Act
+        ResponseEntity<List<GetRoomFeaturesDto>> response = roomFeaturesServiceImpl.getRoomFeatures();
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(2, response.getBody().size());
+        assertEquals("Feature 1", response.getBody().get(0).getRoomFeature());
     }
 
     @Test

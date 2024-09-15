@@ -50,6 +50,19 @@ public class PlaneFlightsController {
         }
     }
 
+    @GetMapping(path = "${GET_FLIGHTS_BY_FILTER_PATH}")
+    public ResponseEntity<?> getFlights(@RequestParam(value = "page") int page,
+                                        @RequestParam(value = "size") int size,
+                                        @RequestParam(value = "departureAirPortId", required = false) Long departureAirPortId,
+                                        @RequestParam(value = "destinationAirPortId", required = false) Long destinationAirPortId,
+                                        @RequestParam(value = "planeCompanyName", required = false) String planeCompanyName){
+        try{
+            return planeFlightsServiceImpl.getFlights(page, size, departureAirPortId, destinationAirPortId, planeCompanyName);
+        }catch (Exception e){
+            return serverErrorException(e);
+        }
+    }
+
     @PutMapping(path = "${EDIT_FLIGHT_PATH}")
     public ResponseEntity<String> editFlight(@PathVariable("flightId") long flightId,
                                              @RequestBody EditFlightDto editFlightDto){

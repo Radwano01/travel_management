@@ -44,7 +44,7 @@ public class PlaneController {
 
     @PutMapping(path="${EDIT_PLANE_PATH}")
     public ResponseEntity<String> editPlane(@PathVariable("planeId") Long planeId,
-                                       @RequestBody EditPlaneDto editPlaneDto){
+                                            @RequestBody EditPlaneDto editPlaneDto){
         try {
             return planeServiceImpl.editPlane(planeId, editPlaneDto);
         }catch (EntityNotFoundException e){

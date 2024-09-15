@@ -1,5 +1,6 @@
 package com.hackathon.backend.hotel.repositories.features;
 
+import com.hackathon.backend.dto.hotelDto.features.GetRoomFeaturesDto;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import com.hackathon.backend.repositories.hotel.hotelFeatures.RoomFeaturesRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -7,6 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,6 +30,18 @@ class RoomFeaturesRepositoryTest {
     @AfterEach
     void tearDown() {
         roomFeaturesRepository.deleteAll();
+    }
+
+
+    @Test
+    void itShouldFindAllRoomFeatures() {
+        // when
+        List<GetRoomFeaturesDto> result = roomFeaturesRepository.findAllRoomFeatures();
+
+        // then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Free WiFi", result.get(0).getRoomFeature());
     }
 
     @Test

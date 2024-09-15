@@ -85,8 +85,8 @@ public class AirPortServiceImpl implements AirPortService {
     @Transactional
     @Override
     public ResponseEntity<String> editAirPort(int placeId,
-                              long airPortId,
-                              AirPortDto airPortDto) {
+                                              long airPortId,
+                                              AirPortDto airPortDto) {
         if(!checkIfSentEmptyData(airPortDto)){
             return badRequestException("you sent an empty data to change");
         }
@@ -131,7 +131,7 @@ public class AirPortServiceImpl implements AirPortService {
 
         place.getAirPorts().remove(airPortEntity);
 
-        placeRepository.delete(place);
+        placeRepository.save(place);
 
         return ResponseEntity.ok("AirPort deleted successfully");
     }

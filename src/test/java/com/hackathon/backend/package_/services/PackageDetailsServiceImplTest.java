@@ -2,8 +2,11 @@ package com.hackathon.backend.package_.services;
 
 import com.hackathon.backend.dto.packageDto.EditPackageDetailsDto;
 import com.hackathon.backend.dto.packageDto.GetPackageANDPackageDetailsDto;
+import com.hackathon.backend.dto.packageDto.features.GetBenefitDto;
+import com.hackathon.backend.dto.packageDto.features.GetRoadmapDto;
 import com.hackathon.backend.entities.package_.PackageDetailsEntity;
 import com.hackathon.backend.entities.package_.PackageEntity;
+import com.hackathon.backend.repositories.package_.PackageDetailsRepository;
 import com.hackathon.backend.repositories.package_.PackageRepository;
 import com.hackathon.backend.services.package_.impl.PackageDetailsServiceImpl;
 import com.hackathon.backend.utilities.S3Service;
@@ -16,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,13 +30,16 @@ import static org.mockito.Mockito.*;
 class PackageDetailsServiceImplTest {
 
     @Mock
-    private PackageRepository packageRepository;
+    PackageRepository packageRepository;
 
     @Mock
-    private S3Service s3Service;
+    PackageDetailsRepository packageDetailsRepository;
+
+    @Mock
+    S3Service s3Service;
 
     @InjectMocks
-    private PackageDetailsServiceImpl packageDetailsServiceImpl;
+    PackageDetailsServiceImpl packageDetailsServiceImpl;
 
     @Test
     void getSinglePackageDetails_ShouldReturnPackageDetails_WhenPackageExists() {
@@ -72,6 +80,52 @@ class PackageDetailsServiceImplTest {
         assertEquals("Package description", response.getBody().getDescription());
 
         verify(packageRepository, times(1)).findById(packageId);
+    }
+
+    @Test
+    void getRoadmapsFromPackage() {
+        // given
+        int packageId = 1;
+        List<GetRoadmapDto> mockRoadmaps = Arrays.asList(
+                new GetRoadmapDto(1, "Roadmap 1"),
+                new GetRoadmapDto(2, "Roadmap 2")
+        );
+
+        //behavior
+        when(packageDetailsRepository.findPackageDetailsRoadmapsByPackageId(packageId))
+                .thenReturn(mockRoadmaps);
+
+        // when
+        ResponseEntity<List<GetRoadmapDto>> response = packageDetailsServiceImpl.getRoadmapsFromPackage(packageId);
+
+        // then
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(2, response.getBody().size());
+        assertEquals("Roadmap 1", response.getBody().get(0).getRoadmap());
+    }
+
+    @Test
+    void getBenefitsFromPackage() {
+        // given
+        int packageId = 2;
+        List<GetBenefitDto> mockBenefits = Arrays.asList(
+                new GetBenefitDto(1, "Benefit 1"),
+                new GetBenefitDto(2, "Benefit 2")
+        );
+
+        // behavior
+        when(packageDetailsRepository.findPackageDetailsBenefitsByPackageId(packageId))
+                .thenReturn(mockBenefits);
+
+        // when
+        ResponseEntity<List<GetBenefitDto>> response = packageDetailsServiceImpl.getBenefitsFromPackage(packageId);
+
+        // then
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(2, response.getBody().size());
+        assertEquals("Benefit 1", response.getBody().get(0).getBenefit());
     }
 
 

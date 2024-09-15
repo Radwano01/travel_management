@@ -10,9 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class FlightDto {
-
     private int price;
-
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
 }

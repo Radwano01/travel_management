@@ -1,5 +1,6 @@
 package com.hackathon.backend.services.hotel.hotelFeatures;
 
+import com.hackathon.backend.dto.hotelDto.features.GetRoomFeaturesDto;
 import com.hackathon.backend.dto.hotelDto.features.RoomFeatureDto;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,7 @@ public interface RoomFeaturesService {
 
     ResponseEntity<String> createRoomFeature(RoomFeatureDto roomFeatureDto);
 
-    ResponseEntity<List<RoomFeaturesEntity>> getRoomFeatures();
+    ResponseEntity<List<GetRoomFeaturesDto>> getRoomFeatures();
 
     ResponseEntity<String> editRoomFeature(int featureId, RoomFeatureDto roomFeatureDto);
 

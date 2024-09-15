@@ -23,7 +23,7 @@ public class BenefitsRelationsController {
 
     @PostMapping(path = "${PACKAGE_BENEFIT_RELATIONS_PATH}")
     public ResponseEntity<String> addPackageRoadmap(@PathVariable("packageId") int packageId,
-                                               @PathVariable("benefitId") int benefitId){
+                                                    @PathVariable("benefitId") int benefitId){
         try {
             return packageBenefitsRelationsServiceImpl.addPackageBenefit(packageId, benefitId);
         }catch (EntityNotFoundException e){
@@ -35,7 +35,7 @@ public class BenefitsRelationsController {
 
     @DeleteMapping(path = "${PACKAGE_BENEFIT_RELATIONS_PATH}")
     public ResponseEntity<String> removePackageRoadmap(@PathVariable("packageId") int packageId,
-                                                  @PathVariable("benefitId") int benefitId){
+                                                       @PathVariable("benefitId") int benefitId){
         try {
             return packageBenefitsRelationsServiceImpl.removePackageBenefit(packageId, benefitId);
         }catch (EntityNotFoundException e){

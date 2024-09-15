@@ -33,6 +33,24 @@ public class PackageDetailsController {
         }
     }
 
+    @GetMapping(path = "${GET_ROADMAPS_FROM_PACKAGE_PATH}")
+    public ResponseEntity<?> getRoadmapsFromPackage(@PathVariable("packageId") int packageId){
+        try{
+            return packageDetailsServiceImpl.getRoadmapsFromPackage(packageId);
+        }catch (Exception e){
+            return serverErrorException(e);
+        }
+    }
+
+    @GetMapping(path = "${GET_BENEFITS_FROM_PACKAGE_PATH}")
+    public ResponseEntity<?> getBenefitsFromPackage(@PathVariable("packageId") int packageId){
+        try{
+            return packageDetailsServiceImpl.getBenefitsFromPackage(packageId);
+        }catch (Exception e){
+            return serverErrorException(e);
+        }
+    }
+
     @PutMapping(path = "${EDIT_PACKAGE_DETAILS_PATH}")
     public ResponseEntity<?> editPackageDetails(@PathVariable("packageId") int packageId,
                                                 @ModelAttribute EditPackageDetailsDto editPackageDetailsDto){
