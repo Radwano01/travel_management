@@ -13,14 +13,17 @@ public class EssentialUserDto {
     private String username;
     private String image;
     private boolean verificationStatus;
+    private String role;
 
     public EssentialUserDto(long id,
                             String username,
                             String image,
-                            boolean verificationStatus) {
+                            boolean verificationStatus,
+                            String role) {
         this.id = id;
         this.username = username;
         this.image = image;
         this.verificationStatus = verificationStatus;
+        this.role = role;
     }
 }

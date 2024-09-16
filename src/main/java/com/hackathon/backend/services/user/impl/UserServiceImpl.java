@@ -143,7 +143,8 @@ public class UserServiceImpl implements UserService {
                     user.getId(),
                     user.getUsername(),
                     user.getImage(),
-                    user.isVerificationStatus()
+                    user.isVerificationStatus(),
+                    user.getRole().getRole()
             );
 
             return CompletableFuture.completedFuture
