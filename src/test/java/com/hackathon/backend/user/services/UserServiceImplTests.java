@@ -118,10 +118,15 @@ public class UserServiceImplTests {
         dto.setUsername("user");
         dto.setPassword("Password1!");
 
+        UserEntity user = new UserEntity();
+        user.setUsername(dto.getUsername());
+        user.setPassword(dto.getPassword());
+        user.setRole(new RoleEntity("USER"));
+
         Authentication authentication = mock(Authentication.class);
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
         when(jwtGenerator.generateToken(any())).thenReturn("jwtToken");
-        when(userRepository.findUserByUsername("user")).thenReturn(Optional.of(new UserEntity()));
+        when(userRepository.findUserByUsername("user")).thenReturn(Optional.of(user));
 
         CompletableFuture<ResponseEntity<?>> response = userServiceImpl.loginUser(dto);
 
