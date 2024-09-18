@@ -6,6 +6,8 @@ import com.hackathon.backend.services.country.impl.CountryServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import static com.hackathon.backend.utilities.ErrorUtils.notFoundException;
@@ -21,7 +23,7 @@ public class CountryController {
     }
 
     @PostMapping(path = "${CREATE_COUNTRY_PATH}")
-    private ResponseEntity<?> createCountry(@ModelAttribute CreateCountryDto createCountryDto){
+    public ResponseEntity<?> createCountry(@ModelAttribute CreateCountryDto createCountryDto){
         try{
             return countryServiceImpl.createCountry(createCountryDto);
         }catch(EntityNotFoundException e){
@@ -32,13 +34,13 @@ public class CountryController {
     }
 
     @GetMapping(path = "${GET_COUNTRIES_PATH}")
-    private ResponseEntity<?> getCountries(){
+    public ResponseEntity<?> getCountries(){
         return countryServiceImpl.getAllCountries();
     }
 
 
     @PutMapping(path = "${EDIT_COUNTRY_PATH}")
-    private ResponseEntity<?> editCountry(@PathVariable("countryId") int countryId,
+    public ResponseEntity<?> editCountry(@PathVariable("countryId") int countryId,
                                           @ModelAttribute EditCountryDto editCountryDto){
         try{
             return countryServiceImpl.editCountry(countryId, editCountryDto);
@@ -50,7 +52,7 @@ public class CountryController {
     }
 
     @DeleteMapping(path = "${DELETE_COUNTRY_PATH}")
-    private ResponseEntity<?> deleteCountry(@PathVariable("countryId") int countryId){
+    public ResponseEntity<?> deleteCountry(@PathVariable("countryId") int countryId){
         try{
             return countryServiceImpl.deleteCountry(countryId);
         }catch (Exception e){
