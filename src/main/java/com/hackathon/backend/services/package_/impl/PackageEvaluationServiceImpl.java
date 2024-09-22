@@ -69,7 +69,8 @@ public class PackageEvaluationServiceImpl implements PackageEvaluationService {
 
     private ResponseEntity<String> checkIfUserAlreadyCommented(PackageEntity packageEntity, long userId){
         for(PackageEvaluationEntity packageEvaluation : packageEntity.getPackageEvaluations()){
-            if(packageEvaluation.getUser().getId() == userId){
+            UserEntity user = packageEvaluation.getUser();
+            if(user != null && user.getId() == userId){
                 return badRequestException("This user has already commented on this hotel");
             }
         }
