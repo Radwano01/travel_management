@@ -59,7 +59,8 @@ public class HotelEvaluationServiceImpl implements HotelEvaluationService {
 
     private ResponseEntity<String> checkIfUserAlreadyCommented(HotelEntity hotel, long userId){
         for(HotelEvaluationEntity hotelEvaluation : hotel.getEvaluations()){
-            if(hotelEvaluation.getUser().getId() == userId){
+            UserEntity user = hotelEvaluation.getUser();
+            if(user != null && user.getId() == userId){
                 return badRequestException("This user has already commented on this hotel");
             }
         }
