@@ -9,4 +9,8 @@ public interface RoomDetailsService {
     ResponseEntity<GetRoomDetailsDto> getHotelRoomDetailsByHotelId(long hotelId);
 
     ResponseEntity<String> editRoomDetails(long hotelId, EditRoomDetailsDto editRoomDetailsDto);
+
+    ResponseEntity<?> getHotelFeaturesFromRoomDetails(long hotelId);
+
+    ResponseEntity<?> getRoomFeaturesFromRoomDetails(long hotelId);
 }

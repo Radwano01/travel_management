@@ -2,9 +2,12 @@ package com.hackathon.backend.services.hotel.impl;
 
 import com.hackathon.backend.dto.hotelDto.EditRoomDetailsDto;
 import com.hackathon.backend.dto.hotelDto.GetRoomDetailsDto;
+import com.hackathon.backend.dto.hotelDto.features.GetHotelFeaturesDto;
+import com.hackathon.backend.dto.hotelDto.features.GetRoomFeaturesDto;
 import com.hackathon.backend.entities.hotel.HotelEntity;
 import com.hackathon.backend.entities.hotel.RoomDetailsEntity;
 import com.hackathon.backend.repositories.hotel.HotelRepository;
+import com.hackathon.backend.repositories.hotel.RoomDetailsRepository;
 import com.hackathon.backend.services.hotel.RoomDetailsService;
 import com.hackathon.backend.utilities.S3Service;
 import jakarta.persistence.EntityNotFoundException;
@@ -13,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static com.hackathon.backend.libs.MyLib.checkIfSentEmptyData;
 import static com.hackathon.backend.utilities.ErrorUtils.*;
 
@@ -20,12 +25,15 @@ import static com.hackathon.backend.utilities.ErrorUtils.*;
 public class RoomDetailsServiceImpl implements RoomDetailsService {
 
     private final HotelRepository hotelRepository;
+    private final RoomDetailsRepository roomDetailsRepository;
     private final S3Service s3Service;
 
     @Autowired
     public RoomDetailsServiceImpl(HotelRepository hotelRepository,
+                                  RoomDetailsRepository roomDetailsRepository,
                                   S3Service s3Service){
         this.hotelRepository = hotelRepository;
+        this.roomDetailsRepository = roomDetailsRepository;
         this.s3Service = s3Service;
     }
 
@@ -51,9 +59,14 @@ public class RoomDetailsServiceImpl implements RoomDetailsService {
         );
     }
 
-    private HotelEntity findHotelById(long hotelId){
-        return hotelRepository.findById(hotelId)
-                .orElseThrow(()-> new EntityNotFoundException("Hotel id not found"));
+    @Override
+    public ResponseEntity<List<GetHotelFeaturesDto>> getHotelFeaturesFromRoomDetails(long hotelId){
+        return ResponseEntity.ok(roomDetailsRepository.findRoomDetailsHotelFeaturesByHotelId(hotelId));
+    }
+
+    @Override
+    public ResponseEntity<List<GetRoomFeaturesDto>> getRoomFeaturesFromRoomDetails(long hotelId){
+        return ResponseEntity.ok(roomDetailsRepository.findRoomDetailsRoomFeaturesByHotelId(hotelId));
     }
 
     @Transactional
@@ -70,6 +83,11 @@ public class RoomDetailsServiceImpl implements RoomDetailsService {
         hotelRepository.save(hotel);
 
         return ResponseEntity.ok(hotel.getRoomDetails().toString());
+    }
+
+    private HotelEntity findHotelById(long hotelId){
+        return hotelRepository.findById(hotelId)
+                .orElseThrow(()-> new EntityNotFoundException("Hotel id not found"));
     }
 
     private void updateToNewData(RoomDetailsEntity roomDetails, EditRoomDetailsDto editRoomDetailsDto) {

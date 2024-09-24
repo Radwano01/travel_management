@@ -31,6 +31,24 @@ public class RoomDetailsController {
         }
     }
 
+    @GetMapping(path = "${GET_HOTEL_FEATURES_FROM_ROOM_DETAILS_PATH}")
+    public ResponseEntity<?> getAllHotelFeaturesFromRoomDetails(@PathVariable("hotelId") long hotelId){
+        try{
+            return roomDetailsServiceImpl.getHotelFeaturesFromRoomDetails(hotelId);
+        }catch (Exception e){
+            return serverErrorException(e);
+        }
+    }
+
+    @GetMapping(path = "${GET_ROOM_FEATURES_FROM_ROOM_DETAILS_PATH}")
+    public ResponseEntity<?> getAllRoomFeaturesFromRoomDetails(@PathVariable("hotelId") long hotelId){
+        try{
+            return roomDetailsServiceImpl.getRoomFeaturesFromRoomDetails(hotelId);
+        }catch (Exception e){
+            return serverErrorException(e);
+        }
+    }
+
     @PutMapping(path = "${EDIT_ROOM_DETAILS_PATH}")
     public ResponseEntity<String> editRoomDetails(@PathVariable("hotelId") long hotelId,
                                                   @ModelAttribute EditRoomDetailsDto editRoomDetailsDto) {
