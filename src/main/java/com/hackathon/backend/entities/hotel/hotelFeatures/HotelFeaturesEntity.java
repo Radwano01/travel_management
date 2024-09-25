@@ -23,7 +23,6 @@ public class HotelFeaturesEntity {
 
     private String hotelFeatures;
 
-    @JsonIgnore
     @ManyToMany(mappedBy = "hotelFeatures", fetch = FetchType.LAZY)
     private List<RoomDetailsEntity> roomDetails = new ArrayList<>();
 

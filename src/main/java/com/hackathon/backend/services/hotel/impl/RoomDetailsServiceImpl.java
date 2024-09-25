@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.hackathon.backend.libs.MyLib.checkIfSentEmptyData;
 import static com.hackathon.backend.utilities.ErrorUtils.*;
@@ -41,14 +42,22 @@ public class RoomDetailsServiceImpl implements RoomDetailsService {
     public ResponseEntity<GetRoomDetailsDto> getHotelRoomDetailsByHotelId(long hotelId){
         HotelEntity hotel = findHotelById(hotelId);
 
+        List<GetHotelFeaturesDto> hotelFeaturesDtos = hotel.getRoomDetails().getHotelFeatures().stream()
+                .map(hotelFeature -> new GetHotelFeaturesDto(hotelFeature.getId(), hotelFeature.getHotelFeatures()))
+                .toList();
+
+        List<GetRoomFeaturesDto> roomFeaturesDtos = hotel.getRoomDetails().getRoomFeatures().stream()
+                .map(roomFeature -> new GetRoomFeaturesDto(roomFeature.getId(), roomFeature.getRoomFeatures()))
+                .toList();
+
         return ResponseEntity.ok
                 (new GetRoomDetailsDto(
                     hotel.getId(),
                     hotel.getHotelName(),
                     hotel.getAddress(),
                     hotel.getRate(),
-                    hotel.getRoomDetails().getHotelFeatures() != null ? hotel.getRoomDetails().getHotelFeatures() : null,
-                    hotel.getRoomDetails().getRoomFeatures() != null ? hotel.getRoomDetails().getRoomFeatures() : null,
+                    hotelFeaturesDtos,
+                    roomFeaturesDtos,
                     hotel.getRoomDetails().getImageOne(),
                     hotel.getRoomDetails().getImageTwo(),
                     hotel.getRoomDetails().getImageThree(),

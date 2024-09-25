@@ -44,11 +44,11 @@ public class PackageDetailsServiceImpl implements PackageDetailsService {
 
         List<GetRoadmapDto> roadmapDtos = packageEntity.getPackageDetails().getRoadmaps().stream()
                 .map(roadmap -> new GetRoadmapDto(roadmap.getId(), roadmap.getRoadmap()))
-                .collect(Collectors.toList());
+                .toList();
 
         List<GetBenefitDto> benefitDtos = packageEntity.getPackageDetails().getBenefits().stream()
                 .map(benefit -> new GetBenefitDto(benefit.getId(), benefit.getBenefit()))
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(
                 new GetPackageANDPackageDetailsDto(

@@ -1,6 +1,8 @@
 package com.hackathon.backend.dto.hotelDto;
 
 
+import com.hackathon.backend.dto.hotelDto.features.GetHotelFeaturesDto;
+import com.hackathon.backend.dto.hotelDto.features.GetRoomFeaturesDto;
 import com.hackathon.backend.entities.hotel.hotelFeatures.HotelFeaturesEntity;
 import com.hackathon.backend.entities.hotel.hotelFeatures.RoomFeaturesEntity;
 import lombok.Getter;
@@ -23,13 +25,13 @@ public class GetRoomDetailsDto {
     private String imageFour;
     private String description;
     private int price;
-    List<HotelFeaturesEntity> hotelFeatures;
-    List<RoomFeaturesEntity> roomFeatures;
+    List<GetHotelFeaturesDto> hotelFeatures;
+    List<GetRoomFeaturesDto> roomFeatures;
 
     public GetRoomDetailsDto(long id, String hotelName,
                              String address, float rate,
-                             List<HotelFeaturesEntity> hotelFeatures,
-                             List<RoomFeaturesEntity> roomFeatures,
+                             List<GetHotelFeaturesDto> hotelFeatures,
+                             List<GetRoomFeaturesDto> roomFeatures,
                              String imageOne, String imageTwo,
                              String imageThree, String imageFour,
                              String description, int price) {
